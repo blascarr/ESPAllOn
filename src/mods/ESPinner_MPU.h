@@ -1,10 +1,10 @@
-#ifndef _ESPINNER_GPIO_H
-#define _ESPINNER_GPIO_H
+#ifndef _ESPINNER_MPU_H
+#define _ESPINNER_MPU_H
 
 #include "../ESPinner.h"
 #include <ESPUI.h>
 
-class ESPinner_GPIO : public ESPinner {
+class ESPinner_MPU : public ESPinner {
   public:
 	void setup() override {
 		Serial.print("Iniciacion configuración de GPIO...");

@@ -11,23 +11,23 @@ class ESPinner {
 		: pinManager(pinManager) {}*/
 	ESPinner() {}
 	// Inicialización
-	virtual void init() = 0;
+	virtual void setup() = 0;
 	// Updates
 	virtual void update() = 0;
 	// Accion de carga del modelo en interfaz
 	virtual void loader() = 0;
-	// Accuón al hacer click en guardar
-	virtual void save() = 0;
-	// Gestión de Debug
-	virtual void debug() = 0;
 
 	// implementacion
 	virtual void implement() = 0;
-
-  private:
-	PinManager<ESP_BoardConf, PinMode> *pinManager;
+	virtual ~ESPinner() {}
+	ESP_PinMode *pinManager;
 };
 
+#include "mods/ESPinner_DC.h"
 #include "mods/ESPinner_GPIO.h"
+#include "mods/ESPinner_LCD.h"
+#include "mods/ESPinner_MPU.h"
+#include "mods/ESPinner_NeoPixel.h"
 #include "mods/ESPinner_Stepper.h"
+#include "mods/ESPinner_TFT.h"
 #endif

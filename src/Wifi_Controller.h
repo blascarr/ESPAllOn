@@ -2,38 +2,11 @@
 #include <DNSServer.h>
 #include <EEPROM.h>
 
-const byte DNS_PORT = 53;
-IPAddress apIP(192, 168, 1, 115);
 DNSServer dnsServer;
 
-#define DEBUG_ESP_OOM
+uint16_t wifi_ssid_text, wifi_pass_text;
 
-#if defined(ESP32)
-#include <ESPmDNS.h>
-#include <WiFi.h>
-#else
-// esp8266
-#include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
-#include <umm_malloc/umm_heap_select.h>
-#ifndef MMU_IRAM_HEAP
-#warning Try MMU option '2nd heap shared' in 'tools' IDE menu (cf. https://arduino-esp8266.readthedocs.io/en/latest/mmu.html#option-summary)
-#warning use decorators: { HeapSelectIram doAllocationsInIRAM; ESPUI.addControl(...) ... } (cf. https://arduino-esp8266.readthedocs.io/en/latest/mmu.html#how-to-select-heap)
-#warning then check http://<ip>/heap
-#endif // MMU_IRAM_HEAP
-#ifndef DEBUG_ESP_OOM
-#error on ESP8266 and ESPUI, you must define OOM debug option when developping
-#endif
-#endif
-
-const char *ssid = "ESPUI";
-const char *password = "espui";
-const char *hostname = "espui";
-
-// Settings
-#define SLOW_BOOT 0
-#define HOSTNAME "ESPUITest"
-#define FORCE_USE_HOTSPOT 1
+void enterWifiDetailsCallback(Control *sender, int type);
 
 void readStringFromEEPROM(String &buf, int baseaddress, int size) {
 	buf.reserve(size);
@@ -57,15 +30,26 @@ void connectWifi() {
 
 	// Load credentials from EEPROM
 	if (!(FORCE_USE_HOTSPOT)) {
-		yield();
-		EEPROM.begin(100);
 		String stored_ssid, stored_pass;
-		readStringFromEEPROM(stored_ssid, 0, 32);
-		readStringFromEEPROM(stored_pass, 32, 96);
-		EEPROM.end();
+		if (!(HARDCODED_CREDENTIALS)) {
+			yield();
+			EEPROM.begin(100);
 
-// Try to connect with stored credentials, fire up an access point if they don't
-// work.
+			readStringFromEEPROM(stored_ssid, 0, 32);
+			readStringFromEEPROM(stored_pass, 32, 96);
+			EEPROM.end();
+
+		} else {
+			stored_ssid = HARDCODED_SSID;
+			stored_pass = HARDCODED_PASS;
+		}
+
+#if defined(DEBUG)
+		Serial.print("SSID: ");
+		Serial.println(stored_ssid.c_str());
+		Serial.print("Pass: ");
+		Serial.println(stored_pass.c_str());
+#endif
 #if defined(ESP32)
 		WiFi.begin(stored_ssid.c_str(), stored_pass.c_str());
 #else
@@ -99,5 +83,38 @@ void connectWifi() {
 			Serial.print(",");
 			connect_timeout--;
 		} while (connect_timeout);
+	}
+}
+
+void textCallback(Control *sender, int type) {
+	// This callback is needed to handle the changed values, even though it
+	// doesn't do anything itself.
+}
+
+void enterWifiDetailsCallback(Control *sender, int type) {
+	if (type == B_UP) {
+		Serial.println();
+		Serial.println("Saving credentials to EEPROM...");
+		Serial.println(ESPUI.getControl(wifi_ssid_text)->value);
+		Serial.println(ESPUI.getControl(wifi_pass_text)->value);
+		unsigned int i;
+		EEPROM.begin(100);
+		for (i = 0; i < ESPUI.getControl(wifi_ssid_text)->value.length(); i++) {
+			EEPROM.write(i, ESPUI.getControl(wifi_ssid_text)->value.charAt(i));
+			if (i == 30)
+				break; // Even though we provided a max length, user input
+					   // should never be trusted
+		}
+		EEPROM.write(i, '\0');
+
+		for (i = 0; i < ESPUI.getControl(wifi_pass_text)->value.length(); i++) {
+			EEPROM.write(i + 32,
+						 ESPUI.getControl(wifi_pass_text)->value.charAt(i));
+			if (i == 94)
+				break; // Even though we provided a max length, user input
+					   // should never be trusted
+		}
+		EEPROM.write(i + 32, '\0');
+		EEPROM.end();
 	}
 }
