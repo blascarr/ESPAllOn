@@ -149,7 +149,10 @@ void removeElement_callback(Control *sender, int type) {
 	Serial.print(sender->label);
 	Serial.print("' = ");
 	Serial.println(sender->value);
-	// ESPUI.removeControl(sender->id);
+	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
+	ESPUI.removeControl(parentRef);
+	removeControlId(controlReferences, parentRef);
+	removeValueFromMap(elementToParentMap, parentRef);
 }
 
 /*----------------------------------------------------*/

@@ -48,7 +48,7 @@ void GPIO_Selector(uint16_t PIN_ptr) {
 	// Remove broken and not permitted GPIOs
 	uint8_t numElements = 20;
 
-	auto GPIOPIN_selector =
+	uint16_t GPIOPIN_selector =
 		ESPUI.addControl(ControlType::Select, "Pin Selector", "0",
 						 ControlColor::Wetasphalt, PIN_ptr, createPIN_callback);
 	for (int i = 0; i < numElements; i++) {
@@ -56,6 +56,7 @@ void GPIO_Selector(uint16_t PIN_ptr) {
 		ESPUI.addControl(ControlType::Option, String(i).c_str(), String(i),
 						 None, GPIOPIN_selector);
 	}
+	// addElementWithParent(elementToParentMap, GPIOPIN_selector, PIN_ptr);
 }
 
 void GPIO_UI(uint16_t GPIO_ptr) {
@@ -68,12 +69,17 @@ void GPIO_UI(uint16_t GPIO_ptr) {
 		ESPUI.addControl(ControlType::Option, GPIO_mods[i].name.c_str(),
 						 GPIO_mods[i].name, None, GPIOMode_selector);
 	}
+
+	addElementWithParent(elementToParentMap, GPIOMode_selector, GPIO_ptr);
+
 	// Num Pin selector
 	GPIO_Selector(GPIO_ptr);
 
 	// Remove Element
-	auto GPIORemove_selector = ESPUI.addControl(
+	uint16_t GPIORemove_selector = ESPUI.addControl(
 		ControlType::Button, "Remove", "Remove", ControlColor::Alizarin,
 		GPIO_ptr, removeElement_callback);
+	addElementWithParent(elementToParentMap, GPIORemove_selector, GPIO_ptr);
+	debugMap(elementToParentMap);
 }
 #endif
