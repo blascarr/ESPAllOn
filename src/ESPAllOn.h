@@ -44,12 +44,6 @@ TabController tabs[] = {{TabType::BasicTab, "Basic controls"},
 						{TabType::AdvancedSettingsTab, "Advanced Settings"},
 						{TabType::NetworkTab, "Wifi Credentials"}};
 
-/*----------------------------------------------------*/
-/*----------------   Vector List  --------------------*/
-/*----------------------------------------------------*/
-
-std::vector<uint16_t> controlReferences;
-
 uint16_t getTab(const TabType &tabType) {
 
 	for (auto &tabElement : tabs) {
@@ -131,9 +125,31 @@ void createPINConfigCallback(Control *sender, int type) {
 	ESPinnerSelector();
 
 	uint16_t previousRef = getBeforeLastGPIOSelector();
+	if (sender->value == "GPIO") {
+#ifdef _ESPINNER_GPIO_H
+		GPIO_UI(previousRef);
+#endif
+	}
 
+	if (sender->value == "Stepper") {
+#ifdef _ESPINNER_STEPPER_H
+		// GPIO_UI(previousRef);
+#endif
+	}
 	// Removes callback from previous selector
 	ESPUI.getControl(previousRef)->callback = voidCallback;
+}
+
+void removeElement_callback(Control *sender, int type) {
+	Serial.print("CB: id(");
+	Serial.print(sender->id);
+	Serial.print(") Type(");
+	Serial.print(type);
+	Serial.print(") '");
+	Serial.print(sender->label);
+	Serial.print("' = ");
+	Serial.println(sender->value);
+	// ESPUI.removeControl(sender->id);
 }
 
 /*----------------------------------------------------*/
@@ -142,13 +158,12 @@ void createPINConfigCallback(Control *sender, int type) {
 
 void ESPinnerSelector() {
 	uint16_t basicTabRef = getTab(TabType::BasicTab);
-	auto maintab = basicTabRef;
 
 	int numElements = sizeof(mods) / sizeof(mods[0]);
 
 	auto mainselector = ESPUI.addControl(ControlType::Select, "Selector",
 										 "VOID", ControlColor::Wetasphalt,
-										 maintab, createPINConfigCallback);
+										 basicTabRef, createPINConfigCallback);
 	for (int i = 0; i < numElements; i++) {
 		ESPUI.addControl(ControlType::Option, mods[i].name.c_str(),
 						 mods[i].name, None, mainselector);
@@ -179,7 +194,6 @@ class ESPAllOn {
 		} // HeapSelectIram
 #endif
 	}
-	void mainTab() {}
 	void wifiTab() {
 		auto wifitab = getTab(TabType::NetworkTab);
 		wifi_ssid_text =

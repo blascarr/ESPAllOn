@@ -3,6 +3,7 @@
 #include <ESPUI.h>
 
 #include <config.h>
+#include <utils.h>
 
 #include "ESPinner.h"
 #include "PinSerializable.h"

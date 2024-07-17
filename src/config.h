@@ -36,3 +36,12 @@ IPAddress apIP(192, 168, 1, 115);
 // Modules
 
 #define MOD_CAPACITY 10
+
+void removeElement_callback(Control *sender, int type);
+
+/*----------------------------------------------------*/
+/*----------------   Vector List  --------------------*/
+/*----------------------------------------------------*/
+
+std::vector<uint16_t> controlReferences;
+std::map<uint16_t, uint16_t> elementToParentMap;
