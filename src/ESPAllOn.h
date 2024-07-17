@@ -6,6 +6,7 @@
 #include <Ticker.h>
 
 enum class ESPinner_Mod {
+	VOID,
 	GPIO,
 	Stepper,
 	RFID,
@@ -21,11 +22,15 @@ struct ESPinner_Module {
 	String name;
 };
 
-const ESPinner_Module mods[] = {
-	{ESPinner_Mod::GPIO, "GPIO"}, {ESPinner_Mod::Stepper, "Stepper"},
-	{ESPinner_Mod::RFID, "RFID"}, {ESPinner_Mod::NeoPixel, "NeoPixel"},
-	{ESPinner_Mod::DC, "DC"},	  {ESPinner_Mod::Encoder, "Encoder"},
-	{ESPinner_Mod::TFT, "TFT"},	  {ESPinner_Mod::LCD, "LCD"}};
+const ESPinner_Module mods[] = {{ESPinner_Mod::VOID, "VOID"},
+								{ESPinner_Mod::GPIO, "GPIO"},
+								{ESPinner_Mod::Stepper, "Stepper"},
+								{ESPinner_Mod::RFID, "RFID"},
+								{ESPinner_Mod::NeoPixel, "NeoPixel"},
+								{ESPinner_Mod::DC, "DC"},
+								{ESPinner_Mod::Encoder, "Encoder"},
+								{ESPinner_Mod::TFT, "TFT"},
+								{ESPinner_Mod::LCD, "LCD"}};
 
 enum class TabType { BasicTab, AdvancedSettingsTab, NetworkTab };
 
@@ -38,6 +43,12 @@ struct TabController {
 TabController tabs[] = {{TabType::BasicTab, "Basic controls"},
 						{TabType::AdvancedSettingsTab, "Advanced Settings"},
 						{TabType::NetworkTab, "Wifi Credentials"}};
+
+/*----------------------------------------------------*/
+/*----------------   Vector List  --------------------*/
+/*----------------------------------------------------*/
+
+std::vector<uint16_t> controlReferences;
 
 uint16_t getTab(const TabType &tabType) {
 
@@ -73,7 +84,7 @@ void ESPinnerSelector();
 /*----------------------------------------------------*/
 /*-------------------CallBacks------------------------*/
 /*----------------------------------------------------*/
-
+void voidCallback(Control *sender, int type) {}
 void generalCallback(Control *sender, int type);
 void extendedCallback(Control *sender, int type, void *param);
 void generalCallback(Control *sender, int type) {
@@ -99,6 +110,15 @@ void extendedCallback(Control *sender, int type, void *param) {
 	Serial.println(String("param = ") + String((int)param));
 }
 
+uint16_t getBeforeLastGPIOSelector() {
+	if (controlReferences.size() >= 2) {
+		return controlReferences[controlReferences.size() - 2];
+	}
+	Serial.println(
+		"Error: Size of ControlReferences is less than two elements");
+	return 0;
+}
+
 void createPINConfigCallback(Control *sender, int type) {
 	Serial.print("CB: id(");
 	Serial.print(sender->id);
@@ -109,6 +129,11 @@ void createPINConfigCallback(Control *sender, int type) {
 	Serial.print("' = ");
 	Serial.println(sender->value);
 	ESPinnerSelector();
+
+	uint16_t previousRef = getBeforeLastGPIOSelector();
+
+	// Removes callback from previous selector
+	ESPUI.getControl(previousRef)->callback = voidCallback;
 }
 
 /*----------------------------------------------------*/
@@ -120,20 +145,16 @@ void ESPinnerSelector() {
 	auto maintab = basicTabRef;
 
 	int numElements = sizeof(mods) / sizeof(mods[0]);
-	String optionValues[numElements];
-	for (int i = 0; i < numElements; i++) {
-		optionValues[i] = mods[i].name;
-	}
 
 	auto mainselector = ESPUI.addControl(ControlType::Select, "Selector",
-										 "GPIO", ControlColor::Wetasphalt,
+										 "VOID", ControlColor::Wetasphalt,
 										 maintab, createPINConfigCallback);
 	for (int i = 0; i < numElements; i++) {
 		ESPUI.addControl(ControlType::Option, mods[i].name.c_str(),
 						 mods[i].name, None, mainselector);
 	}
-	ESPUI.addControl(Switcher, "", "1", Sunflower, mainselector,
-					 generalCallback);
+
+	controlReferences.push_back(mainselector);
 }
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
