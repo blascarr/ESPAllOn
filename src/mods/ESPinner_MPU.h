@@ -7,17 +7,15 @@
 class ESPinner_MPU : public ESPinner {
   public:
 	void setup() override {
-		Serial.print("Iniciacion configuración de GPIO...");
+		DUMPSLN("Iniciacion configuración de GPIO...");
 		// pinManager->isPinOK(12);
 	}
-	void update() override { Serial.print("Update configuración de GPIO..."); }
+	void update() override { DUMPSLN("Update configuración de GPIO..."); }
 	void implement() override {
-		Serial.print("Implementacion configuración de GPIO...");
+		DUMPSLN("Implementacion configuración de GPIO...");
 	}
 
-	void loader() override {
-		Serial.print("Cargando configuración de GPIO...");
-	}
+	void loader() override { DUMPSLN("Cargando configuración de GPIO..."); }
 };
 
 #endif

@@ -17,29 +17,23 @@ const ESPinner_GPIOMode GPIO_mods[] = {
 class ESPinner_GPIO : public ESPinner {
   public:
 	void setup() override {
-		Serial.print("Iniciacion configuración de GPIO...");
+		DUMPSLN("Iniciacion configuración de GPIO...");
 		// pinManager->isPinOK(12);
 	}
-	void update() override { Serial.print("Update configuración de GPIO..."); }
+	void update() override { DUMPSLN("Update configuración de GPIO..."); }
 	void implement() override {
-		Serial.print("Implementacion configuración de GPIO...");
+		DUMPSLN("Implementacion configuración de GPIO...");
 	}
 
-	void loader() override {
-		Serial.print("Cargando configuración de GPIO...");
-	}
+	void loader() override { DUMPSLN("Cargando configuración de GPIO..."); }
 };
 
 void createGPIO_callback(Control *sender, int type) {}
 void createPIN_callback(Control *sender, int type) {
-	Serial.print("CB: id(");
-	Serial.print(sender->id);
-	Serial.print(") Type(");
-	Serial.print(type);
-	Serial.print(") '");
-	Serial.print(sender->label);
-	Serial.print("' = ");
-	Serial.println(sender->value);
+	DUMP("CB: id(", sender->id);
+	DUMP(") Type(", type);
+	DUMP(") '", sender->label);
+	DUMP("' = ", sender->value);
 }
 
 void GPIO_Selector(uint16_t PIN_ptr) {

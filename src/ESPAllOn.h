@@ -32,7 +32,7 @@ const ESPinner_Module mods[] = {{ESPinner_Mod::VOID, "VOID"},
 								{ESPinner_Mod::TFT, "TFT"},
 								{ESPinner_Mod::LCD, "LCD"}};
 
-enum class TabType { BasicTab, AdvancedSettingsTab, NetworkTab };
+enum class TabType { BasicTab, AdvancedSettingsTab, LinkedActions, NetworkTab };
 
 struct TabController {
 	TabType tab;
@@ -41,6 +41,7 @@ struct TabController {
 };
 
 TabController tabs[] = {{TabType::BasicTab, "Basic controls"},
+						{TabType::LinkedActions, "Link Actions"},
 						{TabType::AdvancedSettingsTab, "Advanced Settings"},
 						{TabType::NetworkTab, "Wifi Credentials"}};
 
@@ -58,7 +59,7 @@ uint16_t getTab(const TabType &tabType) {
 		}
 	}
 
-	Serial.println("Error: TabType not found!");
+	DUMPSLN("Error: TabType not found!");
 	return 0;
 }
 /*----------------------------------------------------*/
@@ -78,50 +79,35 @@ void ESPinnerSelector();
 /*----------------------------------------------------*/
 /*-------------------CallBacks------------------------*/
 /*----------------------------------------------------*/
+
+void debugCallback(Control *sender, int type) {
+	DUMPPRINTLN();
+	DUMP("CB: id(", sender->id);
+	DUMP(") Type(", type);
+	DUMP(") '", sender->label);
+	DUMPLN("' = ", sender->value);
+}
+
 void voidCallback(Control *sender, int type) {}
 void generalCallback(Control *sender, int type);
 void extendedCallback(Control *sender, int type, void *param);
-void generalCallback(Control *sender, int type) {
-	Serial.print("CB: id(");
-	Serial.print(sender->id);
-	Serial.print(") Type(");
-	Serial.print(type);
-	Serial.print(") '");
-	Serial.print(sender->label);
-	Serial.print("' = ");
-	Serial.println(sender->value);
-}
+void generalCallback(Control *sender, int type) { debugCallback(sender, type); }
 
 void extendedCallback(Control *sender, int type, void *param) {
-	Serial.print("CB: id(");
-	Serial.print(sender->id);
-	Serial.print(") Type(");
-	Serial.print(type);
-	Serial.print(") '");
-	Serial.print(sender->label);
-	Serial.print("' = ");
-	Serial.println(sender->value);
-	Serial.println(String("param = ") + String((int)param));
+	debugCallback(sender, type);
+	DUMPLN("param = ", String((int)param));
 }
 
 uint16_t getBeforeLastGPIOSelector() {
 	if (controlReferences.size() >= 2) {
 		return controlReferences[controlReferences.size() - 2];
 	}
-	Serial.println(
-		"Error: Size of ControlReferences is less than two elements");
+	DUMPSLN("Error: Size of ControlReferences is less than two elements");
 	return 0;
 }
 
 void createPINConfigCallback(Control *sender, int type) {
-	Serial.print("CB: id(");
-	Serial.print(sender->id);
-	Serial.print(") Type(");
-	Serial.print(type);
-	Serial.print(") '");
-	Serial.print(sender->label);
-	Serial.print("' = ");
-	Serial.println(sender->value);
+	debugCallback(sender, type);
 	ESPinnerSelector();
 
 	uint16_t previousRef = getBeforeLastGPIOSelector();
@@ -141,14 +127,7 @@ void createPINConfigCallback(Control *sender, int type) {
 }
 
 void removeElement_callback(Control *sender, int type) {
-	Serial.print("CB: id(");
-	Serial.print(sender->id);
-	Serial.print(") Type(");
-	Serial.print(type);
-	Serial.print(") '");
-	Serial.print(sender->label);
-	Serial.print("' = ");
-	Serial.println(sender->value);
+	debugCallback(sender, type);
 	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
 	ESPUI.removeControl(parentRef);
 	removeControlId(controlReferences, parentRef);

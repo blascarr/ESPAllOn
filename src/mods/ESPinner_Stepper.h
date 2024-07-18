@@ -7,18 +7,14 @@
 class ESPinner_Stepper : public ESPinner {
   public:
 	void setup() override {
-		Serial.print("Iniciacion configuración de Stepper ...");
+		DUMPSLN("Iniciacion configuración de Stepper ...");
 	}
-	void update() override {
-		Serial.print("Update configuración de Stepper ...");
-	}
+	void update() override { DUMPSLN("Update configuración de Stepper ..."); }
 	void implement() override {
-		Serial.print("Implementacion configuración de Stepper ...");
+		DUMPSLN("Implementacion configuración de Stepper ...");
 	}
 
-	void loader() override {
-		Serial.print("Cargando configuración de Stepper ...");
-	}
+	void loader() override { DUMPSLN("Cargando configuración de Stepper ..."); }
 };
 
 #endif

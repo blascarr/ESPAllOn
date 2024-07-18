@@ -26,7 +26,7 @@ void connectWifi() {
 #else
 	WiFi.hostname(HOSTNAME);
 #endif
-	Serial.println("Begin wifi...");
+	DUMPSLN("Begin wifi...");
 
 	// Load credentials from EEPROM
 	if (!(FORCE_USE_HOTSPOT)) {
@@ -45,10 +45,8 @@ void connectWifi() {
 		}
 
 #if defined(DEBUG)
-		Serial.print("SSID: ");
-		Serial.println(stored_ssid.c_str());
-		Serial.print("Pass: ");
-		Serial.println(stored_pass.c_str());
+		DUMPLN("SSID: ", stored_ssid.c_str());
+		DUMPLN("Pass: ", stored_pass.c_str());
 #endif
 #if defined(ESP32)
 		WiFi.begin(stored_ssid.c_str(), stored_pass.c_str());
@@ -58,20 +56,20 @@ void connectWifi() {
 		connect_timeout = 28; // 7 seconds
 		while (WiFi.status() != WL_CONNECTED && connect_timeout > 0) {
 			delay(250);
-			Serial.print(".");
+			DUMPS(".");
 			connect_timeout--;
 		}
 	}
 
 	if (WiFi.status() == WL_CONNECTED) {
-		Serial.println(WiFi.localIP());
-		Serial.println("Wifi started");
+		DUMPPRINTLN();
+		DUMPLN("IP: ", WiFi.localIP());
 
 		if (!MDNS.begin(HOSTNAME)) {
-			Serial.println("Error setting up MDNS responder!");
+			DUMPSLN("Error setting up MDNS responder!");
 		}
 	} else {
-		Serial.println("\nCreating access point...");
+		DUMPSLN("\nCreating access point...");
 		WiFi.mode(WIFI_AP);
 		WiFi.softAPConfig(IPAddress(192, 168, 1, 1), IPAddress(192, 168, 1, 1),
 						  IPAddress(255, 255, 255, 0));
@@ -80,7 +78,7 @@ void connectWifi() {
 		connect_timeout = 20;
 		do {
 			delay(250);
-			Serial.print(",");
+			DUMPS(",");
 			connect_timeout--;
 		} while (connect_timeout);
 	}
@@ -93,10 +91,9 @@ void textCallback(Control *sender, int type) {
 
 void enterWifiDetailsCallback(Control *sender, int type) {
 	if (type == B_UP) {
-		Serial.println();
-		Serial.println("Saving credentials to EEPROM...");
-		Serial.println(ESPUI.getControl(wifi_ssid_text)->value);
-		Serial.println(ESPUI.getControl(wifi_pass_text)->value);
+		DUMPSLN("Saving credentials to EEPROM...");
+		DUMPLN("SSID: ", ESPUI.getControl(wifi_ssid_text)->value);
+		DUMPLN("PASS: ", ESPUI.getControl(wifi_pass_text)->value);
 		unsigned int i;
 		EEPROM.begin(100);
 		for (i = 0; i < ESPUI.getControl(wifi_ssid_text)->value.length(); i++) {

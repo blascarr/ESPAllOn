@@ -1,6 +1,30 @@
 #include <Arduino.h>
 #include <ESPUI.h>
 
+// ------------------ SERIAL CONFIG --------------------//
+#define PRINTDEBUG true
+#define SERIALDEBUG Serial
+
+#define DUMPS(s)                                                               \
+	{ SERIALDEBUG.print(F(s)); }
+#define DUMPSLN(s)                                                             \
+	{ SERIALDEBUG.println(F(s)); }
+#define DUMPPRINTLN()                                                          \
+	{ SERIALDEBUG.println(); }
+#define DUMPV(v)                                                               \
+	{ SERIALDEBUG.print(v); }
+#define DUMPLN(s, v)                                                           \
+	{                                                                          \
+		DUMPS(s);                                                              \
+		DUMPV(v);                                                              \
+		DUMPPRINTLN();                                                         \
+	}
+#define DUMP(s, v)                                                             \
+	{                                                                          \
+		DUMPS(s);                                                              \
+		DUMPV(v);                                                              \
+	}
+
 void addElementWithParent(std::map<uint16_t, uint16_t> &map, uint16_t elementId,
 						  uint16_t parentId) {
 	map[elementId] = parentId;
@@ -8,10 +32,8 @@ void addElementWithParent(std::map<uint16_t, uint16_t> &map, uint16_t elementId,
 
 void debugMap(std::map<uint16_t, uint16_t> &map) {
 	for (auto it = map.begin(); it != map.end(); ++it) {
-		Serial.print("Clave: ");
-		Serial.print(it->first);
-		Serial.print(" Value: ");
-		Serial.print(it->second);
+		DUMP(" Key: ", it->first);
+		DUMP(" Value: ", it->second);
 	}
 }
 
