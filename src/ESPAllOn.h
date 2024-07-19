@@ -2,6 +2,8 @@
 #define _ESPALLON_H
 
 #include "ESPinner.h"
+#include <ESPAction.h>
+#include <ESPAllOnPinManager.h>
 #include <ESPUI.h>
 #include <Ticker.h>
 
@@ -66,11 +68,10 @@ uint16_t getTab(const TabType &tabType) {
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-uint16_t mainLabel;
-
 void uiUpdate() {
 	static uint16_t sliderVal = 10;
-	ESPUI.updateLabel(mainLabel, String(sliderVal));
+
+	// ESPUI.updateLabel(mainLabel, String(sliderVal));
 }
 
 Ticker UI_UpdateTicker(uiUpdate, 500, 0, MILLIS);
@@ -106,6 +107,16 @@ uint16_t getBeforeLastGPIOSelector() {
 	return 0;
 }
 
+void PINConfigCallback(Control *sender, int type) {
+
+	DUMPSLN("PIN CONFIG ");
+	if (sender->value == "GPIO") {
+#ifdef _ESPINNER_GPIO_H
+		GPIO_UI(sender->id);
+#endif
+	}
+}
+
 void createPINConfigCallback(Control *sender, int type) {
 	debugCallback(sender, type);
 	ESPinnerSelector();
@@ -123,7 +134,7 @@ void createPINConfigCallback(Control *sender, int type) {
 #endif
 	}
 	// Removes callback from previous selector
-	ESPUI.getControl(previousRef)->callback = voidCallback;
+	ESPUI.getControl(previousRef)->callback = PINConfigCallback;
 }
 
 void removeElement_callback(Control *sender, int type) {
@@ -191,7 +202,30 @@ class ESPAllOn {
 						 enterWifiDetailsCallback);
 	}
 
+	void ESPActionSelector() {
+		auto LinkActionTab = getTab(TabType::LinkedActions);
+
+		uint16_t actionSelector = ESPUI.addControl(
+			ControlType::Select, "Action", "", ControlColor::Wetasphalt,
+			LinkActionTab, generalCallback);
+
+		for (const ESPAction &action : actions) {
+			ESPUI.addControl(ControlType::Option, action.getName().c_str(),
+							 action.getReference(), None, actionSelector);
+		}
+		for (const ESPAction &action : actions) {
+			ESPUI.addControl(ControlType::Option, action.getName().c_str(),
+							 action.getReference(), None, actionSelector);
+		}
+
+		uint16_t GPIO_Link_Action = ESPUI.addControl(
+			ControlType::Button, "Link", "Link", ControlColor::Alizarin,
+			actionSelector, voidCallback);
+	}
+
 	void begin() {
+		linkItemsTab();
+
 		wifiTab();
 		ESPUI.begin(HOSTNAME);
 	}
@@ -199,18 +233,37 @@ class ESPAllOn {
 	void save() {
 
 	};
+
+	void linkItemsTab() { ESPActionSelector(); }
 	// Gestión de Debug
 	void debug() {
 
 	};
 	void addDevice(ESPinner *device);
+	void addAction(const ESPAction &action) { actions.push_back(action); }
+	void assignActionToPin(uint16_t pin, const String &actionName) {
+		for (const ESPAction &action : actions) {
+			// if (action.getName() == actionName) {
+			// pinActions[pin] = action;
+			// break;
+			// }
+		}
+	}
+
+	void triggerPin(uint16_t pin) {
+		auto it = pinActions.find(pin);
+		if (it != pinActions.end()) {
+			it->second.execute(12);
+		}
+	}
 
   private:
-	PinManager<ESP_BoardConf, PinMode> *pinManager;
+	ESPAllOnPinManager *pinManager;
 	int capacity;
 	ESPinner **modules;
 	int size;
+	std::vector<ESPAction> actions;
+	std::map<uint16_t, ESPAction> pinActions;
 };
 
-extern ESPAllOn ESPALLON;
 #endif

@@ -21,6 +21,13 @@ pinSerializable datasource(10, InputPin(false, false), PinType::BusDigital);
 ESPinner_GPIO gpio;
 ESPinner_Stepper Esptepper;
 
+void externalAction(uint16_t mode) { Serial.println("EXTERNAL ACTIOOOOON"); }
+void externalAction2(uint16_t mode) { Serial.println("Blocked Door"); }
+
+String nameAction = "Send MQTT Message";
+ESPAction ACTION(nameAction, "ACTION1", externalAction);
+ESPAction ACTION2("BLocked Door", "ACTION2", externalAction2);
+
 void setup() {
 	randomSeed(0);
 	Serial.begin(115200);
@@ -37,9 +44,12 @@ void setup() {
 
 	Esptepper.setup();
 	Esptepper.loader();
+	ESPAllOn::getInstance().addAction(ACTION);
+	ESPAllOn::getInstance().addAction(ACTION2);
 
-	ESPALLON.setup();
-	ESPALLON.begin();
+	ESPAllOn::getInstance().setup();
+	ESPAllOn::getInstance().begin();
+
 	UI_UpdateTicker.start();
 }
 

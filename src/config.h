@@ -26,7 +26,7 @@
 #define FORCE_USE_HOTSPOT 0
 #define DEBUG true
 
-#define HARDCODED_CREDENTIALS true
+#define HARDCODED_CREDENTIALS false
 #define HARDCODED_SSID "ZMS"
 #define HARDCODED_PASS "ZM4K3RS:P"
 
