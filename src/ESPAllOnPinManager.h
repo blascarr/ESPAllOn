@@ -7,5 +7,9 @@ class ESPAllOnPinManager : public PinManager<ESP_BoardConf, PinMode> {
 
   public:
 	ESPAllOnPinManager() {}
+	static ESPAllOnPinManager &getInstance() {
+		static ESPAllOnPinManager instance;
+		return instance;
+	}
 };
 #endif
