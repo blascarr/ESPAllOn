@@ -45,10 +45,11 @@ void GPIO_Selector(uint16_t PIN_ptr) {
 	uint16_t GPIOPIN_selector =
 		ESPUI.addControl(ControlType::Select, "Pin Selector", "0",
 						 ControlColor::Wetasphalt, PIN_ptr, createPIN_callback);
-	for (int i = 0; i < numElements; i++) {
-
-		ESPUI.addControl(ControlType::Option, String(i).c_str(), String(i),
-						 None, GPIOPIN_selector);
+	for (int i = 0; i < ESP_BoardConf::NUM_PINS; i++) {
+		if (!ESPAllOnPinManager::getInstance().isPinAttached(i)) {
+			ESPUI.addControl(ControlType::Option, getLabelForPin(i), String(i),
+							 None, GPIOPIN_selector);
+		}
 	}
 	// addElementWithParent(elementToParentMap, GPIOPIN_selector, PIN_ptr);
 }

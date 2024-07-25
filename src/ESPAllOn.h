@@ -1,9 +1,10 @@
 #ifndef _ESPALLON_H
 #define _ESPALLON_H
 
+#include <ESPAllOnPinManager.h>
+
 #include "ESPinner.h"
 #include <ESPAction.h>
-#include <ESPAllOnPinManager.h>
 #include <ESPUI.h>
 #include <Ticker.h>
 
@@ -38,8 +39,10 @@ enum class TabType { BasicTab, AdvancedSettingsTab, LinkedActions, NetworkTab };
 
 struct TabController {
 	TabType tab;
-	char *description;
+	const char *description;
 	uint16_t tabRef = 0;
+	TabController(TabType t, const char *desc, uint16_t ref = 0)
+		: tab(t), description(desc), tabRef(ref) {}
 };
 
 TabController tabs[] = {{TabType::BasicTab, "Basic controls"},
@@ -161,7 +164,8 @@ void ESPinnerSelector() {
 		ESPUI.addControl(ControlType::Option, mods[i].name.c_str(),
 						 mods[i].name, None, mainselector);
 	}
-
+	auto mainText = ESPUI.addControl(Text, "Descriptor", "ID", Alizarin,
+									 mainselector, generalCallback);
 	controlReferences.push_back(mainselector);
 }
 /*----------------------------------------------------*/
@@ -175,6 +179,10 @@ class ESPAllOn {
 		: capacity(MOD_CAPACITY), size(0),
 		  modules(new ESPinner *[MOD_CAPACITY]) {}
 
+	static ESPAllOn &getInstance() {
+		static ESPAllOn instance;
+		return instance;
+	}
 	void setup() {
 
 #ifdef ESP8266

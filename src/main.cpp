@@ -5,7 +5,6 @@
 #include <config.h>
 #include <utils.h>
 
-#include "ESPinner.h"
 #include "PinSerializable.h"
 #include "Wifi_Controller.h"
 
