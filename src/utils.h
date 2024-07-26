@@ -39,12 +39,23 @@ void debugMap(std::map<uint16_t, uint16_t> &map) {
 
 uint16_t getParentId(const std::map<uint16_t, uint16_t> &map,
 					 uint16_t elementId) {
-	auto it = map.find(elementId);
+	auto it = map.find(elementId); // "it" refers to the element found
 	if (it != map.end()) {
 		return it->second;
 	} else {
 		return 0;
 	}
+}
+
+std::vector<uint16_t> getChildrenIds(const std::map<uint16_t, uint16_t> &map,
+									 uint16_t parentId) {
+	std::vector<uint16_t> childrenIds;
+	for (const auto &pair : map) {
+		if (pair.second == parentId) {
+			childrenIds.push_back(pair.first);
+		}
+	}
+	return childrenIds;
 }
 
 void removeControlId(std::vector<uint16_t> &controlRef, uint16_t id) {

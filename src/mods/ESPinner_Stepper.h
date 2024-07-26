@@ -6,6 +6,8 @@
 
 class ESPinner_Stepper : public ESPinner {
   public:
+	ESPinner_Stepper(ESPinner_Mod espinner_mod) : ESPinner(espinner_mod) {}
+	ESPinner_Stepper() : ESPinner(ESPinner_Mod::Stepper) {}
 	void setup() override {
 		DUMPSLN("Iniciacion configuración de Stepper ...");
 	}

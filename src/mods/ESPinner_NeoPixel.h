@@ -6,6 +6,8 @@
 
 class ESPinner_NEOPIXEL : public ESPinner {
   public:
+	ESPinner_NEOPIXEL(ESPinner_Mod espinner_mod) : ESPinner(espinner_mod) {}
+	ESPinner_NEOPIXEL() : ESPinner(ESPinner_Mod::NeoPixel) {}
 	void setup() override {
 		DUMPSLN("Iniciacion configuración de GPIO...");
 		// pinManager->isPinOK(12);

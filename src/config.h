@@ -38,6 +38,7 @@ IPAddress apIP(192, 168, 1, 115);
 #define MOD_CAPACITY 10
 
 void removeElement_callback(Control *sender, int type);
+void saveElement_callback(Control *sender, int type);
 
 /*----------------------------------------------------*/
 /*----------------   Vector List  --------------------*/

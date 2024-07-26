@@ -8,33 +8,6 @@
 #include <ESPUI.h>
 #include <Ticker.h>
 
-enum class ESPinner_Mod {
-	VOID,
-	GPIO,
-	Stepper,
-	RFID,
-	NeoPixel,
-	DC,
-	Encoder,
-	TFT,
-	LCD
-};
-
-struct ESPinner_Module {
-	ESPinner_Mod model;
-	String name;
-};
-
-const ESPinner_Module mods[] = {{ESPinner_Mod::VOID, "VOID"},
-								{ESPinner_Mod::GPIO, "GPIO"},
-								{ESPinner_Mod::Stepper, "Stepper"},
-								{ESPinner_Mod::RFID, "RFID"},
-								{ESPinner_Mod::NeoPixel, "NeoPixel"},
-								{ESPinner_Mod::DC, "DC"},
-								{ESPinner_Mod::Encoder, "Encoder"},
-								{ESPinner_Mod::TFT, "TFT"},
-								{ESPinner_Mod::LCD, "LCD"}};
-
 enum class TabType { BasicTab, AdvancedSettingsTab, LinkedActions, NetworkTab };
 
 struct TabController {
@@ -140,10 +113,78 @@ void createPINConfigCallback(Control *sender, int type) {
 	ESPUI.getControl(previousRef)->callback = PINConfigCallback;
 }
 
+void saveElement_callback(Control *sender, int type) {
+	debugCallback(sender, type);
+	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
+	std::vector<uint16_t> childrenIds =
+		getChildrenIds(elementToParentMap, parentRef);
+
+	ESPinner espinner;
+	for (uint16_t childControllerId : childrenIds) {
+		String espinner_value =
+			String(ESPUI.getControl(childControllerId)->value);
+		String espinner_label =
+			String(ESPUI.getControl(childControllerId)->label);
+
+		if (espinner_label == "ESPinnerType") {
+			if (espinner_value == "GPIO") {
+			}
+			espinner.setType(ESPinner_Mod::GPIO);
+		}
+
+		if (espinner_label == "ESPinnerID") {
+			espinner.setID(espinner_value);
+		}
+
+		// If ESPinner Model is in Mods , downcasting for details
+		// implementation
+		/* if (espinner.getType() == ESPinner_Mod::GPIO) {
+			ESPinner *gpio_espinner = new ESPinner_GPIO();
+			auto espinner_ptr = dynamic_cast<ESPinner_GPIO *>(gpio_espinner);
+
+			if (espinner_label == "GPIO_ModeSelector") {
+				if (espinner_label == "INPUT") {
+					espinner_ptr->setGPIOMode(
+						ESPinner_GPIOType::ESPINNER_INPUT);
+				} else if (espinner_label == "GPIO_PinSelector") {
+					espinner_ptr->setGPIOMode(
+						ESPinner_GPIOType::ESPINNER_OUTPUT);
+				}
+			}
+			if (espinner_label == "GPIO_PinSelector") {
+				espinner_ptr->setGPIO(espinner_label.toInt());
+			}
+		} */
+		if (espinner_label == "GPIO_PinSelector") {
+			ESP_PinMode pinin = {espinner_value.toInt(),
+								 InputPin(false, false),
+								 PinType::BusDigital,
+								 false,
+								 true,
+								 false};
+			ESPAllOnPinManager::getInstance().attach(pinin);
+		}
+	}
+}
+
 void removeElement_callback(Control *sender, int type) {
 	debugCallback(sender, type);
 	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
 	ESPUI.removeControl(parentRef);
+	std::vector<uint16_t> childrenIds =
+		getChildrenIds(elementToParentMap, parentRef);
+
+	for (uint16_t childControllerId : childrenIds) {
+		String espinner_value =
+			String(ESPUI.getControl(childControllerId)->value);
+		String espinner_label =
+			String(ESPUI.getControl(childControllerId)->label);
+
+		if (espinner_label == "GPIO_PinSelector") {
+			ESPAllOnPinManager::getInstance().detach(espinner_value.toInt());
+		}
+	}
+
 	removeControlId(controlReferences, parentRef);
 	removeValueFromMap(elementToParentMap, parentRef);
 }
@@ -157,16 +198,26 @@ void ESPinnerSelector() {
 
 	int numElements = sizeof(mods) / sizeof(mods[0]);
 
-	auto mainselector = ESPUI.addControl(ControlType::Select, "Selector",
+	auto mainselector = ESPUI.addControl(ControlType::Select, "ESPinnerType",
 										 "VOID", ControlColor::Wetasphalt,
 										 basicTabRef, createPINConfigCallback);
 	for (int i = 0; i < numElements; i++) {
 		ESPUI.addControl(ControlType::Option, mods[i].name.c_str(),
 						 mods[i].name, None, mainselector);
 	}
-	auto mainText = ESPUI.addControl(Text, "Descriptor", "ID", Alizarin,
+	auto mainText = ESPUI.addControl(Text, "ESPinnerID", "ID", Alizarin,
 									 mainselector, generalCallback);
+
+	uint16_t parentControl = ESPUI.getControl(mainText)->id;
+	uint16_t grandParentControl =
+		ESPUI.getControl(parentControl)->parentControl;
+
 	controlReferences.push_back(mainselector);
+
+	addElementWithParent(elementToParentMap, mainselector,
+						 grandParentControl); // Add Selector to parent
+	addElementWithParent(elementToParentMap, mainText,
+						 grandParentControl); // Add ID to parent
 }
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/

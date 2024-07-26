@@ -4,11 +4,34 @@
 #include "PinManager.h"
 #include <ESPUI.h>
 
-class ESPinner {
+enum class ESPinner_Mod {
+	VOID,
+	GPIO,
+	Stepper,
+	RFID,
+	NeoPixel,
+	DC,
+	MPU,
+	Encoder,
+	TFT,
+	LCD
+};
+
+struct ESPinner_Module {
+	ESPinner_Mod model;
+	String name;
+};
+
+const ESPinner_Module mods[] = {
+	{ESPinner_Mod::VOID, "VOID"},		  {ESPinner_Mod::GPIO, "GPIO"},
+	{ESPinner_Mod::Stepper, "Stepper"},	  {ESPinner_Mod::RFID, "RFID"},
+	{ESPinner_Mod::NeoPixel, "NeoPixel"}, {ESPinner_Mod::DC, "DC"},
+	{ESPinner_Mod::MPU, "MPU"},			  {ESPinner_Mod::Encoder, "Encoder"},
+	{ESPinner_Mod::TFT, "TFT"},			  {ESPinner_Mod::LCD, "LCD"}};
+
+class IESPinner {
   public:
-	/*ESPinner(PinManager<ESP_BoardConf, PinMode> *pinManager)
-		: pinManager(pinManager) {}*/
-	ESPinner() {}
+	IESPinner() {}
 	// Inicialización
 	virtual void setup() = 0;
 	// Updates
@@ -18,8 +41,25 @@ class ESPinner {
 
 	// implementacion
 	virtual void implement() = 0;
-	virtual ~ESPinner() {}
-	ESP_PinMode *pinManager;
+	virtual ~IESPinner() {}
+};
+
+class ESPinner : public IESPinner {
+  public:
+	ESPinner_Mod mod;
+	String ID;
+
+	ESPinner(ESPinner_Mod espinner_mod) : mod(espinner_mod) {};
+	ESPinner() : mod(ESPinner_Mod::VOID) {}
+	void setup() override {}
+	void update() override {}
+	void implement() override {}
+	void loader() override {}
+
+	void setType(ESPinner_Mod espinner_mod) { mod = espinner_mod; }
+	ESPinner_Mod getType() { return mod; }
+	void setID(String espinner_ID) { ID = espinner_ID; }
+	String getID() { return ID; }
 };
 
 #include "mods/ESPinner_DC.h"

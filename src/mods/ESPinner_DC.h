@@ -6,6 +6,8 @@
 
 class ESPinner_DC : public ESPinner {
   public:
+	ESPinner_DC(ESPinner_Mod espinner_mod) : ESPinner(espinner_mod) {}
+	ESPinner_DC() : ESPinner(ESPinner_Mod::DC) {}
 	void setup() override {
 		DUMPSLN("Iniciacion configuración de GPIO...");
 		// pinManager->isPinOK(12);

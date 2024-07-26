@@ -6,6 +6,8 @@
 
 class ESPinner_LCD : public ESPinner {
   public:
+	ESPinner_LCD(ESPinner_Mod espinner_mod) : ESPinner(espinner_mod) {}
+	ESPinner_LCD() : ESPinner(ESPinner_Mod::LCD) {}
 	void setup() override {
 		DUMPSLN("Iniciacion configuración de GPIO...");
 		// pinManager->isPinOK(12);

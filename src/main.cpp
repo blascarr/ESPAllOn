@@ -17,8 +17,8 @@ void connectWifi();
 pinSerializable datasource(10, InputPin(false, false), PinType::BusDigital);
 
 // UI handles
-ESPinner_GPIO gpio;
-ESPinner_Stepper Esptepper;
+ESPinner_GPIO gpio(ESPinner_Mod::GPIO);
+ESPinner_Stepper Esptepper(ESPinner_Mod::Stepper);
 
 void externalAction(uint16_t mode) { Serial.println("EXTERNAL ACTIOOOOON"); }
 void externalAction2(uint16_t mode) { Serial.println("Blocked Door"); }
@@ -69,8 +69,11 @@ void loop() {
 			((void (*)())0xf00fdead)();
 #endif
 			break;
+		case 'O': // Force a crash (for testing exception decoder)
+			DUMP_PINOUT();
+			break;
 		default:
-			Serial.print('#');
+			DUMP_PINOUT();
 			break;
 		}
 	}
