@@ -8,7 +8,7 @@ struct ESP_BoardConf {
 
 #if defined(ESP8266)
 struct ESP_BoardConf {
-	static constexpr size_t NUM_PINS = 40;
+	static constexpr size_t NUM_PINS = 20;
 	static ESP_PinMode PINOUT[NUM_PINS];
 };
 #endif

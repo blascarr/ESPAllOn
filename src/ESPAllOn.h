@@ -170,10 +170,9 @@ void saveElement_callback(Control *sender, int type) {
 void removeElement_callback(Control *sender, int type) {
 	debugCallback(sender, type);
 	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
-	ESPUI.removeControl(parentRef);
+
 	std::vector<uint16_t> childrenIds =
 		getChildrenIds(elementToParentMap, parentRef);
-
 	for (uint16_t childControllerId : childrenIds) {
 		String espinner_value =
 			String(ESPUI.getControl(childControllerId)->value);
@@ -181,10 +180,11 @@ void removeElement_callback(Control *sender, int type) {
 			String(ESPUI.getControl(childControllerId)->label);
 
 		if (espinner_label == "GPIO_PinSelector") {
+			DUMP("DETACH PIN ", espinner_value.toInt())
 			ESPAllOnPinManager::getInstance().detach(espinner_value.toInt());
 		}
 	}
-
+	ESPUI.removeControl(parentRef);
 	removeControlId(controlReferences, parentRef);
 	removeValueFromMap(elementToParentMap, parentRef);
 }

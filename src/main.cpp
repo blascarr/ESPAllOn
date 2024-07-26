@@ -14,11 +14,7 @@
 // Function Prototypes
 void connectWifi();
 
-pinSerializable datasource(10, InputPin(false, false), PinType::BusDigital);
-
 // UI handles
-ESPinner_GPIO gpio(ESPinner_Mod::GPIO);
-ESPinner_Stepper Esptepper(ESPinner_Mod::Stepper);
 
 void externalAction(uint16_t mode) { Serial.println("EXTERNAL ACTIOOOOON"); }
 void externalAction2(uint16_t mode) { Serial.println("Blocked Door"); }
@@ -38,11 +34,6 @@ void setup() {
 	WiFi.setSleep(false); // For the ESP32: turn off sleeping to increase UI
 						  // responsivness (at the cost of power use)
 #endif
-	gpio.setup();
-	gpio.loader();
-
-	Esptepper.setup();
-	Esptepper.loader();
 	ESPAllOn::getInstance().addAction(ACTION);
 	ESPAllOn::getInstance().addAction(ACTION2);
 
