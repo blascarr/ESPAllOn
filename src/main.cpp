@@ -11,6 +11,10 @@
 #include "ESPAllOn.h"
 #include <Ticker.h>
 
+#if (ESPALLON_OTA)
+#include "ESPAllOn_OTA.h"
+#endif
+
 // Function Prototypes
 void connectWifi();
 
@@ -41,6 +45,10 @@ void setup() {
 	ESPAllOn::getInstance().begin();
 
 	UI_UpdateTicker.start();
+#if (ESPALLON_OTA)
+	OTA_init();
+	OTA_UpdateTicker.start();
+#endif
 }
 
 void loop() {
@@ -68,6 +76,10 @@ void loop() {
 			break;
 		}
 	}
+
+#if (ESPALLON_OTA)
+	OTA_UpdateTicker.update();
+#endif
 
 #if !defined(ESP32)
 	// We don't need to call this explicitly on ESP32 but we do on 8266

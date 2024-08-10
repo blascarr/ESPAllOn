@@ -46,3 +46,13 @@ void saveElement_callback(Control *sender, int type);
 
 std::vector<uint16_t> controlReferences;
 std::map<uint16_t, uint16_t> elementToParentMap;
+
+/*----------------------------------------------------*/
+/*--------------------   OTA  ------------------------*/
+/*----------------------------------------------------*/
+
+#define ESPALLON_OTA true
+#define OTA_HOST "ESPALLON_OTA"
+// #define OTA_PORT 8266
+// #define OTA_PASSWORD "admin"
+// #define OTA_PASSWORD_HASH "21232f297a57a5a743894a0e4a801fc3"
