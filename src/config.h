@@ -46,3 +46,9 @@ void saveElement_callback(Control *sender, int type);
 
 std::vector<uint16_t> controlReferences;
 std::map<uint16_t, uint16_t> elementToParentMap;
+
+/*----------------------------------------------------*/
+/*--------------   Sleep Low Power -------------------*/
+/*----------------------------------------------------*/
+
+#define ESP_SLEEP true
