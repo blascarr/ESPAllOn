@@ -35,8 +35,6 @@ class ESPAllOnPinManager : public PinManager<ESP_BoardConf, PinMode> {
 	}
 };
 
-#define VERBOSE false
-
 const char *getPinTypeName(PinType pinType) {
 	auto it = pinTypeNames.find(pinType);
 	if (it != pinTypeNames.end()) {

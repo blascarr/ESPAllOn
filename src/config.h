@@ -20,18 +20,24 @@
 #endif
 #endif
 
+#define VERBOSE false
+
 // Settings
 #define SLOW_BOOT 0
 #define HOSTNAME "ESPAllOn"
 #define FORCE_USE_HOTSPOT 0
 #define DEBUG true
 
-#define HARDCODED_CREDENTIALS false
+#define HARDCODED_CREDENTIALS true
 #define HARDCODED_SSID "ZMS"
 #define HARDCODED_PASS "ZM4K3RS:P"
 
+#define DNS_NAME "espallon"
+
 const byte DNS_PORT = 53;
-IPAddress apIP(192, 168, 1, 115);
+IPAddress LOCAL_IP(192, 168, 1, 115);
+IPAddress GATEWAY(192, 168, 1, 1);
+IPAddress SUBNET(255, 255, 255, 0);
 
 // Modules
 

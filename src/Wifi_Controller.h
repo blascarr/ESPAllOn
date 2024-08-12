@@ -48,6 +48,11 @@ void connectWifi() {
 		DUMPLN("SSID: ", stored_ssid.c_str());
 		DUMPLN("Pass: ", stored_pass.c_str());
 #endif
+
+		if (!WiFi.config(LOCAL_IP, GATEWAY, SUBNET)) {
+			DUMPSLN("STA Failed to configure");
+		}
+
 #if defined(ESP32)
 		WiFi.begin(stored_ssid.c_str(), stored_pass.c_str());
 #else
@@ -65,14 +70,13 @@ void connectWifi() {
 		DUMPPRINTLN();
 		DUMPLN("IP: ", WiFi.localIP());
 
-		if (!MDNS.begin(HOSTNAME)) {
+		if (!MDNS.begin(DNS_NAME)) {
 			DUMPSLN("Error setting up MDNS responder!");
 		}
 	} else {
 		DUMPSLN("\nCreating access point...");
 		WiFi.mode(WIFI_AP);
-		WiFi.softAPConfig(IPAddress(192, 168, 1, 1), IPAddress(192, 168, 1, 1),
-						  IPAddress(255, 255, 255, 0));
+		WiFi.softAPConfig(LOCAL_IP, GATEWAY, SUBNET);
 		WiFi.softAP(HOSTNAME);
 
 		connect_timeout = 20;
