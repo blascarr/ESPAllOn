@@ -163,6 +163,8 @@ void saveElement_callback(Control *sender, int type) {
 								 true,
 								 false};
 			ESPAllOnPinManager::getInstance().attach(pinin);
+			// GPIO SELECTOR SHOULD UPDATE GPIO LIST
+			removeGPIOLabel(espinner_value.toInt());
 		}
 	}
 }
@@ -182,6 +184,13 @@ void removeElement_callback(Control *sender, int type) {
 		if (espinner_label == "GPIO_PinSelector") {
 			DUMP("DETACH PIN ", espinner_value.toInt())
 			ESPAllOnPinManager::getInstance().detach(espinner_value.toInt());
+			// GPIO SELECTOR SHOULD UPDATE GPIO LIST
+			std::string label = pinLabels[espinner_value.toInt() - 1];
+			char *cstr = new char[label.length() + 1];
+			strcpy(cstr, label.c_str());
+			std::pair<uint8_t, const char *> newGPIO = {espinner_value.toInt(),
+														cstr};
+			addGPIOLabel(newGPIO);
 		}
 	}
 	ESPUI.removeControl(parentRef);

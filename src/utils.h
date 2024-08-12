@@ -77,6 +77,62 @@ void removeValueFromMap(std::map<uint16_t, uint16_t> &elementToParentMap,
 		elementToParentMap.erase(key);
 	}
 }
+#define PINSIZE 40
+
+enum class labelPin {
+	PIN0 = 0,
+	PIN1,
+	PIN2,
+	PIN3,
+	PIN4,
+	PIN5,
+	PIN6,
+	PIN7,
+	PIN8,
+	PIN9,
+	PIN10,
+	PIN11,
+	PIN12,
+	PIN13,
+	PIN14,
+	PIN15,
+	PIN16,
+	PIN17,
+	PIN18,
+	PIN19,
+	PIN20,
+	PIN21,
+	PIN22,
+	PIN23,
+	PIN24,
+	PIN25,
+	PIN26,
+	PIN27,
+	PIN28,
+	PIN29,
+	PIN30,
+	PIN31,
+	PIN32,
+	PIN33,
+	PIN34,
+	PIN35,
+	PIN36,
+	PIN37,
+	PIN38,
+	PIN39,
+	PIN40,
+};
+
+const std::array<std::string, static_cast<size_t>(PINSIZE)> pinLabels = {
+	"1",  "2",	"3",  "4",	"5",  "6",	"7",  "8",	"9",  "10",
+	"11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+	"21", "22", "23", "24", "25", "26", "27", "28", "29", "30",
+	"31", "32", "33", "34", "35", "36", "37", "38", "39", "40"};
+
+std::string getPinLabel(labelPin pin) {
+	return pinLabels[static_cast<size_t>(pin)];
+}
+
 std::map<uint8_t, const char *> gpioLabels = {
 	{0, "0"},	{1, "1"},	{2, "2"},	{3, "3"},	{4, "4"},	{5, "5"},
 	{6, "6"},	{7, "7"},	{8, "8"},	{9, "9"},	{10, "10"}, {11, "11"},
@@ -93,3 +149,38 @@ const char *getLabelForPin(uint8_t pin) {
 		return "Pin not found";
 	}
 }
+
+const char *getLabelOnList(std::map<uint8_t, const char *> &list, uint8_t pin) {
+	if (list.find(pin) != list.end()) {
+		return list[pin];
+	} else {
+		return "Pin not found";
+	}
+}
+
+void addLabelOnList(std::map<uint8_t, const char *> &list,
+					std::pair<uint8_t, const char *> labelPair) {
+	list[labelPair.first] = labelPair.second;
+}
+
+void removeLabelOnList(std::map<uint8_t, const char *> &list,
+					   std::pair<uint8_t, const char *> labelPair) {
+	list.erase(labelPair.first);
+}
+
+void removeLabelOnList(std::map<uint8_t, const char *> &list, uint8_t gpio) {
+	auto it = list.find(gpio);
+	if (it != list.end()) {
+		list.erase(it);
+	}
+}
+
+void addGPIOLabel(std::pair<uint8_t, const char *> gpioLabelPair) {
+	addLabelOnList(gpioLabels, gpioLabelPair);
+}
+
+void removeGPIOLabel(std::pair<uint8_t, const char *> gpioLabelPair) {
+	removeLabelOnList(gpioLabels, gpioLabelPair);
+}
+
+void removeGPIOLabel(uint8_t gpio) { removeLabelOnList(gpioLabels, gpio); }
