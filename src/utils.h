@@ -1,3 +1,5 @@
+#include "esp_heap_caps.h"
+#include "esp_partition.h"
 #include <Arduino.h>
 #include <ESPUI.h>
 
@@ -208,4 +210,38 @@ void removeGPIOLabel(std::pair<uint8_t, const char *> gpioLabelPair) {
 	removeLabelOnList(gpioLabels, gpioLabelPair);
 }
 
-void removeGPIOLabel(uint8_t gpio) { removeLabelOnList(gpioLabels, gpio); }
+void removeGPIOLabel(uint8_t gpio) { removeLabelOnList(gpioLabels, gpio); }// ------------------ MEMORY MANAGEMENT --------------------//
+
+// ---------------------------------------------------------//
+// ------------------ MEMORY MANAGEMENT --------------------//
+// ---------------------------------------------------------//
+void healthCheck() {
+#if defined(ESP8266)
+	DUMPLN("Free heap: ", ESP.getFreeHeap());
+	DUMPLN("Fragmentation: ", ESP.getHeapFragmentation());
+#endif
+
+#if defined(ESP32)
+	DUMPLN("Free heap: ", esp_get_free_heap_size());
+	DUMPS("Mem: ");
+	heap_caps_print_heap_info(MALLOC_CAP_DEFAULT);
+#endif
+}
+
+void print_partition_info() {
+	esp_partition_iterator_t pi = esp_partition_find(
+		ESP_PARTITION_TYPE_ANY, ESP_PARTITION_SUBTYPE_ANY, NULL);
+	while (pi != NULL) {
+		const esp_partition_t *partition = esp_partition_get(pi);
+		DUMPSLN("Partition:");
+		DUMPLN("Type: ", partition->type);
+		DUMPLN("Size: ", partition->size);
+		pi = esp_partition_next(pi);
+	}
+	esp_partition_iterator_release(pi);
+}
+
+void esp_memory_info() {
+	healthCheck();
+	print_partition_info();
+}

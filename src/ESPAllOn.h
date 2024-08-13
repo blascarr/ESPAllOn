@@ -167,6 +167,7 @@ void saveElement_callback(Control *sender, int type) {
 			removeGPIOLabel(espinner_value.toInt());
 		}
 	}
+	esp_memory_info();
 }
 
 void removeElement_callback(Control *sender, int type) {
@@ -192,6 +193,7 @@ void removeElement_callback(Control *sender, int type) {
 														cstr};
 			addGPIOLabel(newGPIO);
 		}
+		esp_memory_info();
 	}
 	ESPUI.removeControl(parentRef);
 	removeControlId(controlReferences, parentRef);
