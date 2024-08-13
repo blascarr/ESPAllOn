@@ -38,17 +38,10 @@ const byte DNS_PORT = 53;
 IPAddress LOCAL_IP(192, 168, 1, 115);
 IPAddress GATEWAY(192, 168, 1, 1);
 IPAddress SUBNET(255, 255, 255, 0);
+IPAddress PRIMARYDNS(9, 9, 9, 9);
+IPAddress SECONDARYDNS(208, 67, 222, 222);
 
 // Modules
 
 #define MOD_CAPACITY 10
 
-void removeElement_callback(Control *sender, int type);
-void saveElement_callback(Control *sender, int type);
-
-/*----------------------------------------------------*/
-/*----------------   Vector List  --------------------*/
-/*----------------------------------------------------*/
-
-std::vector<uint16_t> controlReferences;
-std::map<uint16_t, uint16_t> elementToParentMap;

@@ -25,6 +25,27 @@
 		DUMPV(v);                                                              \
 	}
 
+void removeElement_callback(Control *sender, int type);
+void saveElement_callback(Control *sender, int type);
+
+/*----------------------------------------------------*/
+/*----------------   Vector List  --------------------*/
+/*----------------------------------------------------*/
+
+// Array List of Containers inside mainSelector in Mod Tabs
+std::vector<uint16_t> controlReferences;
+
+// Map list to link children elements to parent container < child , parent >
+/**
+ *            o ( child UID )
+ *           /
+ *  Parent  O
+ *           \
+ *            o ( child GPIO )
+ */
+
+std::map<uint16_t, uint16_t> elementToParentMap;
+
 void addElementWithParent(std::map<uint16_t, uint16_t> &map, uint16_t elementId,
 						  uint16_t parentId) {
 	map[elementId] = parentId;
@@ -123,6 +144,8 @@ enum class labelPin {
 	PIN40,
 };
 
+// Array of pinLabels to associate with gpioLabels
+
 const std::array<std::string, static_cast<size_t>(PINSIZE)> pinLabels = {
 	"1",  "2",	"3",  "4",	"5",  "6",	"7",  "8",	"9",  "10",
 	"11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
@@ -132,6 +155,8 @@ const std::array<std::string, static_cast<size_t>(PINSIZE)> pinLabels = {
 std::string getPinLabel(labelPin pin) {
 	return pinLabels[static_cast<size_t>(pin)];
 }
+
+// Available List of GPIOs currently
 
 std::map<uint8_t, const char *> gpioLabels = {
 	{0, "0"},	{1, "1"},	{2, "2"},	{3, "3"},	{4, "4"},	{5, "5"},
