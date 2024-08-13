@@ -1,3 +1,57 @@
+# ESPALLON TESTING PLAN
+
+## Testing Environments
+
+There are four separate environments. Two of them are associated with the src Production project, one configured for the **ESP8266** and the other for the **ESP32** board, tagged as “**esp32dev**” and “**esp8266**” respectively. The last two are associated with **Testing environments**, which include a library for **websocket** implementation to execute automated tests with a **Node.js Puppeteer server**.
+
+- `[env:esp32dev]`
+- `[env:esp8266]`
+- `[env:esp32_test]`
+- `[env:esp8266_test]`
+
+To execute **production** environments, we just need run it:
+`pio run --environment esp32dev`
+
+To execute **tests** environments :
+
+`pio test -vv -e esp32_test --filter "test_esp32_espui”`
+
+- **-v** : Verbose Mode. If **Debug Mode** with **Serial** is enabled, verbose Mode is required.
+- **-e** : Board environment. ( **Native** is defined for tests in local to execute requests to the server in board )
+- —**filter** : Useful to execute just one Test folder to save time instead all in one.
+
+![Screenshot from 2024-03-24 14-24-01.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/8c9f46f1-f4a6-4b3a-be5d-bfb554f02347/22d897fd-c7ec-45ee-9292-f04e87c2b919/Screenshot_from_2024-03-24_14-24-01.png)
+
+## **Prepare Environment for Testing**
+
+In order to execute automated test, we should open a server on our computer and define a local IP and port where the tests will be executed on the board,
+
+Inside test/node_test we should execute npm install to operate with the following packages.
+
+- **express** →It will create a server app on local PC with an IP and Port to send info to the board.
+- [\*\*socket.io](http://socket.io)\*\* → It will send operational packages to synchronize testing operations.
+- **puppeteer** → It will execute actions on the app configured in our server code.
+
+It will open a server on port 3000 and we can review every request from ESP to PC server in order to execute the testing. With the following command on our computer we could follow the different petitions from the board to the server.
+
+`netstat -an | grep 3000`
+
+## Execute Puppeteer
+
+Test runs can be executed normally from node.
+
+Test runs can be executed normally from node.
+
+```jsx
+
+node node_test/src_test/puppeteer_test
+```
+
+## Install libboost-all-dev
+
+sudo apt install libboost-all-dev
+
+//----------------------------------------------//
 
 This directory is intended for PlatformIO Test Runner and project tests.
 
@@ -8,4 +62,5 @@ determine whether they are fit for use. Unit testing finds problems early
 in the development cycle.
 
 More information about PlatformIO Unit Testing:
+
 - https://docs.platformio.org/en/latest/advanced/unit-testing/index.html
