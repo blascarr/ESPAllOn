@@ -5,11 +5,11 @@ const path = require('path');
 
 const config = require('./config');
 
-const LOCAL_PC = config.LOCAL_PC;
+const LOCAL_ESP_BOARD = config.LOCAL_ESP_BOARD;
 const LOCAL_PC_PORT = config.LOCAL_PC_PORT;
 const screenshotsFolder = config.screenshots_folder;
 
-console.log(LOCAL_PC + ':' + LOCAL_PC_PORT);
+console.log(LOCAL_ESP_BOARD + ':' + LOCAL_PC_PORT);
 const server = new WebSocket.Server({ port: LOCAL_PC_PORT });
 
 getFormattedDate = () => {
@@ -27,7 +27,7 @@ getFormattedDate = () => {
 runTest = async () => {
 	const browser = await puppeteer.launch({ headless: false });
 	const page = await browser.newPage();
-	await page.goto(LOCAL_PC, { waitUntil: 'networkidle2' });
+	await page.goto(LOCAL_ESP_BOARD, { waitUntil: 'networkidle2' });
 
 	// Wait until selector is available
 	await page.waitForSelector('input', { visible: true });

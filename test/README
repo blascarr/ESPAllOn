@@ -28,13 +28,28 @@ In order to execute automated test, we should open a server on our computer and 
 
 Inside test/node_test we should execute npm install to operate with the following packages.
 
-- **express** →It will create a server app on local PC with an IP and Port to send info to the board.
+- ws →WebSockets library to connect ESP and server.
 - [\*\*socket.io](http://socket.io)\*\* → It will send operational packages to synchronize testing operations.
 - **puppeteer** → It will execute actions on the app configured in our server code.
 
 It will open a server on port 3000 and we can review every request from ESP to PC server in order to execute the testing. With the following command on our computer we could follow the different petitions from the board to the server.
 
 `netstat -an | grep 3000`
+
+### Configuration IP host in server and ESP board
+
+Inside **src_test** folder, there is a **config.js** file where we can provide the **ESP IP connection** in our WiFi.
+
+```jsx
+LOCAL_ESP_BOARD: '[http://192.168.1.115](http://192.168.1.115/)',
+```
+
+In our **ESP** test, there is another **config.h** file where we should insert our **Server host** executed in our **PC**.
+
+```
+IPAddress LOCAL_PC(192, 168, 1, 130);
+uint16_t LOCAL_PC_PORT = 3000;
+```
 
 ## Execute Puppeteer
 
