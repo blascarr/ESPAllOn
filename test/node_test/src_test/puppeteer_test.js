@@ -1,56 +1,80 @@
 const puppeteer = require('puppeteer');
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
+const WebSocket = require('ws');
+const fs = require('fs');
+const path = require('path');
 
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+const config = require('./config');
+
+const LOCAL_PC = config.LOCAL_PC;
+const LOCAL_PC_PORT = config.LOCAL_PC_PORT;
+const screenshotsFolder = config.screenshots_folder;
+
+console.log(LOCAL_PC + ':' + LOCAL_PC_PORT);
+const server = new WebSocket.Server({ port: LOCAL_PC_PORT });
+
+getFormattedDate = () => {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, '0');
+	const day = String(now.getDate()).padStart(2, '0');
+	const hours = String(now.getHours()).padStart(2, '0');
+	const minutes = String(now.getMinutes()).padStart(2, '0');
+	const seconds = String(now.getSeconds()).padStart(2, '0');
+
+	return `${year}-${month}-${day}-${hours}:${minutes}:${seconds}`;
+};
 
 runTest = async () => {
 	const browser = await puppeteer.launch({ headless: false });
 	const page = await browser.newPage();
-	await page.goto('http://192.168.1.115');
+	await page.goto(LOCAL_PC, { waitUntil: 'networkidle2' });
 
-	// Esperar a que el desplegable esté disponible y seleccionar una opción
+	// Wait until selector is available
+	await page.waitForSelector('input', { visible: true });
 	const selects = await page.$$('select');
+	console.log(selects);
 	if (selects.length > 0) {
-		// Seleccionar la primera opción del primer select
-		const firstSelect = selects[0];
+		// Select First option
+		const firstSelect = selects[1];
 		await firstSelect.select('GPIO');
 	}
 
+	await page.waitForSelector('button', { visible: true });
 	const saveButtons = await page.$$eval('button', (buttons) =>
 		buttons.filter((button) => button.textContent.includes('Save'))
 	);
+	console.log(saveButtons);
 	if (saveButtons.length > 0) {
-		// Hacer clic en el primer botón
+		// Click on the first button
 		await saveButtons[0].click();
 	}
-	// Opcional: Captura de pantalla después de hacer clic en el botón
-	await page.screenshot({ path: 'screenshots/resultado.png' });
 
-	// Cerrar el navegador
+	// Optional: Capture Image from test execution
+	const timestamp = getFormattedDate();
+	const screenshotPath = `${screenshotsFolder}/result-${timestamp}.png`;
+	if (!fs.existsSync(screenshotsFolder)) {
+		fs.mkdirSync(screenshotsFolder);
+	}
+
+	await page.screenshot({ path: screenshotPath });
+
+	// Close Browser
 	await browser.close();
 };
 
-io.on('connection', (socket) => {
-	console.log('Un cliente se ha conectado');
+server.on('connection', (socket) => {
+	console.log(`Client connected ${getFormattedDate()}`);
 
-	// Escuchar una señal específica, por ejemplo 'startTest'
-	socket.on('startTest', () => {
-		console.log('Señal recibida para iniciar el test');
-		// Aquí puedes colocar la lógica para ejecutar el test
-		runTest(); // Asumimos que esta función ejecuta el test de Puppeteer
+	socket.on('message', (message) => {
+		console.log(`Message received from ESP : ${message}`);
+		// Test is executed when signal from ESP is received
+		if (message == 'startTest') {
+			console.log('Execute Test');
+			runTest();
+		}
 	});
 
 	socket.on('disconnect', () => {
-		console.log('Cliente desconectado');
+		console.log('Disconnected Client');
 	});
 });
-
-const port = 3000;
-server.listen(port, () => {
-	console.log(`Servidor escuchando en http://localhost:${port}`);
-});
-// runTest();

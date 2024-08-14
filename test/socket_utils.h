@@ -2,6 +2,17 @@
 
 WebSocketsClient webSocket;
 
+void sendSocket() {
+	if (webSocket.isConnected()) {
+		DUMPSLN("SEND Start to WebSocket");
+		webSocket.sendTXT("startTest");
+	} else {
+		DUMPSLN("WebSocket NOT CONNECTED");
+	}
+}
+
+Ticker test_socketTicker(sendSocket, 1000, 1, MILLIS);
+
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
 	switch (type) {
 	case WStype_DISCONNECTED:
@@ -9,6 +20,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
 		break;
 	case WStype_CONNECTED:
 		DUMPSLN("[WebSocket] Conectado\n");
+		test_socketTicker.start();
 		break;
 	case WStype_TEXT:
 		Serial.printf("[WebSocket] Mensaje recibido: %s\n", payload);
@@ -22,21 +34,10 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
 	}
 }
 
-void sendSocket() {
-	if (webSocket.isConnected()) {
-		DUMPSLN("SEND Start to WebSocket");
-		webSocket.sendTXT("startTest");
-	} else {
-		DUMPSLN("WebSocket NOT CONNECTED");
-	}
-}
-
-Ticker test_socketTicker(sendSocket, 5000, 1, MILLIS);
-
 void initSocketProvider() {
 	webSocket.begin(LOCAL_PC, LOCAL_PC_PORT);
 	webSocket.onEvent(webSocketEvent);
-	test_socketTicker.start();
+	webSocket.setReconnectInterval(5000);
 }
 
 void loopSocket() {
