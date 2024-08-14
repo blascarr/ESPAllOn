@@ -114,88 +114,94 @@ void createPINConfigCallback(Control *sender, int type) {
 }
 
 void saveElement_callback(Control *sender, int type) {
-	debugCallback(sender, type);
-	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
-	std::vector<uint16_t> childrenIds =
-		getChildrenIds(elementToParentMap, parentRef);
+	if (type == B_UP) {
+		debugCallback(sender, type);
+		uint16_t parentRef = getParentId(elementToParentMap, sender->id);
+		std::vector<uint16_t> childrenIds =
+			getChildrenIds(elementToParentMap, parentRef);
 
-	ESPinner espinner;
-	for (uint16_t childControllerId : childrenIds) {
-		String espinner_value =
-			String(ESPUI.getControl(childControllerId)->value);
-		String espinner_label =
-			String(ESPUI.getControl(childControllerId)->label);
+		ESPinner espinner;
+		for (uint16_t childControllerId : childrenIds) {
+			String espinner_value =
+				String(ESPUI.getControl(childControllerId)->value);
+			String espinner_label =
+				String(ESPUI.getControl(childControllerId)->label);
 
-		if (espinner_label == "ESPinnerType") {
-			if (espinner_value == "GPIO") {
-			}
-			espinner.setType(ESPinner_Mod::GPIO);
-		}
-
-		if (espinner_label == "ESPinnerID") {
-			espinner.setID(espinner_value);
-		}
-
-		// If ESPinner Model is in Mods , downcasting for details
-		// implementation
-		/* if (espinner.getType() == ESPinner_Mod::GPIO) {
-			ESPinner *gpio_espinner = new ESPinner_GPIO();
-			auto espinner_ptr = dynamic_cast<ESPinner_GPIO *>(gpio_espinner);
-
-			if (espinner_label == "GPIO_ModeSelector") {
-				if (espinner_label == "INPUT") {
-					espinner_ptr->setGPIOMode(
-						ESPinner_GPIOType::ESPINNER_INPUT);
-				} else if (espinner_label == "GPIO_PinSelector") {
-					espinner_ptr->setGPIOMode(
-						ESPinner_GPIOType::ESPINNER_OUTPUT);
+			if (espinner_label == "ESPinnerType") {
+				if (espinner_value == "GPIO") {
 				}
+				espinner.setType(ESPinner_Mod::GPIO);
 			}
+
+			if (espinner_label == "ESPinnerID") {
+				espinner.setID(espinner_value);
+			}
+
+			// If ESPinner Model is in Mods , downcasting for details
+			// implementation
+			/* if (espinner.getType() == ESPinner_Mod::GPIO) {
+				ESPinner *gpio_espinner = new ESPinner_GPIO();
+				auto espinner_ptr = dynamic_cast<ESPinner_GPIO
+			*>(gpio_espinner);
+
+				if (espinner_label == "GPIO_ModeSelector") {
+					if (espinner_label == "INPUT") {
+						espinner_ptr->setGPIOMode(
+							ESPinner_GPIOType::ESPINNER_INPUT);
+					} else if (espinner_label == "GPIO_PinSelector") {
+						espinner_ptr->setGPIOMode(
+							ESPinner_GPIOType::ESPINNER_OUTPUT);
+					}
+				}
+				if (espinner_label == "GPIO_PinSelector") {
+					espinner_ptr->setGPIO(espinner_label.toInt());
+				}
+			} */
 			if (espinner_label == "GPIO_PinSelector") {
-				espinner_ptr->setGPIO(espinner_label.toInt());
+				ESP_PinMode pinin = {espinner_value.toInt(),
+									 InputPin(false, false),
+									 PinType::BusDigital,
+									 false,
+									 true,
+									 false};
+				ESPAllOnPinManager::getInstance().attach(pinin);
+				// GPIO SELECTOR SHOULD UPDATE GPIO LIST
+				removeGPIOLabel(espinner_value.toInt());
 			}
-		} */
-		if (espinner_label == "GPIO_PinSelector") {
-			ESP_PinMode pinin = {espinner_value.toInt(),
-								 InputPin(false, false),
-								 PinType::BusDigital,
-								 false,
-								 true,
-								 false};
-			ESPAllOnPinManager::getInstance().attach(pinin);
-			// GPIO SELECTOR SHOULD UPDATE GPIO LIST
-			removeGPIOLabel(espinner_value.toInt());
 		}
 	}
 }
 
 void removeElement_callback(Control *sender, int type) {
-	debugCallback(sender, type);
-	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
+	if (type == B_UP) {
+		debugCallback(sender, type);
+		uint16_t parentRef = getParentId(elementToParentMap, sender->id);
 
-	std::vector<uint16_t> childrenIds =
-		getChildrenIds(elementToParentMap, parentRef);
-	for (uint16_t childControllerId : childrenIds) {
-		String espinner_value =
-			String(ESPUI.getControl(childControllerId)->value);
-		String espinner_label =
-			String(ESPUI.getControl(childControllerId)->label);
+		std::vector<uint16_t> childrenIds =
+			getChildrenIds(elementToParentMap, parentRef);
+		for (uint16_t childControllerId : childrenIds) {
+			String espinner_value =
+				String(ESPUI.getControl(childControllerId)->value);
+			String espinner_label =
+				String(ESPUI.getControl(childControllerId)->label);
 
-		if (espinner_label == "GPIO_PinSelector") {
-			DUMP("DETACH PIN ", espinner_value.toInt())
-			ESPAllOnPinManager::getInstance().detach(espinner_value.toInt());
-			// GPIO SELECTOR SHOULD UPDATE GPIO LIST
-			std::string label = pinLabels[espinner_value.toInt() - 1];
-			char *cstr = new char[label.length() + 1];
-			strcpy(cstr, label.c_str());
-			std::pair<uint8_t, const char *> newGPIO = {espinner_value.toInt(),
-														cstr};
-			addGPIOLabel(newGPIO);
+			if (espinner_label == "GPIO_PinSelector") {
+				DUMP("DETACH PIN ", espinner_value.toInt())
+				ESPAllOnPinManager::getInstance().detach(
+					espinner_value.toInt());
+				// GPIO SELECTOR SHOULD UPDATE GPIO LIST
+				std::string label = pinLabels[espinner_value.toInt() - 1];
+				char *cstr = new char[label.length() + 1];
+				strcpy(cstr, label.c_str());
+				std::pair<uint8_t, const char *> newGPIO = {
+					espinner_value.toInt(), cstr};
+				addGPIOLabel(newGPIO);
+			}
 		}
+		ESPUI.removeControl(parentRef);
+		removeControlId(controlReferences, parentRef);
+		removeValueFromMap(elementToParentMap, parentRef);
 	}
-	ESPUI.removeControl(parentRef);
-	removeControlId(controlReferences, parentRef);
-	removeValueFromMap(elementToParentMap, parentRef);
 }
 
 /*----------------------------------------------------*/
