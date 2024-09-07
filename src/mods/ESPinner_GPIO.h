@@ -39,11 +39,39 @@ class ESPinner_GPIO : public ESPinner {
 };
 
 void createGPIO_callback(Control *sender, int type) {}
+void saveGPIO_callback(Control *sender, int type) {
+	if (type == B_UP) {
+	}
+}
+
 void createPIN_callback(Control *sender, int type) {
 	DUMP("CB: id(", sender->id);
 	DUMP(") Type(", type);
 	DUMP(") '", sender->label);
 	DUMP("' = ", sender->value);
+
+	// Remove Select GPIO LABEL
+	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
+	uint16_t selectLabelRef = searchByLabel(parentRef, "Select_GPIO");
+	if (selectLabelRef != 0) {
+		ESPUI.removeControl(selectLabelRef);
+		removeValueFromMap(elementToParentMap, selectLabelRef);
+	}
+
+	// Change Selector Control with Text Input for numbers
+	uint16_t GPIOSelectorRef = searchByLabel(parentRef, "GPIO_PinSelector");
+	DUMPLN("Selector Ref ", selectLabelRef);
+	if (GPIOSelectorRef != 0) {
+		DUMPLN("Selector Ref ", selectLabelRef);
+		uint16_t GPIOPIN_input = ESPUI.addControl(
+			ControlType::Text, "GPIO_PinInput",
+			String(ESPUI.getControl(GPIOSelectorRef)->value),
+			ControlColor::Wetasphalt, parentRef, saveGPIO_callback);
+		addElementWithParent(elementToParentMap, GPIOPIN_input,
+							 parentRef); // Add GPIO Selector Input to parent
+		ESPUI.removeControl(GPIOSelectorRef);
+		removeValueFromMap(elementToParentMap, GPIOSelectorRef);
+	}
 }
 
 void GPIO_Selector(uint16_t PIN_ptr) {
@@ -51,6 +79,11 @@ void GPIO_Selector(uint16_t PIN_ptr) {
 	// Just only numbers defined in PinManager Object
 	// Remove broken and not permitted GPIOs
 
+	uint16_t GPIOLabel_selector =
+		ESPUI.addControl(ControlType::Label, "Select_GPIO", "Select GPIO",
+						 ControlColor::Carrot, PIN_ptr);
+	addElementWithParent(elementToParentMap, GPIOLabel_selector,
+						 PIN_ptr); // Add GPIO Label to parent
 	uint16_t GPIOPIN_selector =
 		ESPUI.addControl(ControlType::Select, "GPIO_PinSelector", "0",
 						 ControlColor::Wetasphalt, PIN_ptr, createPIN_callback);
@@ -82,9 +115,9 @@ void GPIO_UI(uint16_t GPIO_ptr) {
 	GPIO_Selector(GPIO_ptr);
 
 	// Remove Element
-	uint16_t GPIOAdd_selector = ESPUI.addControl(
-		ControlType::Button, "GPIOSave", "Save", ControlColor::Alizarin,
-		GPIO_ptr, saveElement_callback);
+	uint16_t GPIOAdd_selector =
+		ESPUI.addControl(ControlType::Button, "GPIOSave", "Save GPIO",
+						 ControlColor::Alizarin, GPIO_ptr, saveGPIO_callback);
 	uint16_t GPIORemove_selector = ESPUI.addControl(
 		ControlType::Button, "GPIORemove", "Remove", ControlColor::Alizarin,
 		GPIO_ptr, removeElement_callback);
@@ -93,6 +126,6 @@ void GPIO_UI(uint16_t GPIO_ptr) {
 						 GPIO_ptr); // Add Save Button to parent
 	addElementWithParent(elementToParentMap, GPIORemove_selector,
 						 GPIO_ptr); // Add Remove Button to parent
-	debugMap(elementToParentMap);
+									// debugMap(elementToParentMap);
 }
 #endif

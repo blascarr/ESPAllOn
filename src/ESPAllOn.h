@@ -88,86 +88,124 @@ void PINConfigCallback(Control *sender, int type) {
 	DUMPSLN("PIN CONFIG ");
 	if (sender->value == "GPIO") {
 #ifdef _ESPINNER_GPIO_H
-		GPIO_UI(sender->id);
+		// GPIO_UI(sender->id);
 #endif
 	}
 }
 
 void createPINConfigCallback(Control *sender, int type) {
 	debugCallback(sender, type);
-	ESPinnerSelector();
 
-	uint16_t previousRef = getBeforeLastGPIOSelector();
+	// Check if STANDARD SAVE Button exists on ESPinner selector
+	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
+	uint16_t labelRef = searchByLabel(parentRef, "SelectorSave");
+	DUMPLN("SAVE EXISTS?: ", labelRef);
+	if (labelRef != 0) {
+		ESPinnerSelector();
+		uint16_t saveButton = searchByLabel(parentRef, "SelectorSave");
+		if (saveButton != 0) {
+			removeValueFromMap(elementToParentMap, saveButton);
+			ESPUI.removeControl(saveButton);
+		}
+	}
+
+	uint16_t ESPinnerTypeRef = searchByLabel(parentRef, "ESPinnerType");
+	// If ESPinnerTypeRef is not VOID then remove content
+	if (ESPinnerTypeRef != 0) {
+		String ESPinnerType_value =
+			String(ESPUI.getControl(ESPinnerTypeRef)->value);
+		if (ESPinnerType_value != "VOID") {
+		}
+	}
+
 	if (sender->value == "GPIO") {
 #ifdef _ESPINNER_GPIO_H
-		GPIO_UI(previousRef);
+		// If GPIO Model exists avoid duplicates
+		uint16_t is_GPIO_Selector =
+			searchByLabel(parentRef, "GPIO_ModeSelector");
+		if (is_GPIO_Selector == 0) {
+			// Remove previous Model in Espinner Selector
+
+			GPIO_UI(parentRef);
+		}
 #endif
 	}
 
 	if (sender->value == "Stepper") {
 #ifdef _ESPINNER_STEPPER_H
-		// GPIO_UI(previousRef);
+		DUMPLN("STEPPER ID: ", parentRef);
 #endif
 	}
-	// Removes callback from previous selector
-	ESPUI.getControl(previousRef)->callback = PINConfigCallback;
+}
+
+void setESPinner(uint16_t id) {
+	uint16_t parentRef = getParentId(elementToParentMap, id);
+	std::vector<uint16_t> childrenIds =
+		getChildrenIds(elementToParentMap, parentRef);
+
+	ESPinner espinner;
+	for (uint16_t childControllerId : childrenIds) {
+		String espinner_value =
+			String(ESPUI.getControl(childControllerId)->value);
+		String espinner_label =
+			String(ESPUI.getControl(childControllerId)->label);
+
+		if (espinner_label == "ESPinnerType") {
+			if (espinner_value == "GPIO") {
+			}
+			espinner.setType(ESPinner_Mod::GPIO);
+		}
+
+		if (espinner_label == "ESPinnerID") {
+			espinner.setID(espinner_value);
+		}
+
+		// If ESPinner Model is in Mods , downcasting for details
+		// implementation
+		/* if (espinner.getType() == ESPinner_Mod::GPIO) {
+			ESPinner *gpio_espinner = new ESPinner_GPIO();
+			auto espinner_ptr = dynamic_cast<ESPinner_GPIO
+		*>(gpio_espinner);
+
+			if (espinner_label == "GPIO_ModeSelector") {
+				if (espinner_label == "INPUT") {
+					espinner_ptr->setGPIOMode(
+						ESPinner_GPIOType::ESPINNER_INPUT);
+				} else if (espinner_label == "GPIO_PinSelector") {
+					espinner_ptr->setGPIOMode(
+						ESPinner_GPIOType::ESPINNER_OUTPUT);
+				}
+			}
+			if (espinner_label == "GPIO_PinSelector") {
+				espinner_ptr->setGPIO(espinner_label.toInt());
+			}
+		} */
+		if (espinner_label == "GPIO_PinSelector") {
+			ESP_PinMode pinin = {espinner_value.toInt(),
+								 InputPin(false, false),
+								 PinType::BusDigital,
+								 false,
+								 true,
+								 false};
+			ESPAllOnPinManager::getInstance().attach(pinin);
+			// GPIO SELECTOR SHOULD UPDATE GPIO LIST
+			removeGPIOLabel(espinner_value.toInt());
+		}
+	}
 }
 
 void saveElement_callback(Control *sender, int type) {
+	DUMPLN("Label: ", sender->label);
 	if (type == B_UP) {
+		ESPinnerSelector();
 		debugCallback(sender, type);
-		uint16_t parentRef = getParentId(elementToParentMap, sender->id);
-		std::vector<uint16_t> childrenIds =
-			getChildrenIds(elementToParentMap, parentRef);
-
-		ESPinner espinner;
-		for (uint16_t childControllerId : childrenIds) {
-			String espinner_value =
-				String(ESPUI.getControl(childControllerId)->value);
-			String espinner_label =
-				String(ESPUI.getControl(childControllerId)->label);
-
-			if (espinner_label == "ESPinnerType") {
-				if (espinner_value == "GPIO") {
-				}
-				espinner.setType(ESPinner_Mod::GPIO);
-			}
-
-			if (espinner_label == "ESPinnerID") {
-				espinner.setID(espinner_value);
-			}
-
-			// If ESPinner Model is in Mods , downcasting for details
-			// implementation
-			/* if (espinner.getType() == ESPinner_Mod::GPIO) {
-				ESPinner *gpio_espinner = new ESPinner_GPIO();
-				auto espinner_ptr = dynamic_cast<ESPinner_GPIO
-			*>(gpio_espinner);
-
-				if (espinner_label == "GPIO_ModeSelector") {
-					if (espinner_label == "INPUT") {
-						espinner_ptr->setGPIOMode(
-							ESPinner_GPIOType::ESPINNER_INPUT);
-					} else if (espinner_label == "GPIO_PinSelector") {
-						espinner_ptr->setGPIOMode(
-							ESPinner_GPIOType::ESPINNER_OUTPUT);
-					}
-				}
-				if (espinner_label == "GPIO_PinSelector") {
-					espinner_ptr->setGPIO(espinner_label.toInt());
-				}
-			} */
-			if (espinner_label == "GPIO_PinSelector") {
-				ESP_PinMode pinin = {espinner_value.toInt(),
-									 InputPin(false, false),
-									 PinType::BusDigital,
-									 false,
-									 true,
-									 false};
-				ESPAllOnPinManager::getInstance().attach(pinin);
-				// GPIO SELECTOR SHOULD UPDATE GPIO LIST
-				removeGPIOLabel(espinner_value.toInt());
-			}
+		// Review Parent in Selector and Review Spinner Model
+		if (sender->value == "GPIO") {
+#ifdef _ESPINNER_GPIO_H
+			// Get Parent to manipulate and update ESPinner Selector
+			uint16_t parentRef = getParentId(elementToParentMap, sender->id);
+			GPIO_UI(parentRef);
+#endif
 		}
 	}
 }
@@ -176,6 +214,7 @@ void removeElement_callback(Control *sender, int type) {
 	if (type == B_UP) {
 		debugCallback(sender, type);
 		uint16_t parentRef = getParentId(elementToParentMap, sender->id);
+		DUMPSLN("ELEMENTS SIZE ");
 
 		std::vector<uint16_t> childrenIds =
 			getChildrenIds(elementToParentMap, parentRef);
@@ -185,7 +224,8 @@ void removeElement_callback(Control *sender, int type) {
 			String espinner_label =
 				String(ESPUI.getControl(childControllerId)->label);
 
-			if (espinner_label == "GPIO_PinSelector") {
+			if (espinner_label == "GPIO_PinSelector" ||
+				espinner_label == "GPIO_PinInput") {
 				DUMP("DETACH PIN ", espinner_value.toInt())
 				ESPAllOnPinManager::getInstance().detach(
 					espinner_value.toInt());
@@ -198,9 +238,14 @@ void removeElement_callback(Control *sender, int type) {
 				addGPIOLabel(newGPIO);
 			}
 		}
-		ESPUI.removeControl(parentRef);
-		removeControlId(controlReferences, parentRef);
-		removeValueFromMap(elementToParentMap, parentRef);
+
+		DUMPLN("ELEMENTS SIZE ", childrenIds.size());
+		if (childrenIds.size() > 1) {
+
+			ESPUI.removeControl(parentRef);
+			removeControlId(controlReferences, parentRef);
+			removeChildrenFromMap(elementToParentMap, parentRef);
+		}
 	}
 }
 
@@ -208,11 +253,13 @@ void removeElement_callback(Control *sender, int type) {
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
+// Create a selector Espinner Type and it executes callback to introduce a new
+// Espinner Object.
 void ESPinnerSelector() {
 	uint16_t basicTabRef = getTab(TabType::BasicTab);
-
 	int numElements = sizeof(mods) / sizeof(mods[0]);
 
+	// Selector for ESPinner Type
 	auto mainselector = ESPUI.addControl(ControlType::Select, "ESPinnerType",
 										 "VOID", ControlColor::Wetasphalt,
 										 basicTabRef, createPINConfigCallback);
@@ -220,6 +267,8 @@ void ESPinnerSelector() {
 		ESPUI.addControl(ControlType::Option, mods[i].name.c_str(),
 						 mods[i].name, None, mainselector);
 	}
+
+	// ID Definition linked to ESPinner
 	auto mainText = ESPUI.addControl(Text, "ESPinnerID", "ID", Alizarin,
 									 mainselector, generalCallback);
 
@@ -233,6 +282,16 @@ void ESPinnerSelector() {
 						 grandParentControl); // Add Selector to parent
 	addElementWithParent(elementToParentMap, mainText,
 						 grandParentControl); // Add ID to parent
+
+	// Save Callback
+	uint16_t GPIOAdd_selector = ESPUI.addControl(
+		ControlType::Button, "SelectorSave", "Save", ControlColor::Alizarin,
+		grandParentControl, saveElement_callback);
+
+	addElementWithParent(elementToParentMap, GPIOAdd_selector,
+						 grandParentControl); // Add Save Button to parent
+
+	debugMap(elementToParentMap);
 }
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
@@ -276,6 +335,7 @@ class ESPAllOn {
 						 enterWifiDetailsCallback);
 	}
 
+	// Link Actions Tab Where Actions are linked with configured device
 	void ESPActionSelector() {
 		auto LinkActionTab = getTab(TabType::LinkedActions);
 

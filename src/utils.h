@@ -87,7 +87,17 @@ void removeControlId(std::vector<uint16_t> &controlRef, uint16_t id) {
 void removeValueFromMap(std::map<uint16_t, uint16_t> &elementToParentMap,
 						uint16_t value) {
 	std::vector<uint16_t> keysToRemove;
+	int numErased = elementToParentMap.erase(value);
+	// if (numErased == 0) {
+	// 	DUMPLN("No Element in map : ", numErased);
+	// } else {
+	// 	DUMPLN("REMOVED ID : ", numErased);
+	// }
+}
 
+void removeChildrenFromMap(std::map<uint16_t, uint16_t> &elementToParentMap,
+						   uint16_t value) {
+	std::vector<uint16_t> keysToRemove;
 	for (const auto &pair : elementToParentMap) {
 		if (pair.second == value) {
 			keysToRemove.push_back(pair.first);
@@ -98,7 +108,35 @@ void removeValueFromMap(std::map<uint16_t, uint16_t> &elementToParentMap,
 		elementToParentMap.erase(key);
 	}
 }
+
+uint16_t searchByValue(uint16_t element_id, String value) {
+	std::vector<uint16_t> childrenIds =
+		getChildrenIds(elementToParentMap, element_id);
+	for (uint16_t childControllerId : childrenIds) {
+		String childController_value =
+			String(ESPUI.getControl(childControllerId)->value);
+		if (childController_value == value) {
+			return childControllerId;
+		}
+	}
+	return 0;
+}
+
+uint16_t searchByLabel(uint16_t element_id, String label) {
+	std::vector<uint16_t> childrenIds =
+		getChildrenIds(elementToParentMap, element_id);
+	for (uint16_t childControllerId : childrenIds) {
+		String childController_label =
+			String(ESPUI.getControl(childControllerId)->label);
+		if (childController_label == label) {
+			return childControllerId;
+		}
+	}
+	return 0;
+}
+
 #define PINSIZE 40
+// #define PINSIZE ESP_BoardConf::NUM_PINS
 
 enum class labelPin {
 	PIN0 = 0,
