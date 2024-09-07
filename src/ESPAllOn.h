@@ -83,21 +83,21 @@ uint16_t getBeforeLastGPIOSelector() {
 	return 0;
 }
 
-void PINConfigCallback(Control *sender, int type) {
-
-	DUMPSLN("PIN CONFIG ");
-	if (sender->value == "GPIO") {
-#ifdef _ESPINNER_GPIO_H
-		// GPIO_UI(sender->id);
-#endif
+const ESPinner_Module *findModByName(const String &name) {
+	for (const auto &module : mods) {
+		if (module.name == name) {
+			return &module; // Return pointer to mod
+		}
 	}
+	return nullptr; // Return nullptr if not found
 }
 
 void createPINConfigCallback(Control *sender, int type) {
 	debugCallback(sender, type);
 
-	// Check if STANDARD SAVE Button exists on ESPinner selector
 	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
+
+	// Check if STANDARD SAVE Button exists on ESPinner selector
 	uint16_t labelRef = searchByLabel(parentRef, "SelectorSave");
 	DUMPLN("SAVE EXISTS?: ", labelRef);
 	if (labelRef != 0) {
@@ -133,8 +133,86 @@ void createPINConfigCallback(Control *sender, int type) {
 
 	if (sender->value == "Stepper") {
 #ifdef _ESPINNER_STEPPER_H
-		DUMPLN("STEPPER ID: ", parentRef);
+		uint16_t is_Stepper_Selector =
+			searchByLabel(parentRef, "Stepper_Selector");
+		if (is_Stepper_Selector == 0) {
+			// Remove previous Model in Espinner Selector
+			Stepper_UI(parentRef);
+		}
 #endif
+	}
+
+	if (sender->value == "DC") {
+#ifdef _ESPINNER_DC_H
+		// If DC Model exists avoid duplicates
+		uint16_t is_DC_Selector = searchByLabel(parentRef, "DC_ModeSelector");
+		if (is_DC_Selector == 0) {
+			// Remove previous Model in Espinner Selector
+			DC_UI(parentRef);
+		}
+#endif
+	}
+
+	if (sender->value == "MPU") {
+#ifdef _ESPINNER_MPU_H
+		// If MPU Model exists avoid duplicates
+		uint16_t is_MPU_Selector = searchByLabel(parentRef, "MPU_ModeSelector");
+		if (is_MPU_Selector == 0) {
+			MPU_UI(parentRef);
+		}
+#endif
+	}
+
+	if (sender->value == "TFT") {
+#ifdef _ESPINNER_TFT_H
+		// If TFT Model exists avoid duplicates
+		uint16_t is_TFT_Selector = searchByLabel(parentRef, "TFT_ModeSelector");
+		if (is_TFT_Selector == 0) {
+			TFT_UI(parentRef);
+		}
+#endif
+	}
+
+	if (sender->value == "Neopixel") {
+#ifdef _ESPINNER_NEOPIXEL_H
+		// If NEOPIXEL Model exists avoid duplicates
+		uint16_t is_NEOPIXEL_Selector =
+			searchByLabel(parentRef, "NP_ModeSelector");
+		if (is_NEOPIXEL_Selector == 0) {
+			NP_UI(parentRef);
+		}
+#endif
+	}
+
+	if (sender->value == "LCD") {
+#ifdef _ESPINNER_LCD_H
+		// If LCD Model exists avoid duplicates
+		uint16_t is_LCD_Selector = searchByLabel(parentRef, "LCD_ModeSelector");
+		if (is_LCD_Selector == 0) {
+			LCD_UI(parentRef);
+		}
+#endif
+	}
+
+	if (sender->value == "RFID") {
+#ifdef _ESPINNER_RFID_H
+		// If RFID Model exists avoid duplicates
+		uint16_t is_RFID_Selector =
+			searchByLabel(parentRef, "RFID_ModeSelector");
+		if (is_RFID_Selector == 0) {
+			RFID_UI(parentRef);
+		}
+#endif
+	}
+
+	// Disable EspinnerType Selector and change Label on Parent
+	uint16_t EspinnerTypeRef = searchByLabel(parentRef, "ESPinnerType");
+	if (EspinnerTypeRef != 0) {
+		String ESPinnerType_Label =
+			String(ESPUI.getControl(EspinnerTypeRef)->value);
+		const ESPinner_Module *ESPinnerMod = findModByName(ESPinnerType_Label);
+		ESPUI.getControl(parentRef)->label = (ESPinnerMod->name).c_str();
+		ESPUI.getControl(EspinnerTypeRef)->enabled = false;
 	}
 }
 
@@ -200,11 +278,40 @@ void saveElement_callback(Control *sender, int type) {
 		ESPinnerSelector();
 		debugCallback(sender, type);
 		// Review Parent in Selector and Review Spinner Model
+		uint16_t parentRef = getParentId(elementToParentMap, sender->id);
 		if (sender->value == "GPIO") {
 #ifdef _ESPINNER_GPIO_H
-			// Get Parent to manipulate and update ESPinner Selector
-			uint16_t parentRef = getParentId(elementToParentMap, sender->id);
 			GPIO_UI(parentRef);
+#endif
+		}
+		if (sender->value == "LCD") {
+#ifdef _ESPINNER_LCD_H
+			LCD_UI(parentRef);
+#endif
+		}
+		if (sender->value == "MPU") {
+#ifdef _ESPINNER_MPU_H
+			MPU_UI(parentRef);
+#endif
+		}
+		if (sender->value == "TFT") {
+#ifdef _ESPINNER_TFT_H
+			TFT_UI(parentRef);
+#endif
+		}
+		if (sender->value == "Stepper") {
+#ifdef _ESPINNER_STEPPER_H
+			Stepper_UI(parentRef);
+#endif
+		}
+		if (sender->value == "Encoder") {
+#ifdef _ESPINNER_ENCODER_H
+			Encoder_UI(parentRef);
+#endif
+		}
+		if (sender->value == "RFID") {
+#ifdef _ESPINNER_RFID_H
+			RFID_UI(parentRef);
 #endif
 		}
 	}

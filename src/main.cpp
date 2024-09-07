@@ -9,6 +9,7 @@
 #include "Wifi_Controller.h"
 
 #include "ESPAllOn.h"
+#include "ESPAllOnGUI.h"
 #include <Ticker.h>
 
 // Function Prototypes

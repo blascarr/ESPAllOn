@@ -63,10 +63,12 @@ class ESPinner : public IESPinner {
 };
 
 #include "mods/ESPinner_DC.h"
+#include "mods/ESPinner_Encoder.h"
 #include "mods/ESPinner_GPIO.h"
 #include "mods/ESPinner_LCD.h"
 #include "mods/ESPinner_MPU.h"
 #include "mods/ESPinner_NeoPixel.h"
+#include "mods/ESPinner_RFID.h"
 #include "mods/ESPinner_Stepper.h"
 #include "mods/ESPinner_TFT.h"
 #endif

@@ -25,9 +25,15 @@
 		DUMPV(v);                                                              \
 	}
 
+#define DANGER_COLOR "#f55d76"
+#define SUCCESS_COLOR "#8ced9b"
+
+using UICallback = void (*)(Control *sender, int type);
+
 void removeElement_callback(Control *sender, int type);
 void saveElement_callback(Control *sender, int type);
-
+void GUI_GPIOSelector(uint16_t parentRef, const char *GPIOLabel,
+					  const char *GPIOValue, UICallback SelectorCallback);
 /*----------------------------------------------------*/
 /*----------------   Vector List  --------------------*/
 /*----------------------------------------------------*/
@@ -135,8 +141,17 @@ uint16_t searchByLabel(uint16_t element_id, String label) {
 	return 0;
 }
 
+char *getBackground(const char *color) {
+	static char buffer[40];
+	snprintf(buffer, sizeof(buffer), "background-color: %s;", color);
+	return buffer;
+}
 #define PINSIZE 40
 // #define PINSIZE ESP_BoardConf::NUM_PINS
+
+bool isNumericString(String str) {
+	return (str.toInt() != 0 && str.toInt() < PINSIZE);
+}
 
 enum class labelPin {
 	PIN0 = 0,
@@ -247,3 +262,62 @@ void removeGPIOLabel(std::pair<uint8_t, const char *> gpioLabelPair) {
 }
 
 void removeGPIOLabel(uint8_t gpio) { removeLabelOnList(gpioLabels, gpio); }
+
+//-------------- UI --------------------//
+
+void GUI_SaveButton(uint16_t parentRef, const char *saveLabel,
+					const char *saveValue, UICallback saveCallback) {
+	// Save Element Button
+	uint16_t GPIOAdd_selector =
+		ESPUI.addControl(ControlType::Button, saveLabel, saveValue,
+						 ControlColor::Alizarin, parentRef, saveCallback);
+	addElementWithParent(elementToParentMap, GPIOAdd_selector,
+						 parentRef); // Add Save Button to parent
+}
+void GUI_RemoveButton(uint16_t parentRef, const char *removeLabel,
+					  const char *removeValue, UICallback removeCallback) {
+	// Remove Element Button
+	uint16_t GPIORemove_selector =
+		ESPUI.addControl(ControlType::Button, removeLabel, removeValue,
+						 ControlColor::Alizarin, parentRef, removeCallback);
+
+	addElementWithParent(elementToParentMap, GPIORemove_selector,
+						 parentRef); // Add Remove Button to parent
+}
+
+void GUIButtons_Elements(uint16_t parentRef, const char *saveLabel,
+						 const char *saveValue, const char *removeLabel,
+						 const char *removeValue, UICallback saveCallback,
+						 UICallback removeCallback) {
+	GUI_SaveButton(parentRef, saveLabel, saveValue, saveCallback);
+	GUI_RemoveButton(parentRef, removeLabel, removeValue, removeCallback);
+	// debugMap(elementToParentMap);
+}
+
+void GUI_GPIOSetLabel(uint16_t parentRef, const char *GPIOLabel,
+					  const char *GPIOValue) {
+	uint16_t GPIOLabel_selector =
+		ESPUI.addControl(ControlType::Label, GPIOLabel, GPIOValue,
+						 ControlColor::Carrot, parentRef);
+	char *backgroundStyle = getBackground(DANGER_COLOR);
+	ESPUI.setElementStyle(GPIOLabel_selector, backgroundStyle);
+	addElementWithParent(elementToParentMap, GPIOLabel_selector,
+						 parentRef); // Add GPIO Label to parent
+}
+
+void saveButtonCheck(uint16_t parentRef, const char *SelectorLabel,
+					 const char *SaveButtonLabel) {
+	uint16_t GPIOSelectorRef = searchByLabel(parentRef, SelectorLabel);
+	uint16_t SaveButtonRef = searchByLabel(parentRef, SaveButtonLabel);
+	String GPIOSelector_value = ESPUI.getControl(GPIOSelectorRef)->value;
+
+	if (GPIOSelector_value == "0" || isNumericString(GPIOSelector_value)) {
+		char *backgroundStyle = getBackground(SUCCESS_COLOR);
+		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);
+		// Save ESPINNER
+
+	} else {
+		char *backgroundStyle = getBackground(DANGER_COLOR);
+		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);
+	}
+}
