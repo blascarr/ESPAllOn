@@ -22,12 +22,16 @@ struct ESPinner_Module {
 	String name;
 };
 
-const ESPinner_Module mods[] = {
-	{ESPinner_Mod::VOID, "VOID"},		  {ESPinner_Mod::GPIO, "GPIO"},
-	{ESPinner_Mod::Stepper, "Stepper"},	  {ESPinner_Mod::RFID, "RFID"},
-	{ESPinner_Mod::NeoPixel, "NeoPixel"}, {ESPinner_Mod::DC, "DC"},
-	{ESPinner_Mod::MPU, "MPU"},			  {ESPinner_Mod::Encoder, "Encoder"},
-	{ESPinner_Mod::TFT, "TFT"},			  {ESPinner_Mod::LCD, "LCD"}};
+const ESPinner_Module mods[] = {{ESPinner_Mod::VOID, VOID_LABEL},
+								{ESPinner_Mod::GPIO, GPIO_LABEL},
+								{ESPinner_Mod::Stepper, STEPPER_LABEL},
+								{ESPinner_Mod::RFID, RFID_LABEL},
+								{ESPinner_Mod::NeoPixel, NEOPIXEL_LABEL},
+								{ESPinner_Mod::DC, DC_LABEL},
+								{ESPinner_Mod::MPU, MPU_LABEL},
+								{ESPinner_Mod::Encoder, ENCODER_LABEL},
+								{ESPinner_Mod::TFT, TFT_LABEL},
+								{ESPinner_Mod::LCD, LCD_LABEL}};
 
 class IESPinner {
   public:

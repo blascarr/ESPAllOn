@@ -24,7 +24,7 @@ void saveStepper_callback(Control *sender, int type) {
 	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
 	if (type == B_UP) {
 		// If Text Input --> Check if number, modify ESPinnerSelectors and Save
-		saveButtonCheck(parentRef, "GPIO_PinInput", "GPIOSave");
+		saveButtonCheck(parentRef, STEPPER_PININPUT_LABEL, STEPPER_SAVE_LABEL);
 	}
 }
 
@@ -36,14 +36,16 @@ void saveStepper_callback(Control *sender, int type) {
  */
 
 void Stepper_Selector(uint16_t PIN_ptr) {
-	GUI_GPIOSetLabel(PIN_ptr, "Select_Stepper_GPIO", "Select Stepper");
-	GUI_GPIOSelector(PIN_ptr, "Stepper_Selector", "0", createDC_callback);
+	GUI_GPIOSetLabel(PIN_ptr, STEPPER_SELECT_LABEL, STEPPER_SELECT_VALUE);
+	GUI_GPIOSelector(PIN_ptr, STEPPER_PINSELECTOR_LABEL,
+					 STEPPER_PINSELECTOR_VALUE, createDC_callback);
 }
 
 void Stepper_UI(uint16_t Stepper_ptr) {
 	Stepper_Selector(Stepper_ptr);
-	GUIButtons_Elements(Stepper_ptr, "GPIOSave", "Save GPIO", "GPIORemove",
-						"Remove", saveStepper_callback, removeElement_callback);
+	GUIButtons_Elements(Stepper_ptr, STEPPER_SAVE_LABEL, STEPPER_SAVE_VALUE,
+						STEPPER_REMOVE_LABEL, STEPPER_REMOVE_VALUE,
+						saveStepper_callback, removeElement_callback);
 }
 
 #endif

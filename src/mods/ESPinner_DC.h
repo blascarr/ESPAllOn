@@ -8,16 +8,13 @@ class ESPinner_DC : public ESPinner {
   public:
 	ESPinner_DC(ESPinner_Mod espinner_mod) : ESPinner(espinner_mod) {}
 	ESPinner_DC() : ESPinner(ESPinner_Mod::DC) {}
-	void setup() override {
-		DUMPSLN("Iniciacion configuración de GPIO...");
-		// pinManager->isPinOK(12);
-	}
-	void update() override { DUMPSLN("Update configuración de GPIO..."); }
+	void setup() override { DUMPSLN("Iniciacion configuración de DC..."); }
+	void update() override { DUMPSLN("Update configuración de DC..."); }
 	void implement() override {
-		DUMPSLN("Implementacion configuración de GPIO...");
+		DUMPSLN("Implementacion configuración de DC...");
 	}
 
-	void loader() override { DUMPSLN("Cargando configuración de GPIO..."); }
+	void loader() override { DUMPSLN("Cargando configuración de DC..."); }
 };
 
 void createDC_callback(Control *sender, int type) {}
@@ -34,18 +31,20 @@ void saveDC_callback(Control *sender, int type) {
 	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
 	if (type == B_UP) {
 		// If Text Input --> Check if number, modify ESPinnerSelectors and Save
-		saveButtonCheck(parentRef, "GPIO_PinInput", "GPIOSave");
+		saveButtonCheck(parentRef, DC_PININPUT_LABEL, DC_SAVE_LABEL);
 	}
 }
 
 void DC_Selector(uint16_t PIN_ptr) {
-	GUI_GPIOSetLabel(PIN_ptr, "Select_DC_GPIO", "Select DC");
-	GUI_GPIOSelector(PIN_ptr, "DC_PinSelector", "0", createDC_callback);
+	GUI_GPIOSetLabel(PIN_ptr, DC_SELECT_LABEL, DC_SELECT_VALUE);
+	GUI_GPIOSelector(PIN_ptr, DC_PINSELECTOR_LABEL, DC_PINSELECTOR_VALUE,
+					 createDC_callback);
 }
 
 void DC_UI(uint16_t DC_ptr) {
 	DC_Selector(DC_ptr);
-	GUIButtons_Elements(DC_ptr, "GPIOSave", "Save GPIO", "GPIORemove", "Remove",
-						saveDC_callback, removeElement_callback);
+	GUIButtons_Elements(DC_ptr, DC_SAVE_LABEL, DC_SAVE_VALUE, DC_REMOVE_LABEL,
+						DC_REMOVE_VALUE, saveDC_callback,
+						removeElement_callback);
 }
 #endif

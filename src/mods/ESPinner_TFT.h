@@ -8,16 +8,13 @@ class ESPinner_TFT : public ESPinner {
   public:
 	ESPinner_TFT(ESPinner_Mod espinner_mod) : ESPinner(espinner_mod) {}
 	ESPinner_TFT() : ESPinner(ESPinner_Mod::TFT) {}
-	void setup() override {
-		DUMPSLN("Iniciacion configuración de GPIO...");
-		// pinManager->isPinOK(12);
-	}
-	void update() override { DUMPSLN("Update configuración de GPIO..."); }
+	void setup() override { DUMPSLN("Iniciacion configuración de TFT..."); }
+	void update() override { DUMPSLN("Update configuración de TFT..."); }
 	void implement() override {
-		DUMPSLN("Implementacion configuración de GPIO...");
+		DUMPSLN("Implementacion configuración de TFT...");
 	}
 
-	void loader() override { DUMPSLN("Cargando configuración de GPIO..."); }
+	void loader() override { DUMPSLN("Cargando configuración de TFT..."); }
 };
 
 void createTFT_callback(Control *sender, int type) {}
@@ -26,7 +23,7 @@ void saveTFT_callback(Control *sender, int type) {
 	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
 	if (type == B_UP) {
 		// If Text Input --> Check if number, modify ESPinnerSelectors and Save
-		saveButtonCheck(parentRef, "TFT_PinInput", "TFT_Save");
+		saveButtonCheck(parentRef, TFT_PININPUT_LABEL, TFT_SAVE_LABEL);
 	}
 }
 
@@ -38,14 +35,16 @@ void saveTFT_callback(Control *sender, int type) {
  */
 
 void TFT_Selector(uint16_t TFT_ptr) {
-	GUI_GPIOSetLabel(TFT_ptr, "Select_TFT_GPIO", "Select TFT");
-	GUI_GPIOSelector(TFT_ptr, "TFT_PinSelector", "0", createTFT_callback);
+	GUI_GPIOSetLabel(TFT_ptr, TFT_SELECT_LABEL, TFT_SELECT_VALUE);
+	GUI_GPIOSelector(TFT_ptr, TFT_PINSELECTOR_LABEL, TFT_PINSELECTOR_VALUE,
+					 createTFT_callback);
 }
 
 void TFT_UI(uint16_t TFT_ptr) {
 	TFT_Selector(TFT_ptr);
-	GUIButtons_Elements(TFT_ptr, "TFT_Save", "Save TFT", "TFT_Remove", "Remove",
-						saveTFT_callback, removeElement_callback);
+	GUIButtons_Elements(TFT_ptr, TFT_SAVE_LABEL, TFT_SAVE_VALUE,
+						TFT_REMOVE_LABEL, TFT_REMOVE_VALUE, saveTFT_callback,
+						removeElement_callback);
 }
 
 #endif

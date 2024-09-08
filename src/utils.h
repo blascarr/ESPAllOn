@@ -308,6 +308,10 @@ void GUI_GPIOSetLabel(uint16_t parentRef, const char *GPIOLabel,
 void saveButtonCheck(uint16_t parentRef, const char *SelectorLabel,
 					 const char *SaveButtonLabel) {
 	uint16_t GPIOSelectorRef = searchByLabel(parentRef, SelectorLabel);
+
+	if (GPIOSelectorRef == 0) {
+		return;
+	}
 	uint16_t SaveButtonRef = searchByLabel(parentRef, SaveButtonLabel);
 	String GPIOSelector_value = ESPUI.getControl(GPIOSelectorRef)->value;
 
