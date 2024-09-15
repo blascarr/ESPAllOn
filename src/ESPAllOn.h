@@ -1,8 +1,6 @@
 #ifndef _ESPALLON_H
 #define _ESPALLON_H
 
-#include <ESPAllOnPinManager.h>
-
 #include "ESPinner.h"
 #include <ESPAction.h>
 #include <ESPUI.h>
@@ -209,62 +207,6 @@ void createPINConfigCallback(Control *sender, int type) {
 		const ESPinner_Module *ESPinnerMod = findModByName(ESPinnerType_Label);
 		ESPUI.getControl(parentRef)->label = (ESPinnerMod->name).c_str();
 		ESPUI.getControl(EspinnerTypeRef)->enabled = false;
-	}
-}
-
-void setESPinner(uint16_t id) {
-	uint16_t parentRef = getParentId(elementToParentMap, id);
-	std::vector<uint16_t> childrenIds =
-		getChildrenIds(elementToParentMap, parentRef);
-
-	ESPinner espinner;
-	for (uint16_t childControllerId : childrenIds) {
-		String espinner_value =
-			String(ESPUI.getControl(childControllerId)->value);
-		String espinner_label =
-			String(ESPUI.getControl(childControllerId)->label);
-
-		if (espinner_label == ESPINNERTYPE_LABEL) {
-			if (espinner_value == GPIO_LABEL) {
-			}
-			espinner.setType(ESPinner_Mod::GPIO);
-		}
-
-		if (espinner_label == ESPINNERID_LABEL) {
-			espinner.setID(espinner_value);
-		}
-
-		// If ESPinner Model is in Mods , downcasting for details
-		// implementation
-		/* if (espinner.getType() == ESPinner_Mod::GPIO) {
-			ESPinner *gpio_espinner = new ESPinner_GPIO();
-			auto espinner_ptr = dynamic_cast<ESPinner_GPIO
-		*>(gpio_espinner);
-
-			if (espinner_label == "GPIO_ModeSelector") {
-				if (espinner_label == "INPUT") {
-					espinner_ptr->setGPIOMode(
-						ESPinner_GPIOType::ESPINNER_INPUT);
-				} else if (espinner_label == "GPIO_PinSelector") {
-					espinner_ptr->setGPIOMode(
-						ESPinner_GPIOType::ESPINNER_OUTPUT);
-				}
-			}
-			if (espinner_label == "GPIO_PinSelector") {
-				espinner_ptr->setGPIO(espinner_label.toInt());
-			}
-		} */
-		if (espinner_label == GPIO_PINSELECTOR_LABEL) {
-			ESP_PinMode pinin = {espinner_value.toInt(),
-								 InputPin(false, false),
-								 PinType::BusDigital,
-								 false,
-								 true,
-								 false};
-			ESPAllOnPinManager::getInstance().attach(pinin);
-			// GPIO SELECTOR SHOULD UPDATE GPIO LIST
-			removeGPIOLabel(espinner_value.toInt());
-		}
 	}
 }
 

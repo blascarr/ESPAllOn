@@ -1,11 +1,11 @@
 
 #include <Arduino.h>
-#include <ESPUI.h>
 
 #include <config.h>
 #include <utils.h>
 
-#include "PinSerializable.h"
+#include <ESPAllOnPinManager.h>
+
 #include "Wifi_Controller.h"
 
 #include "ESPAllOn.h"

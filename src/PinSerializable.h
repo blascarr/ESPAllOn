@@ -1,7 +1,5 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <Persistance.h>
-#include <PinManager.h>
 
 class pinSerializable : public PinMode, public IStringSerializable {
   public:
