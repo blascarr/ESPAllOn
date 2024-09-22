@@ -258,7 +258,6 @@ void removeElement_callback(Control *sender, int type) {
 	if (type == B_UP) {
 		debugCallback(sender, type);
 		uint16_t parentRef = getParentId(elementToParentMap, sender->id);
-		DUMPSLN("ELEMENTS SIZE ");
 
 		std::vector<uint16_t> childrenIds =
 			getChildrenIds(elementToParentMap, parentRef);
@@ -274,12 +273,13 @@ void removeElement_callback(Control *sender, int type) {
 				ESPAllOnPinManager::getInstance().detach(
 					espinner_value.toInt());
 				// GPIO SELECTOR SHOULD UPDATE GPIO LIST
-				std::string label = pinLabels[espinner_value.toInt() - 1];
+				std::string label = ESPAllOnPinManager::getInstance()
+										.pinLabels[espinner_value.toInt() - 1];
 				char *cstr = new char[label.length() + 1];
 				strcpy(cstr, label.c_str());
 				std::pair<uint8_t, const char *> newGPIO = {
 					espinner_value.toInt(), cstr};
-				addGPIOLabel(newGPIO);
+				addGPIOLabelInPinManager(newGPIO);
 			}
 		}
 
@@ -301,13 +301,13 @@ void removeElement_callback(Control *sender, int type) {
 // Espinner Object.
 void ESPinnerSelector() {
 	uint16_t basicTabRef = getTab(TabType::BasicTab);
-	int numElements = sizeof(mods) / sizeof(mods[0]);
+	int numMods = sizeof(mods) / sizeof(mods[0]);
 
 	// Selector for ESPinner Type
 	auto mainselector = ESPUI.addControl(
 		ControlType::Select, ESPINNERTYPE_LABEL, ESPINNERTYPE_VALUE,
 		ControlColor::Wetasphalt, basicTabRef, createPINConfigCallback);
-	for (int i = 0; i < numElements; i++) {
+	for (int i = 0; i < numMods; i++) {
 		ESPUI.addControl(ControlType::Option, mods[i].name.c_str(),
 						 mods[i].name, None, mainselector);
 	}

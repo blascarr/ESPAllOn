@@ -4,20 +4,18 @@
 #include "../ESPinner.h"
 #include <ESPUI.h>
 
-enum class ESPinner_GPIOType { ESPINNER_INPUT, ESPINNER_OUTPUT };
-
 struct ESPinner_GPIOMode {
-	ESPinner_GPIOType model;
+	GPIOMode model;
 	String name;
 };
 
 const ESPinner_GPIOMode GPIO_mods[] = {
-	{ESPinner_GPIOType::ESPINNER_INPUT, GPIO_ESPINNERINPUT_LABEL},
-	{ESPinner_GPIOType::ESPINNER_OUTPUT, GPIO_ESPINNEROUTPUT_LABEL}};
+	{GPIOMode::Input, GPIO_ESPINNERINPUT_LABEL},
+	{GPIOMode::Output, GPIO_ESPINNEROUTPUT_LABEL}};
 class ESPinner_GPIO : public ESPinner {
   public:
 	uint8_t gpio;
-	ESPinner_GPIOType GPIO_mode;
+	GPIOMode GPIO_mode;
 
 	ESPinner_GPIO(ESPinner_Mod espinner_mod) : ESPinner(espinner_mod) {}
 	ESPinner_GPIO() : ESPinner(ESPinner_Mod::GPIO) {}
@@ -31,8 +29,28 @@ class ESPinner_GPIO : public ESPinner {
 
 	void setGPIO(uint8_t gpio_pin) { gpio = gpio_pin; }
 	uint8_t getGPIO() { return gpio; }
-	void setGPIOMode(ESPinner_GPIOType mode) { GPIO_mode = mode; }
-	ESPinner_GPIOType getGPIOMode() { return GPIO_mode; }
+	void setGPIOMode(GPIOMode mode) { GPIO_mode = mode; }
+	GPIOMode getGPIOMode() { return GPIO_mode; }
+	ESP_PinMode getPinModeConf() {
+
+		switch (GPIO_mode) {
+		case GPIOMode::Input: {
+			InputPin model = InputPin(false, false);
+			ESP_PinMode pinMode = {this->getGPIO(), model, PinType::BusDigital};
+			return pinMode;
+		}
+		case GPIOMode::Output: {
+			OutputPin model = OutputPin(false);
+			ESP_PinMode pinMode = {this->getGPIO(), model, PinType::BusDigital};
+			return pinMode;
+		}
+		// If no GPIO_Mode is configured, return as Output by default
+		default:
+			ESP_PinMode pinMode = {this->getGPIO(), OutputPin(false),
+								   PinType::BusDigital};
+			return pinMode;
+		}
+	};
 };
 
 void createGPIOMod_callback(Control *sender, int type) {}
@@ -44,18 +62,51 @@ void saveButtonGPIOCheck(uint16_t parentRef) {
 	String GPIOSelector_value;
 	if (GPIOSelectorRef != 0) {
 		GPIOSelector_value = ESPUI.getControl(GPIOSelectorRef)->value;
-		return;
+		// TODO if GPIOSelector_value exists -> Check if ESP_PinMode List
+		// related with Container exists. Create new One
 	}
 	if (GPIOTextInputRef != 0) {
+		// TODO if InputRef is checked, we
+		// should update the PinModel in PinManager
 		GPIOSelector_value = ESPUI.getControl(GPIOTextInputRef)->value;
 	}
 	uint16_t SaveButtonRef = searchByLabel(parentRef, GPIO_SAVE_LABEL);
 
-	if (GPIOSelector_value == "0" || isNumericString(GPIOSelector_value)) {
+	if (isNumericString(GPIOSelector_value)) {
 		char *backgroundStyle = getBackground(SUCCESS_COLOR);
 		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);
-		// Save ESPINNER
 
+		// Save ESPINNER
+		ESPinner_GPIO espinnerGPIO;
+		std::vector<uint16_t> childrenIds =
+			getChildrenIds(elementToParentMap, parentRef);
+		for (uint16_t childControllerId : childrenIds) {
+			String espinner_value =
+				String(ESPUI.getControl(childControllerId)->value);
+			String espinner_label =
+				String(ESPUI.getControl(childControllerId)->label);
+			DUMPLN("Label ESPinner: ", espinner_label);
+			DUMPLN("Value ESPinner: ", espinner_value);
+			if (espinner_label == GPIO_MODESELECTOR_LABEL) {
+				if (espinner_label == GPIO_ESPINNERINPUT_LABEL) {
+					espinnerGPIO.setGPIOMode(GPIOMode::Input);
+				} else if (espinner_label == GPIO_ESPINNEROUTPUT_LABEL) {
+					espinnerGPIO.setGPIOMode(GPIOMode::Output);
+				}
+			}
+			if (espinner_label == GPIO_PININPUT_LABEL ||
+				espinner_label == GPIO_PINSELECTOR_LABEL) {
+				espinnerGPIO.setGPIO(espinner_value.toInt());
+			}
+		}
+		// Create new ESpinner if model is the first one
+		ESP_PinMode pinModel = espinnerGPIO.getPinModeConf();
+		ESPAllOnPinManager::getInstance().attach(pinModel);
+
+		// TODO Update ESpinner if pin Model was set before.
+
+		// TODO Call to Utils in order to recheck Selectors created in other
+		// Containers.
 	} else {
 		char *backgroundStyle = getBackground(DANGER_COLOR);
 		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);
@@ -79,10 +130,14 @@ void createPIN_callback(Control *sender, int type) {
 
 	// Remove Select GPIO LABEL
 	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
+	// Check Selector in order to create ESPinner and remove Pin from GPIO
+	// PinManager
 	uint16_t selectLabelRef = searchByLabel(parentRef, GPIO_SELECT_LABEL);
+	DUMPLN("Selector Label ", selectLabelRef);
 	if (selectLabelRef != 0) {
 		ESPUI.removeControl(selectLabelRef);
 		removeValueFromMap(elementToParentMap, selectLabelRef);
+		saveButtonGPIOCheck(parentRef);
 	}
 
 	// Change Selector Control with Text Input for numbers

@@ -10,10 +10,13 @@ void GUI_GPIOSelector(uint16_t parentRef, const char *GPIOLabel,
 	uint16_t GPIOPIN_selector =
 		ESPUI.addControl(ControlType::Select, GPIOLabel, GPIOValue,
 						 ControlColor::Wetasphalt, parentRef, SelectorCallback);
-	for (int i = 0; i < ESP_BoardConf::NUM_PINS; i++) {
-		if (!ESPAllOnPinManager::getInstance().isPinAttached(i)) {
-			ESPUI.addControl(ControlType::Option, getLabelForPin(i), String(i),
-							 None, GPIOPIN_selector);
+	for (const auto &pair : ESPAllOnPinManager::getInstance().gpioLabels) {
+		// TODO Pins attached not included, neither broken not used with Wifi
+		// or other issue.
+		if (!ESPAllOnPinManager::getInstance().isPinAttached(pair.first)) {
+			ESPUI.addControl(ControlType::Option,
+							 getLabelFromPinManager(pair.first),
+							 String(pair.first), None, GPIOPIN_selector);
 		}
 	}
 	addElementWithParent(elementToParentMap, GPIOPIN_selector,

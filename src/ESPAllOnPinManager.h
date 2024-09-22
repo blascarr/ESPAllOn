@@ -6,6 +6,50 @@
 #include <PinManager.h>
 #include <PinSerializable.h>
 
+enum class labelPin {
+	PIN0 = 0,
+	PIN1 = 1,
+	PIN2 = 2,
+	PIN3 = 3,
+	PIN4 = 4,
+	PIN5 = 5,
+	PIN6 = 6,
+	PIN7 = 7,
+	PIN8 = 8,
+	PIN9 = 9,
+	PIN10 = 10,
+	PIN11 = 11,
+	PIN12 = 12,
+	PIN13 = 13,
+	PIN14 = 14,
+	PIN15 = 15,
+	PIN16 = 16,
+	PIN17 = 17,
+	PIN18 = 18,
+	PIN19 = 19,
+	PIN20 = 20,
+	PIN21 = 21,
+	PIN22 = 22,
+	PIN23 = 23,
+	PIN24 = 24,
+	PIN25 = 25,
+	PIN26 = 26,
+	PIN27 = 27,
+	PIN28 = 28,
+	PIN29 = 29,
+	PIN30 = 30,
+	PIN31 = 31,
+	PIN32 = 32,
+	PIN33 = 33,
+	PIN34 = 34,
+	PIN35 = 35,
+	PIN36 = 36,
+	PIN37 = 37,
+	PIN38 = 38,
+	PIN39 = 39,
+	PIN40 = 40,
+};
+
 const std::map<PinType, const char *> pinTypeNames = {
 	{PinType::None, "None"},
 	{PinType::Ethernet, "Ethernet"},
@@ -28,15 +72,65 @@ const std::map<PinType, const char *> pinTypeNames = {
 	{PinType::VSPI_MOSI, "VSPI_MOSI"},
 	{PinType::VSPI_CLK, "VSPI_CLK"},
 	{PinType::VSPI_CS, "VSPI_CS"}};
+
+// ---------------------------------------------------------- //
+// --------------------ESPAllOnPinManager-------------------- //
+// ---------------------------------------------------------- //
+/*	ESPAllOnPinManager define a structure where PIN Labels works with GUI
+ *	in order to review which Pins can be used in different ESPinner Mods.
+ *	ESPAllOn Object will manage ESPAllOnPinManager with a pointer reference.
+ *	But maybe is not necessary, because ESPAllOnPinManager has an instance
+ * 	in order to check it as a SingleTon Pattern.
+ */
 class ESPAllOnPinManager : public PinManager<ESP_BoardConf, PinMode> {
 
   public:
-	ESPAllOnPinManager() {}
+	std::map<uint8_t, std::string> gpioLabels;
+	std::vector<std::string> pinLabels;
+	ESPAllOnPinManager() {
+		pinLabels.reserve(ESP_BoardConf::NUM_PINS);
+		for (int i = 0; i <= ESP_BoardConf::NUM_PINS; i++) {
+			pinLabels.push_back(std::to_string(i));
+			gpioLabels[i] = std::to_string(i);
+		}
+	}
+
 	static ESPAllOnPinManager &getInstance() {
 		static ESPAllOnPinManager instance;
 		return instance;
 	}
+
+	void printLabels() {
+		for (const std::string &label : pinLabels) {
+			DUMPLN("PIN ", label.c_str());
+		}
+	}
 };
+
+const char *getLabelFromPinManager(uint8_t pin) {
+	if (ESPAllOnPinManager::getInstance().gpioLabels.find(pin) !=
+		ESPAllOnPinManager::getInstance().gpioLabels.end()) {
+		return ESPAllOnPinManager::getInstance().gpioLabels[pin].c_str();
+		return "";
+	} else {
+		return "Pin not found";
+	}
+}
+void addGPIOLabelInPinManager(std::pair<uint8_t, const char *> gpioLabelPair) {
+	ESPAllOnPinManager::getInstance().gpioLabels[gpioLabelPair.first] =
+		gpioLabelPair.second;
+}
+void removeGPIOLabelFromPinManager(
+	std::pair<uint8_t, const char *> gpioLabelPair) {
+	ESPAllOnPinManager::getInstance().gpioLabels.erase(gpioLabelPair.first);
+}
+
+void removeGPIOLabelFromPinManager(uint8_t gpio) {
+	auto it = ESPAllOnPinManager::getInstance().gpioLabels.find(gpio);
+	if (it != ESPAllOnPinManager::getInstance().gpioLabels.end()) {
+		ESPAllOnPinManager::getInstance().gpioLabels.erase(it);
+	}
+}
 
 const char *getPinTypeName(PinType pinType) {
 	auto it = pinTypeNames.find(pinType);
@@ -69,90 +163,5 @@ void DUMP_PINOUT() {
 #endif
 	}
 }
-
-enum class labelPin {
-	PIN0 = 0,
-	PIN1,
-	PIN2,
-	PIN3,
-	PIN4,
-	PIN5,
-	PIN6,
-	PIN7,
-	PIN8,
-	PIN9,
-	PIN10,
-	PIN11,
-	PIN12,
-	PIN13,
-	PIN14,
-	PIN15,
-	PIN16,
-	PIN17,
-	PIN18,
-	PIN19,
-	PIN20,
-	PIN21,
-	PIN22,
-	PIN23,
-	PIN24,
-	PIN25,
-	PIN26,
-	PIN27,
-	PIN28,
-	PIN29,
-	PIN30,
-	PIN31,
-	PIN32,
-	PIN33,
-	PIN34,
-	PIN35,
-	PIN36,
-	PIN37,
-	PIN38,
-	PIN39,
-	PIN40,
-};
-
-// Array of pinLabels to associate with gpioLabels
-
-const std::array<std::string, static_cast<size_t>(PINSIZE)> pinLabels = {
-	"1",  "2",	"3",  "4",	"5",  "6",	"7",  "8",	"9",  "10",
-	"11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
-	"21", "22", "23", "24", "25", "26", "27", "28", "29", "30",
-	"31", "32", "33", "34", "35", "36", "37", "38", "39", "40"};
-
-std::string getPinLabel(labelPin pin) {
-	return pinLabels[static_cast<size_t>(pin)];
-}
-
-// Available List of GPIOs currently
-
-std::map<uint8_t, const char *> gpioLabels = {
-	{0, "0"},	{1, "1"},	{2, "2"},	{3, "3"},	{4, "4"},	{5, "5"},
-	{6, "6"},	{7, "7"},	{8, "8"},	{9, "9"},	{10, "10"}, {11, "11"},
-	{12, "12"}, {13, "13"}, {14, "14"}, {15, "15"}, {16, "16"}, {17, "17"},
-	{18, "18"}, {19, "19"}, {20, "20"}, {21, "21"}, {22, "22"}, {23, "23"},
-	{24, "24"}, {25, "25"}, {26, "26"}, {27, "27"}, {28, "28"}, {29, "29"},
-	{30, "30"}, {31, "31"}, {32, "32"}, {33, "33"}, {34, "34"}, {35, "35"},
-	{36, "36"}, {37, "37"}, {38, "38"}, {39, "39"}};
-
-const char *getLabelForPin(uint8_t pin) {
-	if (gpioLabels.find(pin) != gpioLabels.end()) {
-		return gpioLabels[pin];
-	} else {
-		return "Pin not found";
-	}
-}
-
-void addGPIOLabel(std::pair<uint8_t, const char *> gpioLabelPair) {
-	addLabelOnList(gpioLabels, gpioLabelPair);
-}
-
-void removeGPIOLabel(std::pair<uint8_t, const char *> gpioLabelPair) {
-	removeLabelOnList(gpioLabels, gpioLabelPair);
-}
-
-void removeGPIOLabel(uint8_t gpio) { removeLabelOnList(gpioLabels, gpio); }
 
 #endif

@@ -40,7 +40,8 @@ void setup() {
 
 	ESPAllOn::getInstance().setup();
 	ESPAllOn::getInstance().begin();
-
+	ESPAllOnPinManager::getInstance();
+	ESPAllOnPinManager::getInstance().printLabels();
 	UI_UpdateTicker.start();
 }
 
