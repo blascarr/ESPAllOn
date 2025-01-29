@@ -4,7 +4,7 @@
 #include "ESPinner.h"
 #include <ESPAction.h>
 #include <ESPUI.h>
-#include <Ticker.h>
+#include <TickerFree.h>
 
 enum class TabType { BasicTab, AdvancedSettingsTab, LinkedActions, NetworkTab };
 
@@ -49,7 +49,7 @@ void uiUpdate() {
 	// ESPUI.updateLabel(mainLabel, String(sliderVal));
 }
 
-Ticker UI_UpdateTicker(uiUpdate, 500, 0, MILLIS);
+TickerFree<> UI_UpdateTicker(uiUpdate, 500, 0, MILLIS);
 void ESPinnerSelector();
 
 /*----------------------------------------------------*/

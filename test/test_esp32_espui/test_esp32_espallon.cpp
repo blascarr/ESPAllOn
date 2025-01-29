@@ -6,7 +6,7 @@
 
 // UI handles
 void endTest() { UNITY_END(); }
-Ticker test_endTicker(endTest, 30000, 0, MILLIS);
+TickerFree<> test_endTicker(endTest, 30000, 0, MILLIS);
 
 void externalAction(uint16_t mode) { Serial.println("EXTERNAL ACTIOOOOON"); }
 void externalAction2(uint16_t mode) { Serial.println("Blocked Door"); }

@@ -11,7 +11,7 @@ void sendSocket() {
 	}
 }
 
-Ticker test_socketTicker(sendSocket, 1000, 1, MILLIS);
+TickerFree<> test_socketTicker(sendSocket, 1000, 1, MILLIS);
 
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
 	switch (type) {

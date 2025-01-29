@@ -6,13 +6,21 @@
 #define SERIALDEBUG Serial
 
 #define DUMPS(s)                                                               \
-	{ SERIALDEBUG.print(F(s)); }
+	{                                                                          \
+		SERIALDEBUG.print(F(s));                                               \
+	}
 #define DUMPSLN(s)                                                             \
-	{ SERIALDEBUG.println(F(s)); }
+	{                                                                          \
+		SERIALDEBUG.println(F(s));                                             \
+	}
 #define DUMPPRINTLN()                                                          \
-	{ SERIALDEBUG.println(); }
+	{                                                                          \
+		SERIALDEBUG.println();                                                 \
+	}
 #define DUMPV(v)                                                               \
-	{ SERIALDEBUG.print(v); }
+	{                                                                          \
+		SERIALDEBUG.print(v);                                                  \
+	}
 #define DUMPLN(s, v)                                                           \
 	{                                                                          \
 		DUMPS(s);                                                              \

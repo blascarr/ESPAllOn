@@ -10,7 +10,7 @@
 
 #include "ESPAllOn.h"
 #include "ESPAllOnGUI.h"
-#include <Ticker.h>
+#include <TickerFree.h>
 
 // Function Prototypes
 void connectWifi();
