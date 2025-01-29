@@ -1,8 +1,8 @@
 #ifndef _ESPALLON_H
 #define _ESPALLON_H
 
-#include "ESPinner.h"
-#include <ESPAction.h>
+#include "../ESPAction.h"
+#include "../ESPinner.h"
 #include <ESPUI.h>
 #include <TickerFree.h>
 

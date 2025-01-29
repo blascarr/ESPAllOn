@@ -1,3 +1,6 @@
+#ifndef _ESPALLON_WIFI_CONTROLLER_H
+#define _ESPALLON_WIFI_CONTROLLER_H
+
 #include <Arduino.h>
 #include <DNSServer.h>
 #include <EEPROM.h>
@@ -119,3 +122,5 @@ void enterWifiDetailsCallback(Control *sender, int type) {
 		EEPROM.end();
 	}
 }
+
+#endif

@@ -1,7 +1,7 @@
 #ifndef _ESPINNER_NEOPIXEL_H
 #define _ESPINNER_NEOPIXEL_H
 
-#include "../ESPinner.h"
+#include "../controllers/ESPinner.h"
 #include <ESPUI.h>
 
 class ESPinner_NEOPIXEL : public ESPinner {

@@ -1,3 +1,6 @@
+#ifndef _ESPALLON_ACTION_H
+#define _ESPALLON_ACTION_H
+
 #include <Arduino.h>
 
 class ESPAction {
@@ -16,3 +19,4 @@ class ESPAction {
 	String reference;
 	ActionFunc action;
 };
+#endif

@@ -2,7 +2,7 @@
 #include <unity.h>
 
 #include "../config.h"
-#include "../socket_utils.h"
+#include "../utils/socket_utils.h"
 
 // UI handles
 void endTest() { UNITY_END(); }
@@ -28,12 +28,12 @@ void setup() {
 
 	ESPAllOn::getInstance().setup();
 	ESPAllOn::getInstance().begin();
-	initSocketProvider();
+	// initSocketProvider();
 	UI_UpdateTicker.start();
 	test_endTicker.start();
 }
 
 void loop() {
 	test_endTicker.update();
-	loopSocket();
+	// loopSocket();
 }

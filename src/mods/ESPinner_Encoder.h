@@ -1,7 +1,7 @@
 #ifndef _ESPINNER_ENCODER_H
 #define _ESPINNER_ENCODER_H
 
-#include "../ESPinner.h"
+#include "../controllers/ESPinner.h"
 #include <ESPUI.h>
 
 class ESPinner_Encoder : public ESPinner {

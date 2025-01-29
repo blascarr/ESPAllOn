@@ -4,12 +4,11 @@
 #include <config.h>
 #include <utils.h>
 
-#include <ESPAllOnPinManager.h>
+#include "controllers/ESPAllOnPinManager.h"
+#include "controllers/Wifi_Controller.h"
 
-#include "Wifi_Controller.h"
-
-#include "ESPAllOn.h"
-#include "ESPAllOnGUI.h"
+#include "controllers/UI/ESPAllOn.h"
+#include "controllers/UI/ESPAllOnGUI.h"
 #include <TickerFree.h>
 
 // Function Prototypes

@@ -1,7 +1,8 @@
 #ifndef _ESPINNER_GPIO_H
 #define _ESPINNER_GPIO_H
 
-#include "../ESPinner.h"
+#include "../controllers/ESPAllOnPinManager.h"
+#include "../controllers/ESPinner.h"
 #include <ESPUI.h>
 
 struct ESPinner_GPIOMode {

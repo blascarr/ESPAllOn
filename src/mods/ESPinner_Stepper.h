@@ -1,7 +1,7 @@
 #ifndef _ESPINNER_STEPPER_H
 #define _ESPINNER_STEPPER_H
 
-#include "../ESPinner.h"
+#include "../controllers/ESPinner.h"
 #include <ESPUI.h>
 
 class ESPinner_Stepper : public ESPinner {

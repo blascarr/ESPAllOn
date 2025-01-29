@@ -1,10 +1,10 @@
 #ifndef _ESPALLON_PIN_MANAGER_H
 #define _ESPALLON_PIN_MANAGER_H
-#include "ESP_Boards.h"
 
+#include "../models/ESP_Boards.h"
+#include "../models/PinSerializable.h"
 #include <Persistance.h>
 #include <PinManager.h>
-#include <PinSerializable.h>
 
 enum class labelPin {
 	PIN0 = 0,

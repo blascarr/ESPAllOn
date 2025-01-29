@@ -1,8 +1,8 @@
 #ifndef _ESPINNER_H
 #define _ESPINNER_H
 
-#include "PinManager.h"
 #include <ESPUI.h>
+#include <PinManager.h>
 
 enum class ESPinner_Mod {
 	VOID,

@@ -1,5 +1,9 @@
+#ifndef _PINSERIALIZABLE_H
+#define _PINSERIALIZABLE_H
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <Persistance.h>
+#include <PinManager.h>
 
 class pinSerializable : public PinMode, public IStringSerializable {
   public:
@@ -28,3 +32,4 @@ class pinSerializable : public PinMode, public IStringSerializable {
 		return true;
 	}
 };
+#endif

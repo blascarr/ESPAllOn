@@ -1,7 +1,7 @@
 #ifndef _ESPINNER_MPU_H
 #define _ESPINNER_MPU_H
 
-#include "../ESPinner.h"
+#include "../controllers/ESPinner.h"
 #include <ESPUI.h>
 
 class ESPinner_MPU : public ESPinner {

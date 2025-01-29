@@ -1,7 +1,7 @@
 #ifndef _ESPINNER_LCD_H
 #define _ESPINNER_LCD_H
 
-#include "../ESPinner.h"
+#include "../controllers/ESPinner.h"
 #include <ESPUI.h>
 
 class ESPinner_LCD : public ESPinner {

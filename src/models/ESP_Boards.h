@@ -1,3 +1,6 @@
+#ifndef _ESPALLON_BOARDS_H
+#define _ESPALLON_BOARDS_H
+
 #include "PinManager.h"
 #if defined(ESP32)
 struct ESP_BoardConf {
@@ -16,3 +19,4 @@ struct ESP_BoardConf {
 ESP_PinMode ESP_BoardConf::PINOUT[ESP_BoardConf::NUM_PINS] = {
 
 };
+#endif

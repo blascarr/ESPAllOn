@@ -1,5 +1,9 @@
 #ifndef _ESPALLONGUI_H
 #define _ESPALLONGUI_H
+#include "../../utils.h"
+#include "../ESPAllOnPinManager.h"
+#include <Arduino.h>
+#include <ESPUI.h>
 
 void GUI_GPIOSelector(uint16_t parentRef, const char *GPIOLabel,
 					  const char *GPIOValue, UICallback SelectorCallback) {

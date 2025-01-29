@@ -1,3 +1,5 @@
+#ifndef _ESPALLON_UTILS_H
+#define _ESPALLON_UTILS_H
 #include <Arduino.h>
 #include <ESPUI.h>
 
@@ -248,3 +250,4 @@ void saveButtonCheck(uint16_t parentRef, const char *SelectorLabel,
 		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);
 	}
 }
+#endif
