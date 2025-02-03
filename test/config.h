@@ -21,7 +21,5 @@ uint8_t esp_mac[] = {0x60, 0x8B, 0x0E, 0x01, 0x5A, 0x32};
 
 #include "../src/controllers/UI/ESPAllOn.h"
 #include <TickerFree.h>
-// Function Prototypes
-void connectWifi();
 
 #endif

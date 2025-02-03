@@ -1,3 +1,6 @@
+#ifndef _ESPALLON_CONFIG_H
+#define _ESPALLON_CONFIG_H
+
 #include <Arduino.h>
 
 #if defined(ESP32)
@@ -216,3 +219,42 @@ IPAddress SECONDARYDNS(208, 67, 222, 222);
 #define ENCODER_PINSELECTOR_LABEL "Encoder_PinSelector"
 #define ENCODER_PINSELECTOR_VALUE "0"
 #define ENCODER_MODESELECTOR_LABEL "Encoder_ModeSelector"
+
+// ------------------ SERIAL CONFIG --------------------//
+#define PRINTDEBUG true
+#define SERIALDEBUG Serial
+
+#define DUMPS(s)                                                               \
+	{                                                                          \
+		SERIALDEBUG.print(F(s));                                               \
+	}
+#define DUMPSLN(s)                                                             \
+	{                                                                          \
+		SERIALDEBUG.println(F(s));                                             \
+	}
+#define DUMPPRINTLN()                                                          \
+	{                                                                          \
+		SERIALDEBUG.println();                                                 \
+	}
+#define DUMPV(v)                                                               \
+	{                                                                          \
+		SERIALDEBUG.print(v);                                                  \
+	}
+#define DUMPLN(s, v)                                                           \
+	{                                                                          \
+		DUMPS(s);                                                              \
+		DUMPV(v);                                                              \
+		DUMPPRINTLN();                                                         \
+	}
+#define DUMP(s, v)                                                             \
+	{                                                                          \
+		DUMPS(s);                                                              \
+		DUMPV(v);                                                              \
+	}
+#define DUMPF_P(fmt, ...)                                                      \
+	{                                                                          \
+		SERIALDEBUG.printf_P(PSTR(fmt), ##__VA_ARGS__);                        \
+	}
+#define DUMPSPRINTF(buf, fmt, ...) sprintf((char *)(buf), fmt, ##__VA_ARGS__)
+
+#endif

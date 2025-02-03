@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <unity.h>
 
-#include "../config.h"
+#include "../../config.h"
 #include <chrono>
 #include <cstdlib>
 #include <iostream>

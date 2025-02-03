@@ -11,8 +11,7 @@
 #include "controllers/UI/ESPAllOnGUI.h"
 #include <TickerFree.h>
 
-// Function Prototypes
-void connectWifi();
+#include "controllers/ESPAllOn_Wifi.h"
 
 // UI handles
 
@@ -23,13 +22,15 @@ String nameAction = "Send MQTT Message";
 ESPAction ACTION(nameAction, "ACTION1", externalAction);
 ESPAction ACTION2("BLocked Door", "ACTION2", externalAction2);
 
+ESPALLON_Wifi wifi = ESPALLON_Wifi::getInstance();
+
 void setup() {
 	randomSeed(0);
 	Serial.begin(115200);
 	while (!Serial)
 		;
 
-	connectWifi();
+	wifi.connectWifi();
 #if defined(ESP32)
 	WiFi.setSleep(false); // For the ESP32: turn off sleeping to increase UI
 						  // responsivness (at the cost of power use)
@@ -42,19 +43,21 @@ void setup() {
 	ESPAllOnPinManager::getInstance();
 	ESPAllOnPinManager::getInstance().printLabels();
 	UI_UpdateTicker.start();
+	wifi.start();
+	wifi.connectWifi();
 }
 
 void loop() {
 
 	UI_UpdateTicker.update();
-
+	wifi.update();
 	if (Serial.available()) {
 		switch (Serial.read()) {
 		case 'w': // Print IP details
 			Serial.println(WiFi.localIP());
 			break;
 		case 'W': // Reconnect wifi
-			connectWifi();
+			wifi.connectWifi();
 			break;
 		case 'C': // Force a crash (for testing exception decoder)
 #if !defined(ESP32)

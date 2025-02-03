@@ -1,15 +1,17 @@
 #include <Arduino.h>
 #include <unity.h>
 
-#include "../config.h"
-#include "../utils/socket_utils.h"
+#include "../../../src/controllers/ESPAllOn_Wifi.h"
+#include "../../config.h"
+#include "../../utils/socket_utils.h"
+#include "../../utils/testTicker.h"
 
 // UI handles
 void endTest() { UNITY_END(); }
-TickerFree<> test_endTicker(endTest, 30000, 0, MILLIS);
+TickerFree<> test_endTicker(runTest, 30000, 0, MILLIS);
 
-void externalAction(uint16_t mode) { Serial.println("EXTERNAL ACTIOOOOON"); }
-void externalAction2(uint16_t mode) { Serial.println("Blocked Door"); }
+void externalAction(uint16_t mode) { DUMPSLN("EXTERNAL ACTIOOOOON"); }
+void externalAction2(uint16_t mode) { DUMPSLN("Blocked Door"); }
 
 String nameAction = "Send MQTT Message";
 ESPAction ACTION(nameAction, "ACTION1", externalAction);
@@ -20,7 +22,7 @@ void setup() {
 	randomSeed(0);
 	if (PRINTDEBUG)
 		SERIALDEBUG.begin(115200);
-	connectWifi();
+	ESPALLON_Wifi::getInstance().connectWifi();
 	// RUN_TEST(test_esp_mac);
 
 	ESPAllOn::getInstance().addAction(ACTION);
@@ -31,6 +33,7 @@ void setup() {
 	// initSocketProvider();
 	UI_UpdateTicker.start();
 	test_endTicker.start();
+	UNITY_END();
 }
 
 void loop() {

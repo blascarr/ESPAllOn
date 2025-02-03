@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <unity.h>
 
-#include "../config.h"
+#include "../../config.h"
 /*
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
