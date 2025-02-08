@@ -1,10 +1,12 @@
-#ifndef _ESPALLON_H
-#define _ESPALLON_H
-
-#include "../ESPAction.h"
-#include "../ESPinner.h"
+#ifndef _ESPALLON_TABCONTROLLER_H
+#define _ESPALLON_TABCONTROLLER_H
 #include <ESPUI.h>
 #include <TickerFree.h>
+
+#include "../../manager/ESPinner_Manager.h"
+#include "../../utils.h"
+
+void ESPinnerSelector();
 
 enum class TabType { BasicTab, AdvancedSettingsTab, LinkedActions, NetworkTab };
 
@@ -39,18 +41,6 @@ uint16_t getTab(const TabType &tabType) {
 	DUMPSLN("Error: TabType not found!");
 	return 0;
 }
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-
-void uiUpdate() {
-	static uint16_t sliderVal = 10;
-
-	// ESPUI.updateLabel(mainLabel, String(sliderVal));
-}
-
-TickerFree<> UI_UpdateTicker(uiUpdate, 500, 0, MILLIS);
-void ESPinnerSelector();
 
 /*----------------------------------------------------*/
 /*-------------------CallBacks------------------------*/
@@ -210,6 +200,47 @@ void createPINConfigCallback(Control *sender, int type) {
 	}
 }
 
+// Create a selector Espinner Type and it executes callback to introduce a new
+// Espinner Object.
+void ESPinnerSelector() {
+	uint16_t basicTabRef = getTab(TabType::BasicTab);
+	int numMods = sizeof(mods) / sizeof(mods[0]);
+
+	// Selector for ESPinner Type
+	auto mainselector = ESPUI.addControl(
+		ControlType::Select, ESPINNERTYPE_LABEL, ESPINNERTYPE_VALUE,
+		ControlColor::Wetasphalt, basicTabRef, createPINConfigCallback);
+	for (int i = 0; i < numMods; i++) {
+		ESPUI.addControl(ControlType::Option, mods[i].name.c_str(),
+						 mods[i].name, None, mainselector);
+	}
+
+	// ID Definition linked to ESPinner
+	auto mainText = ESPUI.addControl(Text, ESPINNERID_LABEL, ESPINNERID_VALUE,
+									 Alizarin, mainselector, generalCallback);
+
+	uint16_t parentControl = ESPUI.getControl(mainText)->id;
+	uint16_t grandParentControl =
+		ESPUI.getControl(parentControl)->parentControl;
+
+	controlReferences.push_back(mainselector);
+
+	addElementWithParent(elementToParentMap, mainselector,
+						 grandParentControl); // Add Selector to parent
+	addElementWithParent(elementToParentMap, mainText,
+						 grandParentControl); // Add ID to parent
+
+	// Save Callback
+	uint16_t GPIOAdd_selector = ESPUI.addControl(
+		ControlType::Button, SAVEESPINNER_LABEL, SAVEESPINNER_VALUE,
+		ControlColor::Alizarin, grandParentControl, saveElement_callback);
+
+	addElementWithParent(elementToParentMap, GPIOAdd_selector,
+						 grandParentControl); // Add Save Button to parent
+
+	debugMap(elementToParentMap);
+}
+
 void saveElement_callback(Control *sender, int type) {
 	if (type == B_UP) {
 		ESPinnerSelector();
@@ -272,6 +303,9 @@ void removeElement_callback(Control *sender, int type) {
 				DUMP("DETACH PIN ", espinner_value.toInt())
 				ESPAllOnPinManager::getInstance().detach(
 					espinner_value.toInt());
+
+				// TODO : Detach ESPinner in Manager by ID
+				ESPinner_Manager::getInstance().detach("ID");
 				// GPIO SELECTOR SHOULD UPDATE GPIO LIST
 				std::string label = ESPAllOnPinManager::getInstance()
 										.pinLabels[espinner_value.toInt() - 1];
@@ -296,154 +330,5 @@ void removeElement_callback(Control *sender, int type) {
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
-
-// Create a selector Espinner Type and it executes callback to introduce a new
-// Espinner Object.
-void ESPinnerSelector() {
-	uint16_t basicTabRef = getTab(TabType::BasicTab);
-	int numMods = sizeof(mods) / sizeof(mods[0]);
-
-	// Selector for ESPinner Type
-	auto mainselector = ESPUI.addControl(
-		ControlType::Select, ESPINNERTYPE_LABEL, ESPINNERTYPE_VALUE,
-		ControlColor::Wetasphalt, basicTabRef, createPINConfigCallback);
-	for (int i = 0; i < numMods; i++) {
-		ESPUI.addControl(ControlType::Option, mods[i].name.c_str(),
-						 mods[i].name, None, mainselector);
-	}
-
-	// ID Definition linked to ESPinner
-	auto mainText = ESPUI.addControl(Text, ESPINNERID_LABEL, ESPINNERID_VALUE,
-									 Alizarin, mainselector, generalCallback);
-
-	uint16_t parentControl = ESPUI.getControl(mainText)->id;
-	uint16_t grandParentControl =
-		ESPUI.getControl(parentControl)->parentControl;
-
-	controlReferences.push_back(mainselector);
-
-	addElementWithParent(elementToParentMap, mainselector,
-						 grandParentControl); // Add Selector to parent
-	addElementWithParent(elementToParentMap, mainText,
-						 grandParentControl); // Add ID to parent
-
-	// Save Callback
-	uint16_t GPIOAdd_selector = ESPUI.addControl(
-		ControlType::Button, SAVEESPINNER_LABEL, SAVEESPINNER_VALUE,
-		ControlColor::Alizarin, grandParentControl, saveElement_callback);
-
-	addElementWithParent(elementToParentMap, GPIOAdd_selector,
-						 grandParentControl); // Add Save Button to parent
-
-	debugMap(elementToParentMap);
-}
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-
-class ESPAllOn {
-
-  public:
-	ESPAllOn()
-		: capacity(MOD_CAPACITY), size(0),
-		  modules(new ESPinner *[MOD_CAPACITY]) {}
-
-	static ESPAllOn &getInstance() {
-		static ESPAllOn instance;
-		return instance;
-	}
-	void setup() {
-
-#ifdef ESP8266
-		{
-			HeapSelectIram doAllocationsInIRAM;
-#endif
-			ESPinnerSelector();
-
-#ifdef ESP8266
-		} // HeapSelectIram
-#endif
-	}
-	void wifiTab() {
-		auto wifitab = getTab(TabType::NetworkTab);
-		wifi_ssid_text =
-			ESPUI.addControl(ControlType::Text, SSID_LABEL, VOID_VALUE,
-							 ControlColor::Alizarin, wifitab, textCallback);
-		ESPUI.addControl(ControlType::Max, VOID_VALUE, "32", None,
-						 wifi_ssid_text);
-		wifi_pass_text =
-			ESPUI.addControl(ControlType::Text, PASS_LABEL, VOID_VALUE,
-							 ControlColor::Alizarin, wifitab, textCallback);
-		ESPUI.addControl(ControlType::Max, VOID_VALUE, "64", None,
-						 wifi_pass_text);
-		ESPUI.addControl(ControlType::Button, SAVE_LABEL, SAVE_VALUE,
-						 ControlColor::Peterriver, wifitab,
-						 enterWifiDetailsCallback);
-	}
-
-	// Link Actions Tab Where Actions are linked with configured device
-	void ESPActionSelector() {
-		auto LinkActionTab = getTab(TabType::LinkedActions);
-
-		uint16_t actionSelector = ESPUI.addControl(
-			ControlType::Select, ACTION_LABEL, VOID_VALUE,
-			ControlColor::Wetasphalt, LinkActionTab, generalCallback);
-
-		for (const ESPAction &action : actions) {
-			ESPUI.addControl(ControlType::Option, action.getName().c_str(),
-							 action.getReference(), None, actionSelector);
-		}
-		for (const ESPAction &action : actions) {
-			ESPUI.addControl(ControlType::Option, action.getName().c_str(),
-							 action.getReference(), None, actionSelector);
-		}
-
-		uint16_t GPIO_Link_Action = ESPUI.addControl(
-			ControlType::Button, LINKACTION_LABEL, LINKACTION_VALUE,
-			ControlColor::Alizarin, actionSelector, voidCallback);
-	}
-
-	void begin() {
-		linkItemsTab();
-
-		wifiTab();
-		ESPUI.begin(HOSTNAME);
-	}
-
-	void save() {
-
-	};
-
-	void linkItemsTab() { ESPActionSelector(); }
-	// Gestión de Debug
-	void debug() {
-
-	};
-	void addDevice(ESPinner *device);
-	void addAction(const ESPAction &action) { actions.push_back(action); }
-	void assignActionToPin(uint16_t pin, const String &actionName) {
-		for (const ESPAction &action : actions) {
-			// if (action.getName() == actionName) {
-			// pinActions[pin] = action;
-			// break;
-			// }
-		}
-	}
-
-	void triggerPin(uint16_t pin) {
-		auto it = pinActions.find(pin);
-		if (it != pinActions.end()) {
-			it->second.execute(12);
-		}
-	}
-
-  private:
-	ESPAllOnPinManager *pinManager;
-	int capacity;
-	ESPinner **modules;
-	int size;
-	std::vector<ESPAction> actions;
-	std::map<uint16_t, ESPAction> pinActions;
-};
 
 #endif

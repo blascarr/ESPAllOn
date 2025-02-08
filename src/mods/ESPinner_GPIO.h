@@ -2,7 +2,7 @@
 #define _ESPINNER_GPIO_H
 
 #include "../controllers/ESPAllOnPinManager.h"
-#include "../controllers/ESPinner.h"
+#include "../manager/ESPinner_Manager.h"
 #include <ESPUI.h>
 
 struct ESPinner_GPIOMode {
@@ -52,6 +52,34 @@ class ESPinner_GPIO : public ESPinner {
 			return pinMode;
 		}
 	};
+	JsonDocument serializeJSON() override {
+		StaticJsonDocument<256> doc;
+		doc["ESPinner_Mod"] = "ESPINNER_GPIO";
+		doc["ID"] = getID();
+		doc["GPIO"] = getGPIO();
+		// doc["MODE"] = getGPIOMode();
+		// doc["Config"] = getPinModeConf();
+		/*
+		doc["isBroken"] = "ESPINNER_GPIO";
+		doc["canDeepSleep"] = "ESPINNER_GPIO";
+		doc["isTouchGPIO"] = "ESPINNER_GPIO";
+		doc["Config"] = "ESPINNER_GPIO";
+		doc["isADC"] = "ESPINNER_GPIO";
+		*/
+		return doc;
+	}
+	bool deserializeJSON(const String &data) {
+		StaticJsonDocument<256> doc;
+		DeserializationError error = deserializeJson(doc, data);
+		if (error) {
+			return false;
+		}
+		// name = doc["ESPinner_Mod"].as<const char *>();
+		// isVirus = doc["virus"].as<bool>();
+		// int auxMode = doc["GPIO"].as<int>();
+
+		return true;
+	};
 };
 
 void createGPIOMod_callback(Control *sender, int type) {}
@@ -78,7 +106,7 @@ void saveButtonGPIOCheck(uint16_t parentRef) {
 		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);
 
 		// Save ESPINNER
-		ESPinner_GPIO espinnerGPIO;
+		auto espinnerGPIO = std::make_unique<ESPinner_GPIO>();
 		std::vector<uint16_t> childrenIds =
 			getChildrenIds(elementToParentMap, parentRef);
 		for (uint16_t childControllerId : childrenIds) {
@@ -90,22 +118,28 @@ void saveButtonGPIOCheck(uint16_t parentRef) {
 			DUMPLN("Value ESPinner: ", espinner_value);
 			if (espinner_label == GPIO_MODESELECTOR_LABEL) {
 				if (espinner_label == GPIO_ESPINNERINPUT_LABEL) {
-					espinnerGPIO.setGPIOMode(GPIOMode::Input);
+					espinnerGPIO->setGPIOMode(GPIOMode::Input);
 				} else if (espinner_label == GPIO_ESPINNEROUTPUT_LABEL) {
-					espinnerGPIO.setGPIOMode(GPIOMode::Output);
+					espinnerGPIO->setGPIOMode(GPIOMode::Output);
 				}
 			}
+
+			if (espinner_label == ESPINNERID_LABEL) {
+				espinnerGPIO->setID(espinner_value);
+			}
+
 			if (espinner_label == GPIO_PININPUT_LABEL ||
 				espinner_label == GPIO_PINSELECTOR_LABEL) {
-				espinnerGPIO.setGPIO(espinner_value.toInt());
+				espinnerGPIO->setGPIO(espinner_value.toInt());
 			}
 		}
 		// Create new ESpinner if model is the first one
-		ESP_PinMode pinModel = espinnerGPIO.getPinModeConf();
+		ESP_PinMode pinModel = espinnerGPIO->getPinModeConf();
 		ESPAllOnPinManager::getInstance().attach(pinModel);
 
 		// TODO Update ESpinner if pin Model was set before.
-
+		// Save GPIO Instance in Storage
+		ESPinner_Manager::getInstance().push(std::move(espinnerGPIO));
 		// TODO Call to Utils in order to recheck Selectors created in other
 		// Containers.
 	} else {

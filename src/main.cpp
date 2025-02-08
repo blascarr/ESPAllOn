@@ -7,8 +7,8 @@
 #include "controllers/ESPAllOnPinManager.h"
 #include "controllers/Wifi_Controller.h"
 
-#include "controllers/UI/ESPAllOn.h"
 #include "controllers/UI/ESPAllOnGUI.h"
+#include "manager/ESPAllOn.h"
 #include <TickerFree.h>
 
 #include "controllers/ESPAllOn_Wifi.h"
@@ -42,6 +42,7 @@ void setup() {
 	ESPAllOn::getInstance().begin();
 	ESPAllOnPinManager::getInstance();
 	ESPAllOnPinManager::getInstance().printLabels();
+	ESPinner_Manager::getInstance().loadFromStorage();
 	UI_UpdateTicker.start();
 	wifi.start();
 	wifi.connectWifi();

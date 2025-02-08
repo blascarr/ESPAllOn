@@ -44,6 +44,9 @@ IPAddress SUBNET(255, 255, 255, 0);
 IPAddress PRIMARYDNS(9, 9, 9, 9);
 IPAddress SECONDARYDNS(208, 67, 222, 222);
 
+// ------------ Persistance CONFIG ------------//
+String ESPinner_File = "/espinners";
+
 // --------------- TABS Definition ----------------//
 #define BASICTAB_LABEL "Basic controls"
 #define LINKACTIONSTAB_LABEL "Link Actions"

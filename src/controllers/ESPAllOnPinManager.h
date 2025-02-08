@@ -2,8 +2,6 @@
 #define _ESPALLON_PIN_MANAGER_H
 
 #include "../models/ESP_Boards.h"
-#include "../models/PinSerializable.h"
-#include <Persistance.h>
 #include <PinManager.h>
 
 enum class labelPin {
@@ -82,7 +80,7 @@ const std::map<PinType, const char *> pinTypeNames = {
  *	But maybe is not necessary, because ESPAllOnPinManager has an instance
  * 	in order to check it as a SingleTon Pattern.
  */
-class ESPAllOnPinManager : public PinManager<ESP_BoardConf, PinMode> {
+class ESPAllOnPinManager : public PinManager<ESP_BoardConf, ESP_PinMode> {
 
   public:
 	std::map<uint8_t, std::string> gpioLabels;

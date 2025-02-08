@@ -1,8 +1,9 @@
 #ifndef _ESPINNER_H
 #define _ESPINNER_H
+#define NVS
 
 #include <ESPUI.h>
-#include <PinManager.h>
+#include <Persistance.h>
 
 enum class ESPinner_Mod {
 	VOID,
@@ -48,10 +49,11 @@ class IESPinner {
 	virtual ~IESPinner() {}
 };
 
-class ESPinner : public IESPinner {
+class ESPinner : public IESPinner, public IJSONSerializable {
   public:
 	ESPinner_Mod mod;
 	String ID;
+	static std::unique_ptr<ESPinner> create(const String &type);
 
 	ESPinner(ESPinner_Mod espinner_mod) : mod(espinner_mod) {};
 	ESPinner() : mod(ESPinner_Mod::VOID) {}
