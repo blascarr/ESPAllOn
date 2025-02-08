@@ -1,7 +1,7 @@
 #ifndef _ESPINNER_RFID_H
 #define _ESPINNER_RFID_H
 
-#include "../controllers/ESPinner.h"
+#include "../../controllers/ESPinner.h"
 #include <ESPUI.h>
 
 class ESPinner_RFID : public ESPinner {

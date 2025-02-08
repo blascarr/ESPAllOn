@@ -3,34 +3,11 @@
 
 #include "../config.h"
 #include "./Storage_Manager.h"
+#include <Persistance.h>
 
 #include "../controllers/ESPinner.h"
 
-#include <Persistance.h>
-
-#if __cplusplus < 201402L
-#include <memory>
-#include <utility> // For std::forward
-
-namespace std {
-template <typename T, typename... Args>
-unique_ptr<T> make_unique(Args &&...args) {
-	return unique_ptr<T>(new T(forward<Args>(args)...));
-}
-} // namespace std
-
-/*
-std::unique_ptr<ESPinner> ESPinner::create(const String &type) {
-	if (type == "ESPINNER_GPIO") {
-		auto ptr = std::make_unique<ESPinner_GPIO>();
-		return std::unique_ptr<ESPinner>(
-			static_cast<ESPinner *>(ptr.release()));
-	}
-	// Agregar otros tipos aquí
-	return nullptr;
-}
-*/
-#endif
+#include "./upcast/upcast_utils.h"
 
 class ESPinner_Manager {
   private:
@@ -112,5 +89,7 @@ class ESPinner_Manager {
 		ESPinnerManager.getStorageModel()->save(data, ESPinner_File);
 	}
 };
+
+#include "../mods/ESPinner_GPIO/ESPinner_GPIO_Controls.h"
 
 #endif

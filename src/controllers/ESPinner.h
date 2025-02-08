@@ -68,13 +68,13 @@ class ESPinner : public IESPinner, public IJSONSerializable {
 	String getID() { return ID; }
 };
 
-#include "mods/ESPinner_DC.h"
-#include "mods/ESPinner_Encoder.h"
-#include "mods/ESPinner_GPIO.h"
-#include "mods/ESPinner_LCD.h"
-#include "mods/ESPinner_MPU.h"
-#include "mods/ESPinner_NeoPixel.h"
-#include "mods/ESPinner_RFID.h"
-#include "mods/ESPinner_Stepper.h"
-#include "mods/ESPinner_TFT.h"
+#include "mods/ESPinner_DC/ESPinner_DC.h"
+#include "mods/ESPinner_Encoder/ESPinner_Encoder.h"
+#include "mods/ESPinner_GPIO/ESPinner_GPIO.h"
+#include "mods/ESPinner_LCD/ESPinner_LCD.h"
+#include "mods/ESPinner_MPU/ESPinner_MPU.h"
+#include "mods/ESPinner_NeoPixel/ESPinner_NeoPixel.h"
+#include "mods/ESPinner_RFID/ESPinner_RFID.h"
+#include "mods/ESPinner_Stepper/ESPinner_Stepper.h"
+#include "mods/ESPinner_TFT/ESPinner_TFT.h"
 #endif

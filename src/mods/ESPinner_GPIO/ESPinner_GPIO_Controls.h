@@ -1,87 +1,16 @@
-#ifndef _ESPINNER_GPIO_H
-#define _ESPINNER_GPIO_H
+#ifndef _ESPINNER_GPIO_CONTROLS_H
+#define _ESPINNER_GPIO_CONTROLS_H
 
-#include "../controllers/ESPAllOnPinManager.h"
-#include "../manager/ESPinner_Manager.h"
-#include <ESPUI.h>
+#include "./ESPinner_GPIO.h"
 
-struct ESPinner_GPIOMode {
-	GPIOMode model;
-	String name;
-};
-
-const ESPinner_GPIOMode GPIO_mods[] = {
-	{GPIOMode::Input, GPIO_ESPINNERINPUT_LABEL},
-	{GPIOMode::Output, GPIO_ESPINNEROUTPUT_LABEL}};
-class ESPinner_GPIO : public ESPinner {
-  public:
-	uint8_t gpio;
-	GPIOMode GPIO_mode;
-
-	ESPinner_GPIO(ESPinner_Mod espinner_mod) : ESPinner(espinner_mod) {}
-	ESPinner_GPIO() : ESPinner(ESPinner_Mod::GPIO) {}
-	void setup() override { DUMPSLN("Iniciacion configuración de GPIO..."); }
-	void update() override { DUMPSLN("Update configuración de GPIO..."); }
-	void implement() override {
-		DUMPSLN("Implementacion configuración de GPIO...");
-	}
-
-	void loader() override { DUMPSLN("Cargando configuración de GPIO..."); }
-
-	void setGPIO(uint8_t gpio_pin) { gpio = gpio_pin; }
-	uint8_t getGPIO() { return gpio; }
-	void setGPIOMode(GPIOMode mode) { GPIO_mode = mode; }
-	GPIOMode getGPIOMode() { return GPIO_mode; }
-	ESP_PinMode getPinModeConf() {
-
-		switch (GPIO_mode) {
-		case GPIOMode::Input: {
-			InputPin model = InputPin(false, false);
-			ESP_PinMode pinMode = {this->getGPIO(), model, PinType::BusDigital};
-			return pinMode;
-		}
-		case GPIOMode::Output: {
-			OutputPin model = OutputPin(false);
-			ESP_PinMode pinMode = {this->getGPIO(), model, PinType::BusDigital};
-			return pinMode;
-		}
-		// If no GPIO_Mode is configured, return as Output by default
-		default:
-			ESP_PinMode pinMode = {this->getGPIO(), OutputPin(false),
-								   PinType::BusDigital};
-			return pinMode;
-		}
-	};
-	JsonDocument serializeJSON() override {
-		StaticJsonDocument<256> doc;
-		doc["ESPinner_Mod"] = "ESPINNER_GPIO";
-		doc["ID"] = getID();
-		doc["GPIO"] = getGPIO();
-		// doc["MODE"] = getGPIOMode();
-		// doc["Config"] = getPinModeConf();
-		/*
-		doc["isBroken"] = "ESPINNER_GPIO";
-		doc["canDeepSleep"] = "ESPINNER_GPIO";
-		doc["isTouchGPIO"] = "ESPINNER_GPIO";
-		doc["Config"] = "ESPINNER_GPIO";
-		doc["isADC"] = "ESPINNER_GPIO";
-		*/
-		return doc;
-	}
-	bool deserializeJSON(const String &data) {
-		StaticJsonDocument<256> doc;
-		DeserializationError error = deserializeJson(doc, data);
-		if (error) {
-			return false;
-		}
-		// name = doc["ESPinner_Mod"].as<const char *>();
-		// isVirus = doc["virus"].as<bool>();
-		// int auxMode = doc["GPIO"].as<int>();
-
-		return true;
-	};
-};
-
+#include "../../manager/ESPinner_Manager.h"
+/*
+ *	GPIO_ModeSelector
+ *	Select_GPIO
+ *	GPIO_PinSelector
+ *	GPIOSave
+ *	GPIORemove
+ */
 void createGPIOMod_callback(Control *sender, int type) {}
 
 void saveButtonGPIOCheck(uint16_t parentRef) {
@@ -190,14 +119,6 @@ void createPIN_callback(Control *sender, int type) {
 	}
 }
 
-/*
- *	GPIO_ModeSelector
- *	Select_GPIO
- *	GPIO_PinSelector
- *	GPIOSave
- *	GPIORemove
- */
-
 void GPIO_Selector(uint16_t PIN_ptr) {
 	GUI_GPIOSetLabel(PIN_ptr, GPIO_SELECT_LABEL, GPIO_SELECT_VALUE);
 	GUI_GPIOSelector(PIN_ptr, GPIO_PINSELECTOR_LABEL, GPIO_PINSELECTOR_VALUE,
@@ -225,4 +146,5 @@ void GPIO_UI(uint16_t GPIO_ptr) {
 						REMOVEESPINNER_LABEL, REMOVEESPINNER_VALUE,
 						saveGPIO_callback, removeElement_callback);
 }
+
 #endif

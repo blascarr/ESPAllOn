@@ -11,8 +11,6 @@
 #include "manager/ESPAllOn.h"
 #include <TickerFree.h>
 
-#include "controllers/ESPAllOn_Wifi.h"
-
 // UI handles
 
 void externalAction(uint16_t mode) { Serial.println("EXTERNAL ACTIOOOOON"); }
