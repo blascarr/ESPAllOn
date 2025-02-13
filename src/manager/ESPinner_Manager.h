@@ -2,7 +2,7 @@
 #define _ESPINNER_MANAGER_H
 
 #include "../config.h"
-#include "./Storage_Manager.h"
+#include "Storage_Manager.h"
 #include <Persistance.h>
 
 #include "../controllers/ESPinner.h"
@@ -15,11 +15,15 @@ class ESPinner_Manager {
 	Persistance ESPinnerManager;
 
   public:
-	ESPinner_Manager() : ESPinnerManager(nullptr, &storage) {}
+	ESPinner_Manager() : ESPinnerManager(nullptr, &storage) {
+		storage.setRoot(ESPinner_File);
+	}
 	static ESPinner_Manager &getInstance() {
 		static ESPinner_Manager instance;
 		return instance;
 	}
+	size_t espinnerSize() const { return ESPinners.size(); }
+	void clearESPinners() { ESPinners.clear(); }
 
 	bool deserializeJSON(const String &data) {
 		StaticJsonDocument<256> doc;
@@ -36,7 +40,7 @@ class ESPinner_Manager {
 
 	void loadFromStorage() {
 		DynamicJsonDocument doc(256);
-		String serialized = ESPinnerManager.loadData(ESPinner_File);
+		String serialized = ESPinnerManager.loadData(ESPinner_Path);
 		DUMP("Dataloaded: ", serialized);
 		DeserializationError error = deserializeJson(doc, serialized);
 		if (!error) {
@@ -44,17 +48,22 @@ class ESPinner_Manager {
 				DUMPSLN("ERROR: NO JSON ARRAY FORMAT.");
 				return;
 			}
+			clearESPinners();
 			JsonArray array = doc.as<JsonArray>();
 			for (JsonDocument obj : array) {
+				String mod = obj[ESPINNER_MODEL_JSONCONFIG].as<const char *>();
 
-				String output;
-				String mod = obj["ESPinner_Mod"].as<const char *>();
 				DUMPLN("MOD: ", mod);
-				if (mod == "ESPINNER_GPIO") {
-					// ESPinner_GPIO gpioESPINNER;
-					// gpioESPINNER.deserializeJSON(output);
+				auto espinner = ESPinner::create(mod);
+				if (espinner) {
+					String output;
+					DUMPLN("ESPinner loaded: ", mod);
+					serializeJson(obj, output);
+					espinner->deserializeJSON(output);
+					ESPinners.push_back(std::move(espinner));
 				}
 			}
+			// Create ESPinners in UI
 		}
 	}
 
@@ -86,10 +95,23 @@ class ESPinner_Manager {
 
 		String data;
 		serializeJson(doc, data);
-		ESPinnerManager.getStorageModel()->save(data, ESPinner_File);
+		ESPinnerManager.getStorageModel()->save(data, ESPinner_Path);
 	}
+
+	void clearPinConfigInStorage() {
+		ESPinnerManager.getStorageModel()->remove(ESPinner_Path);
+	}
+	// void clearStorage() { ESPinnerManager.getStorageModel()->removeAll(); }
 };
 
+#include "../mods/ESPinner_DC/ESPinner_DC_Controls.h"
+#include "../mods/ESPinner_Encoder/ESPinner_Encoder_Controls.h"
 #include "../mods/ESPinner_GPIO/ESPinner_GPIO_Controls.h"
+#include "../mods/ESPinner_LCD/ESPinner_LCD_Controls.h"
+#include "../mods/ESPinner_MPU/ESPinner_MPU_Controls.h"
+#include "../mods/ESPinner_NeoPixel/ESPinner_NeoPixel_Controls.h"
+#include "../mods/ESPinner_RFID/ESPinner_RFID_Controls.h"
+#include "../mods/ESPinner_Stepper/ESPinner_Stepper_Controls.h"
+#include "../mods/ESPinner_TFT/ESPinner_TFT_Controls.h"
 
 #endif

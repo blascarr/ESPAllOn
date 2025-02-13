@@ -2,14 +2,13 @@
 #define _ESPALLON_H
 
 #include "../controllers/ESPAllOn_Wifi.h"
-#include "../controllers/Wifi_Controller.h"
 
 #include "../controllers/ESPinner.h"
 #include "../controllers/UI/TabController.h"
+#include "../controllers/Wifi_Controller.h"
 #include "../utils.h"
 
 #include "../controllers/ESPAction.h"
-#include "../controllers/ESPinner.h"
 
 #include <TickerFree.h>
 
@@ -29,6 +28,15 @@ void uiUpdate() {
 
 	// ESPUI.updateLabel(mainLabel, String(sliderVal));
 }
+
+void removeConfig(Control *sender, int type) {
+	DUMPSLN("REMOVE PIN CONFIG");
+	ESPinner_Manager::getInstance().clearPinConfigInStorage();
+}
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 TickerFree<> UI_UpdateTicker(uiUpdate, 500, 0, MILLIS);
 
@@ -70,6 +78,10 @@ class ESPAllOn {
 		ESPUI.addControl(ControlType::Button, SAVE_LABEL, SAVE_VALUE,
 						 ControlColor::Peterriver, wifitab,
 						 enterWifiDetailsCallback);
+
+		ESPUI.addControl(ControlType::Button, REMOVE_PINCONFIG_LABEL,
+						 REMOVE_PINCONFIG_VALUE, ControlColor::Peterriver,
+						 wifitab, removeConfig);
 	}
 
 	// Link Actions Tab Where Actions are linked with configured device

@@ -45,7 +45,11 @@ IPAddress PRIMARYDNS(9, 9, 9, 9);
 IPAddress SECONDARYDNS(208, 67, 222, 222);
 
 // ------------ Persistance CONFIG ------------//
-String ESPinner_File = "/espinners";
+String ESPinner_File = "/ESPinner";
+String ESPinner_Path = "espinners";
+#define ESPINNER_MODEL_JSONCONFIG "ESPinner_Mod"
+#define ESPINNER_ID_JSONCONFIG "ID"
+#define ESPINNER_GPIO_JSONCONFIG "GPIO"
 
 // --------------- TABS Definition ----------------//
 #define BASICTAB_LABEL "Basic controls"
@@ -73,6 +77,9 @@ String ESPinner_File = "/espinners";
 #define VOID_LABEL "VOID"
 #define SAVE_VALUE "Save"
 #define VOID_VALUE ""
+
+#define REMOVE_PINCONFIG_LABEL "REMOVE_PIN_CONFIGURATION"
+#define REMOVE_PINCONFIG_VALUE "REMOVE PIN CONFIG"
 
 #define ACTION_LABEL "Action"
 #define ACTION_VALUE "Action"

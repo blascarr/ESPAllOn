@@ -178,6 +178,17 @@ void createPINConfigCallback(Control *sender, int type) {
 #endif
 	}
 
+	if (sender->value == ENCODER_LABEL) {
+#ifdef _ESPINNER_ENCODER_H
+		// If RFID Model exists avoid duplicates
+		uint16_t is_ENCODER_Selector =
+			searchByLabel(parentRef, ENCODER_MODESELECTOR_LABEL);
+		if (is_ENCODER_Selector == 0) {
+			Encoder_UI(parentRef);
+		}
+#endif
+	}
+
 	if (sender->value == RFID_LABEL) {
 #ifdef _ESPINNER_RFID_H
 		// If RFID Model exists avoid duplicates
@@ -250,6 +261,11 @@ void saveElement_callback(Control *sender, int type) {
 		if (sender->value == GPIO_LABEL) {
 #ifdef _ESPINNER_GPIO_H
 			GPIO_UI(parentRef);
+#endif
+		}
+		if (sender->value == NEOPIXEL_LABEL) {
+#ifdef _ESPINNER_NEOPIXEL_H
+			NP_UI(parentRef);
 #endif
 		}
 		if (sender->value == LCD_LABEL) {

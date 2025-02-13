@@ -5,10 +5,10 @@
 #include <utils.h>
 
 #include "controllers/ESPAllOnPinManager.h"
-#include "controllers/Wifi_Controller.h"
 
 #include "controllers/UI/ESPAllOnGUI.h"
 #include "manager/ESPAllOn.h"
+
 #include <TickerFree.h>
 
 // UI handles

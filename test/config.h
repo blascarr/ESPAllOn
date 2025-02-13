@@ -17,9 +17,10 @@ uint8_t esp_mac[] = {0x60, 0x8B, 0x0E, 0x01, 0x5A, 0x32};
 #define HOST_PORT 80
 
 #include "../src/controllers/Wifi_Controller.h"
+
 #include "../src/models/PinSerializable.h"
 
-#include "../src/controllers/UI/ESPAllOn.h"
+#include "../src/manager/ESPAllOn.h"
 #include <TickerFree.h>
 
 #endif

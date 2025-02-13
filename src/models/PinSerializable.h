@@ -2,7 +2,8 @@
 #define _PINSERIALIZABLE_H
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <Persistance.h>
+
+#include "../manager/Storage_Manager.h"
 #include <PinManager.h>
 
 class pinSerializable : public PinMode, public IStringSerializable {

@@ -53,9 +53,9 @@ class ESPinner_GPIO : public ESPinner {
 	};
 	JsonDocument serializeJSON() override {
 		StaticJsonDocument<256> doc;
-		doc["ESPinner_Mod"] = "ESPINNER_GPIO";
-		doc["ID"] = getID();
-		doc["GPIO"] = getGPIO();
+		doc[ESPINNER_MODEL_JSONCONFIG] = "ESPINNER_GPIO";
+		doc[ESPINNER_ID_JSONCONFIG] = getID();
+		doc[ESPINNER_GPIO_JSONCONFIG] = getGPIO();
 		// doc["MODE"] = getGPIOMode();
 		// doc["Config"] = getPinModeConf();
 		/*
