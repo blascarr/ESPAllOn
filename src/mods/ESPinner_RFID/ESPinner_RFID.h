@@ -21,6 +21,7 @@ class ESPinner_RFID : public ESPinner {
 	JsonDocument serializeJSON() override {
 		StaticJsonDocument<256> doc;
 		doc[ESPINNER_MODEL_JSONCONFIG] = "ESPINNER_RFID";
+		doc[ESPINNER_ID_JSONCONFIG] = ESPinner::getID();
 		doc[ESPINNER_GPIO_JSONCONFIG] = getGPIO();
 		return doc;
 	}

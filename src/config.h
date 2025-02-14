@@ -49,7 +49,20 @@ String ESPinner_File = "/ESPinner";
 String ESPinner_Path = "espinners";
 #define ESPINNER_MODEL_JSONCONFIG "ESPinner_Mod"
 #define ESPINNER_ID_JSONCONFIG "ID"
+
+// -------- Persistance GPIO CONFIG --------//
 #define ESPINNER_GPIO_JSONCONFIG "GPIO"
+#define ESPINNER_INPUT_CONFIG "INPUT"
+#define ESPINNER_OUTPUT_CONFIG "OUTPUT"
+#define ESPINNER_IO_JSONCONFIG "IO"
+
+// -------- Persistance STEPPER CONFIG --------//
+#define ESPINNER_STEPPER_JSONCONFIG "GPIO"
+#define ESPINNER_STEPPER_A_CONFIG "A"
+#define ESPINNER_STEPPER_AA_CONFIG "AA"
+#define ESPINNER_STEPPER_B_CONFIG "B"
+#define ESPINNER_STEPPER_BB_CONFIG "BB"
+#define ESPINNER_STEPPER_DRIVER_CONFIG "DRIVER"
 
 // --------------- TABS Definition ----------------//
 #define BASICTAB_LABEL "Basic controls"
@@ -114,8 +127,14 @@ String ESPinner_Path = "espinners";
 #define STEPPER_SELECT_VALUE "Select Stepper"
 #define STEPPER_PININPUT_LABEL "Stepper_PinInput"
 #define STEPPER_PININPUT_VALUE "Select_Stepper"
-#define STEPPER_PINSELECTOR_LABEL "Stepper_PinSelector"
-#define STEPPER_PINSELECTOR_VALUE "0"
+#define STEPPER_PINSELECTOR_A_LABEL "Stepper_A+"
+#define STEPPER_PINSELECTOR_A_VALUE "10"
+#define STEPPER_PINSELECTOR_AA_LABEL "Stepper_A-"
+#define STEPPER_PINSELECTOR_AA_VALUE "11"
+#define STEPPER_PINSELECTOR_B_LABEL "Stepper_B+"
+#define STEPPER_PINSELECTOR_B_VALUE "12"
+#define STEPPER_PINSELECTOR_BB_LABEL "Stepper_B-"
+#define STEPPER_PINSELECTOR_BB_VALUE "13"
 #define STEPPER_MODESELECTOR_LABEL "Stepper_ModeSelector"
 
 // --------------- DC MOD Definition ----------------//

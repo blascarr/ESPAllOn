@@ -30,13 +30,16 @@ void setup() {
 	auto espinnerGPIO_1 = std::make_unique<ESPinner_GPIO>();
 	espinnerGPIO_1->setGPIO(5);
 	espinnerGPIO_1->setGPIOMode(GPIOMode::Input);
+	espinnerGPIO_1->setID("ESPINNER GPIO 1");
 
 	auto espinnerGPIO_2 = std::make_unique<ESPinner_GPIO>();
 	espinnerGPIO_2->setGPIO(10);
 	espinnerGPIO_2->setGPIOMode(GPIOMode::Output);
+	espinnerGPIO_2->setID("ESPINNER GPIO 2");
 
 	auto espinnerDC = std::make_unique<ESPinner_DC>();
 	espinnerDC->setGPIO(11);
+	espinnerDC->setID("ESPINNER DC");
 
 	// ESPinnerTestList.push_back(std::move(espinnerGPIO_1));
 	// ESPinnerTestList.push_back(std::move(espinnerGPIO_2));

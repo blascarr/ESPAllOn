@@ -19,14 +19,24 @@ void createStepper_callback(Control *sender, int type) {}
 /*
  *	Stepper_ModeSelector
  *	Select_Stepper_P1
+ *	Stepper_PinA+
+ * 	Stepper_PinA-
+ *  Stepper_PinB+
+ *  Stepper_PinB-
  *	Stepper_Save
  *	Stepper_Remove
  */
 
 void Stepper_Selector(uint16_t PIN_ptr) {
 	GUI_GPIOSetLabel(PIN_ptr, STEPPER_SELECT_LABEL, STEPPER_SELECT_VALUE);
-	GUI_GPIOSelector(PIN_ptr, STEPPER_PINSELECTOR_LABEL,
-					 STEPPER_PINSELECTOR_VALUE, createStepper_callback);
+	GUI_GPIOSelector(PIN_ptr, STEPPER_PINSELECTOR_A_LABEL,
+					 STEPPER_PINSELECTOR_A_VALUE, createStepper_callback);
+	GUI_GPIOSelector(PIN_ptr, STEPPER_PINSELECTOR_AA_LABEL,
+					 STEPPER_PINSELECTOR_AA_VALUE, createStepper_callback);
+	GUI_GPIOSelector(PIN_ptr, STEPPER_PINSELECTOR_B_LABEL,
+					 STEPPER_PINSELECTOR_B_VALUE, createStepper_callback);
+	GUI_GPIOSelector(PIN_ptr, STEPPER_PINSELECTOR_BB_LABEL,
+					 STEPPER_PINSELECTOR_BB_VALUE, createStepper_callback);
 }
 
 void Stepper_UI(uint16_t Stepper_ptr) {

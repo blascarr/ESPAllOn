@@ -30,8 +30,10 @@ void uiUpdate() {
 }
 
 void removeConfig(Control *sender, int type) {
-	DUMPSLN("REMOVE PIN CONFIG");
-	ESPinner_Manager::getInstance().clearPinConfigInStorage();
+	if (type == B_UP) {
+		DUMPSLN("REMOVE PIN CONFIG");
+		ESPinner_Manager::getInstance().clearPinConfigInStorage();
+	}
 }
 
 /*----------------------------------------------------*/

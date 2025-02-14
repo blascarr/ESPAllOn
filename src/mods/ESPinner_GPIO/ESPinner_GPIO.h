@@ -30,7 +30,26 @@ class ESPinner_GPIO : public ESPinner {
 	void setGPIO(uint8_t gpio_pin) { gpio = gpio_pin; }
 	uint8_t getGPIO() { return gpio; }
 	void setGPIOMode(GPIOMode mode) { GPIO_mode = mode; }
+	void setGPIOMode(String mode) {
+		if (mode == ESPINNER_INPUT_CONFIG) {
+			setGPIOMode(GPIOMode::Input);
+		}
+		if (mode == ESPINNER_OUTPUT_CONFIG) {
+			setGPIOMode(GPIOMode::Output);
+		}
+	}
+
 	GPIOMode getGPIOMode() { return GPIO_mode; }
+
+	String getGPIOMode_JSON() {
+		if (GPIO_mode == GPIOMode::Input) {
+			return ESPINNER_INPUT_CONFIG;
+		}
+		if (GPIO_mode == GPIOMode::Output) {
+			return ESPINNER_OUTPUT_CONFIG;
+		}
+	}
+
 	ESP_PinMode getPinModeConf() {
 
 		switch (GPIO_mode) {
@@ -54,9 +73,10 @@ class ESPinner_GPIO : public ESPinner {
 	JsonDocument serializeJSON() override {
 		StaticJsonDocument<256> doc;
 		doc[ESPINNER_MODEL_JSONCONFIG] = "ESPINNER_GPIO";
-		doc[ESPINNER_ID_JSONCONFIG] = getID();
+		doc[ESPINNER_ID_JSONCONFIG] = ESPinner::getID();
 		doc[ESPINNER_GPIO_JSONCONFIG] = getGPIO();
-		// doc["MODE"] = getGPIOMode();
+		doc[ESPINNER_IO_JSONCONFIG] = getGPIOMode_JSON();
+
 		// doc["Config"] = getPinModeConf();
 		/*
 		doc["isBroken"] = "ESPINNER_GPIO";
@@ -73,9 +93,11 @@ class ESPinner_GPIO : public ESPinner {
 		if (error) {
 			return false;
 		}
-		// name = doc["ESPinner_Mod"].as<const char *>();
-		// isVirus = doc["virus"].as<bool>();
-		// int auxMode = doc["GPIO"].as<int>();
+		gpio = doc[ESPINNER_GPIO_JSONCONFIG].as<int>();
+		String ID = doc[ESPINNER_ID_JSONCONFIG].as<const char *>();
+		ESPinner::setID(ID);
+		String GPIOMODE = doc[ESPINNER_IO_JSONCONFIG].as<const char *>();
+		setGPIOMode(GPIOMODE);
 
 		return true;
 	};

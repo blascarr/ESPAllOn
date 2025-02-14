@@ -25,19 +25,6 @@ class ESPinner_Manager {
 	size_t espinnerSize() const { return ESPinners.size(); }
 	void clearESPinners() { ESPinners.clear(); }
 
-	bool deserializeJSON(const String &data) {
-		StaticJsonDocument<256> doc;
-		DeserializationError error = deserializeJson(doc, data);
-		if (error) {
-			return false;
-		}
-		// name = doc["ESPinner_Mod"].as<const char *>();
-		// isVirus = doc["virus"].as<bool>();
-		// int auxMode = doc["GPIO"].as<int>();
-
-		return true;
-	};
-
 	void loadFromStorage() {
 		DynamicJsonDocument doc(256);
 		String serialized = ESPinnerManager.loadData(ESPinner_Path);
@@ -63,7 +50,9 @@ class ESPinner_Manager {
 					ESPinners.push_back(std::move(espinner));
 				}
 			}
-			// Create ESPinners in UI
+			// TODO: Create ESPinners in UI
+			// saveElement_callback(Control *sender, int type)
+			// ESPAllOnPinManager::getInstance().attach()
 		}
 	}
 
