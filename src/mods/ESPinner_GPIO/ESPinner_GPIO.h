@@ -72,7 +72,7 @@ class ESPinner_GPIO : public ESPinner {
 	};
 	JsonDocument serializeJSON() override {
 		StaticJsonDocument<256> doc;
-		doc[ESPINNER_MODEL_JSONCONFIG] = "ESPINNER_GPIO";
+		doc[ESPINNER_MODEL_JSONCONFIG] = ESPINNER_GPIO_JSONCONFIG;
 		doc[ESPINNER_ID_JSONCONFIG] = ESPinner::getID();
 		doc[ESPINNER_GPIO_JSONCONFIG] = getGPIO();
 		doc[ESPINNER_IO_JSONCONFIG] = getGPIOMode_JSON();
@@ -103,4 +103,11 @@ class ESPinner_GPIO : public ESPinner {
 	};
 };
 
+void createGPIOMod_callback(Control *sender, int type);
+void saveButtonGPIOCheck(uint16_t parentRef);
+void saveGPIO_callback(Control *sender, int type);
+void createPIN_callback(Control *sender, int type);
+void GPIO_Selector(uint16_t PIN_ptr);
+void GPIO_UI(uint16_t GPIO_ptr);
+void GPIO_UIFromESPinner(uint16_t GPIO_ptr);
 #endif

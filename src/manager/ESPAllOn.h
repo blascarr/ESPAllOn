@@ -59,6 +59,7 @@ class ESPAllOn {
 		{
 			HeapSelectIram doAllocationsInIRAM;
 #endif
+			// Creates first ESPinner Controller
 			ESPinnerSelector();
 
 #ifdef ESP8266

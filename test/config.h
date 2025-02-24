@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <ESPUI.h>
+#include <unity.h>
 
 #include <../src/config.h>
 #include <../src/utils.h>
@@ -19,6 +20,9 @@ uint8_t esp_mac[] = {0x60, 0x8B, 0x0E, 0x01, 0x5A, 0x32};
 #include "../src/controllers/Wifi_Controller.h"
 
 #include "../src/models/PinSerializable.h"
+
+#include "../src/controllers/ESPAllOnPinManager.h"
+#include "../src/controllers/UI/ESPAllOnGUI.h"
 
 #include "../src/manager/ESPAllOn.h"
 #include <TickerFree.h>

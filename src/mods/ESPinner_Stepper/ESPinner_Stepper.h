@@ -77,7 +77,7 @@ class ESPinner_Stepper : public ESPinner {
 
 	JsonDocument serializeJSON() override {
 		StaticJsonDocument<256> doc;
-		doc[ESPINNER_MODEL_JSONCONFIG] = "ESPINNER_STEPPER";
+		doc[ESPINNER_MODEL_JSONCONFIG] = ESPINNER_STEPPER_JSONCONFIG;
 		doc[ESPINNER_ID_JSONCONFIG] = ESPinner::getID();
 		doc[ESPINNER_STEPPER_A_CONFIG] = getGPIOA();
 		doc[ESPINNER_STEPPER_AA_CONFIG] = getGPIOAA();

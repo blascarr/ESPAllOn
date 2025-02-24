@@ -1,12 +1,9 @@
 #ifndef _UTILS_TEST_H
 #define _UTILS_TEST_H
 
-#include <Arduino.h>
-#include <Wire.h>
-#include <unity.h>
-
 #include "../config.h"
 #include "TickerFree.h"
+#include <unity.h>
 #include <vector>
 
 typedef std::function<void()> TestFunction;

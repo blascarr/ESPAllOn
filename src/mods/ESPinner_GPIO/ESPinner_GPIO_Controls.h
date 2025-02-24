@@ -11,7 +11,9 @@
  *	GPIOSave
  *	GPIORemove
  */
-void createGPIOMod_callback(Control *sender, int type) {}
+void createGPIOMod_callback(Control *sender, int type) {
+	DUMPSLN("CREATE GPIO PIN");
+}
 
 void saveButtonGPIOCheck(uint16_t parentRef) {
 	uint16_t GPIOTextInputRef = searchByLabel(parentRef, GPIO_PININPUT_LABEL);
@@ -93,9 +95,11 @@ void createPIN_callback(Control *sender, int type) {
 	DUMP("' = ", sender->value);
 
 	// Remove Select GPIO LABEL
+	DUMPSLN("REMOVED GPIO LABEL?");
 	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
 	// Check Selector in order to create ESPinner and remove Pin from GPIO
 	// PinManager
+	DUMPSLN("SELECTOR LABEL?");
 	uint16_t selectLabelRef = searchByLabel(parentRef, GPIO_SELECT_LABEL);
 	DUMPLN("Selector Label ", selectLabelRef);
 	if (selectLabelRef != 0) {
@@ -143,6 +147,44 @@ void GPIO_UI(uint16_t GPIO_ptr) {
 	GPIO_Selector(GPIO_ptr);
 
 	GUIButtons_Elements(GPIO_ptr, GPIO_SAVE_LABEL, GPIO_SAVE_VALUE,
+						REMOVEESPINNER_LABEL, REMOVEESPINNER_VALUE,
+						saveGPIO_callback, removeElement_callback);
+}
+
+void GPIO_UIFromESPinner(uint16_t tab_ptr) {
+
+	uint16_t GPIOPIN_selector = ESPUI.addControl(
+		ControlType::Select, GPIO_PINSELECTOR_LABEL, GPIO_PINSELECTOR_VALUE,
+		ControlColor::Wetasphalt, tab_ptr, createPIN_callback);
+
+	for (const auto &pair : ESPAllOnPinManager::getInstance().gpioLabels) {
+		// TODO Pins attached not included, neither broken not used with Wifi
+		// or other issue.
+		if (!ESPAllOnPinManager::getInstance().isPinAttached(pair.first)) {
+			ESPUI.addControl(ControlType::Option,
+							 getLabelFromPinManager(pair.first),
+							 String(pair.first), None, GPIOPIN_selector);
+		}
+	}
+	addElementWithParent(elementToParentMap, GPIOPIN_selector,
+						 tab_ptr); // Add GPIO Selector to parent
+
+	int numElements = sizeof(GPIO_mods) / sizeof(GPIO_mods[0]);
+
+	auto GPIOMode_selector = ESPUI.addControl(
+		ControlType::Select, GPIO_MODESELECTOR_LABEL, GPIO_mods[0].name,
+		ControlColor::Wetasphalt, GPIOPIN_selector, createGPIOMod_callback);
+	for (int i = 0; i < numElements; i++) {
+		ESPUI.addControl(ControlType::Option, GPIO_mods[i].name.c_str(),
+						 GPIO_mods[i].name, None, GPIOMode_selector);
+	}
+
+	addElementWithParent(
+		elementToParentMap, GPIOMode_selector,
+		GPIOPIN_selector); // Add INPUT/OUTPUT Selector to parent
+
+	// GPIO_Selector(GPIOPIN_selector);
+	GUIButtons_Elements(GPIOPIN_selector, GPIO_SAVE_LABEL, GPIO_SAVE_VALUE,
 						REMOVEESPINNER_LABEL, REMOVEESPINNER_VALUE,
 						saveGPIO_callback, removeElement_callback);
 }

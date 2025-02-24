@@ -39,7 +39,6 @@ void setup() {
 	ESPAllOn::getInstance().setup();
 	ESPAllOn::getInstance().begin();
 	ESPAllOnPinManager::getInstance();
-	ESPAllOnPinManager::getInstance().printLabels();
 	ESPinner_Manager::getInstance().loadFromStorage();
 	UI_UpdateTicker.start();
 	wifi.start();

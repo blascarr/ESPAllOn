@@ -3,7 +3,6 @@
 #include <ESPUI.h>
 #include <TickerFree.h>
 
-#include "../../manager/ESPinner_Manager.h"
 #include "../../utils.h"
 
 void ESPinnerSelector();
@@ -18,11 +17,10 @@ struct TabController {
 		: tab(t), description(desc), tabRef(ref) {}
 };
 
-TabController tabs[] = {
-	{TabType::BasicTab, BASICTAB_LABEL},
-	{TabType::LinkedActions, LINKACTIONSTAB_LABEL},
-	{TabType::AdvancedSettingsTab, ADVANCEDSETTINGSTAB_LABEL},
-	{TabType::NetworkTab, WIFITAB_LABEL}};
+TabController tabs[] = {{TabType::BasicTab, BASICTAB_LABEL},
+						{TabType::LinkedActions, LINKACTIONSTAB_LABEL},
+						{TabType::AdvancedSettingsTab, ADVCONFIGTAB_LABEL},
+						{TabType::NetworkTab, WIFITAB_LABEL}};
 
 uint16_t getTab(const TabType &tabType) {
 
@@ -73,6 +71,8 @@ const ESPinner_Module *findModByName(const String &name) {
 	return nullptr; // Return nullptr if not found
 }
 
+#include "../../manager/ESPinner_Manager.h"
+
 void createPINConfigCallback(Control *sender, int type) {
 	debugCallback(sender, type);
 
@@ -107,6 +107,8 @@ void createPINConfigCallback(Control *sender, int type) {
 			// Remove previous Model in Espinner Selector
 
 			GPIO_UI(parentRef);
+			char *backgroundStyle = getBackground(PENDING_COLOR);
+			ESPUI.setPanelStyle(parentRef, backgroundStyle);
 		}
 #endif
 	}
@@ -220,7 +222,7 @@ void ESPinnerSelector() {
 	// Selector for ESPinner Type
 	auto mainselector = ESPUI.addControl(
 		ControlType::Select, ESPINNERTYPE_LABEL, ESPINNERTYPE_VALUE,
-		ControlColor::Wetasphalt, basicTabRef, createPINConfigCallback);
+		ControlColor::Turquoise, basicTabRef, createPINConfigCallback);
 	for (int i = 0; i < numMods; i++) {
 		ESPUI.addControl(ControlType::Option, mods[i].name.c_str(),
 						 mods[i].name, None, mainselector);
@@ -248,8 +250,6 @@ void ESPinnerSelector() {
 
 	addElementWithParent(elementToParentMap, GPIOAdd_selector,
 						 grandParentControl); // Add Save Button to parent
-
-	debugMap(elementToParentMap);
 }
 
 void saveElement_callback(Control *sender, int type) {
@@ -261,6 +261,8 @@ void saveElement_callback(Control *sender, int type) {
 		if (sender->value == GPIO_LABEL) {
 #ifdef _ESPINNER_GPIO_H
 			GPIO_UI(parentRef);
+			char *backgroundStyle = getBackground(SELECTED_COLOR);
+			ESPUI.setPanelStyle(parentRef, backgroundStyle);
 #endif
 		}
 		if (sender->value == NEOPIXEL_LABEL) {

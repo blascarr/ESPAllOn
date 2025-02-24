@@ -51,23 +51,46 @@ String ESPinner_Path = "espinners";
 #define ESPINNER_ID_JSONCONFIG "ID"
 
 // -------- Persistance GPIO CONFIG --------//
-#define ESPINNER_GPIO_JSONCONFIG "GPIO"
+#define ESPINNER_GPIO_JSONCONFIG "ESPINNER_GPIO"
 #define ESPINNER_INPUT_CONFIG "INPUT"
 #define ESPINNER_OUTPUT_CONFIG "OUTPUT"
 #define ESPINNER_IO_JSONCONFIG "IO"
 
 // -------- Persistance STEPPER CONFIG --------//
-#define ESPINNER_STEPPER_JSONCONFIG "GPIO"
+#define ESPINNER_STEPPER_JSONCONFIG "ESPINNER_STEPPER"
 #define ESPINNER_STEPPER_A_CONFIG "A"
 #define ESPINNER_STEPPER_AA_CONFIG "AA"
 #define ESPINNER_STEPPER_B_CONFIG "B"
 #define ESPINNER_STEPPER_BB_CONFIG "BB"
 #define ESPINNER_STEPPER_DRIVER_CONFIG "DRIVER"
 
+// -------- Persistance DC CONFIG --------//
+#define ESPINNER_DC_JSONCONFIG "ESPINNER_DC"
+
+// -------- Persistance DC CONFIG --------//
+#define ESPINNER_NEOPIXEL_JSONCONFIG "ESPINNER_NEOPIXEL"
+
+// -------- Persistance DC CONFIG --------//
+#define ESPINNER_MPU_JSONCONFIG "ESPINNER_MPU"
+
+// -------- Persistance DC CONFIG --------//
+#define ESPINNER_ENCODER_JSONCONFIG "ESPINNER_ENCODER"
+
+// -------- Persistance RFID CONFIG --------//
+#define ESPINNER_RFID_JSONCONFIG "ESPINNER_RFID"
+
+// -------- Persistance TFT CONFIG --------//
+#define ESPINNER_TFT_JSONCONFIG "ESPINNER_TFT"
+
+// -------- Persistance LCD CONFIG --------//
+#define ESPINNER_LCD_JSONCONFIG "ESPINNER_LCD"
+
 // --------------- TABS Definition ----------------//
-#define BASICTAB_LABEL "Basic controls"
+#define BASICTAB_LABEL "ESPinners"
 #define LINKACTIONSTAB_LABEL "Link Actions"
 #define ADVANCEDSETTINGSTAB_LABEL "Advanced Settings"
+
+#define ADVCONFIGTAB_LABEL "Config"
 #define WIFITAB_LABEL "Wifi Credentials"
 
 // ----------------------------------------//
@@ -248,42 +271,5 @@ String ESPinner_Path = "espinners";
 #define ENCODER_PINSELECTOR_LABEL "Encoder_PinSelector"
 #define ENCODER_PINSELECTOR_VALUE "0"
 #define ENCODER_MODESELECTOR_LABEL "Encoder_ModeSelector"
-
-// ------------------ SERIAL CONFIG --------------------//
-#define PRINTDEBUG true
-#define SERIALDEBUG Serial
-
-#define DUMPS(s)                                                               \
-	{                                                                          \
-		SERIALDEBUG.print(F(s));                                               \
-	}
-#define DUMPSLN(s)                                                             \
-	{                                                                          \
-		SERIALDEBUG.println(F(s));                                             \
-	}
-#define DUMPPRINTLN()                                                          \
-	{                                                                          \
-		SERIALDEBUG.println();                                                 \
-	}
-#define DUMPV(v)                                                               \
-	{                                                                          \
-		SERIALDEBUG.print(v);                                                  \
-	}
-#define DUMPLN(s, v)                                                           \
-	{                                                                          \
-		DUMPS(s);                                                              \
-		DUMPV(v);                                                              \
-		DUMPPRINTLN();                                                         \
-	}
-#define DUMP(s, v)                                                             \
-	{                                                                          \
-		DUMPS(s);                                                              \
-		DUMPV(v);                                                              \
-	}
-#define DUMPF_P(fmt, ...)                                                      \
-	{                                                                          \
-		SERIALDEBUG.printf_P(PSTR(fmt), ##__VA_ARGS__);                        \
-	}
-#define DUMPSPRINTF(buf, fmt, ...) sprintf((char *)(buf), fmt, ##__VA_ARGS__)
 
 #endif

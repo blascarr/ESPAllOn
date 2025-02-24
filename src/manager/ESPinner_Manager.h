@@ -7,16 +7,18 @@
 
 #include "../controllers/ESPinner.h"
 
+#include "../controllers/UI/TabController.h"
 #include "./upcast/upcast_utils.h"
-
 class ESPinner_Manager {
   private:
 	std::list<std::unique_ptr<ESPinner>> ESPinners;
 	Persistance ESPinnerManager;
+	ESPAllOnPinManager *pinManager;
 
   public:
 	ESPinner_Manager() : ESPinnerManager(nullptr, &storage) {
 		storage.setRoot(ESPinner_File);
+		pinManager = &ESPAllOnPinManager::getInstance();
 	}
 	static ESPinner_Manager &getInstance() {
 		static ESPinner_Manager instance;
@@ -48,10 +50,20 @@ class ESPinner_Manager {
 					serializeJson(obj, output);
 					espinner->deserializeJSON(output);
 					ESPinners.push_back(std::move(espinner));
+
+					// Get Main Control in Tab
+					// espinner->createGUI();
+					uint16_t parentRef = getTab(TabType::BasicTab);
+					if (mod == ESPINNER_GPIO_JSONCONFIG) {
+						// GPIO_UIFromESPinner(parentRef);
+					}
+					// createGUIFromStorage(mod);
+					// Create Model
+					// saveElement_callback(tab, B_UP);
 				}
 			}
 			// TODO: Create ESPinners in UI
-			// saveElement_callback(Control *sender, int type)
+			//
 			// ESPAllOnPinManager::getInstance().attach()
 		}
 	}

@@ -35,8 +35,10 @@
 		DUMPV(v);                                                              \
 	}
 
-#define DANGER_COLOR "#f55d76"
-#define SUCCESS_COLOR "#8ced9b"
+#define DANGER_COLOR "#cc3333"
+#define SUCCESS_COLOR "#33cc66"
+#define PENDING_COLOR "#6633dd"
+#define SELECTED_COLOR "#1165aa"
 
 using UICallback = void (*)(Control *sender, int type);
 
@@ -68,6 +70,7 @@ void addElementWithParent(std::map<uint16_t, uint16_t> &map, uint16_t elementId,
 }
 
 void debugMap(std::map<uint16_t, uint16_t> &map) {
+	DUMPLN("SIZE MAP: ", map.size());
 	for (auto it = map.begin(); it != map.end(); ++it) {
 		DUMP(" Key: ", it->first);
 		DUMP(" Value: ", it->second);
@@ -78,8 +81,10 @@ uint16_t getParentId(const std::map<uint16_t, uint16_t> &map,
 					 uint16_t elementId) {
 	auto it = map.find(elementId); // "it" refers to the element found
 	if (it != map.end()) {
+		DUMPLN("PARENT ID ", it->second);
 		return it->second;
 	} else {
+		DUMPSLN("THERE IS NO PARENT HERE");
 		return 0;
 	}
 }

@@ -20,7 +20,7 @@ class ESPinner_Encoder : public ESPinner {
 	uint8_t getGPIO() { return gpio; }
 	JsonDocument serializeJSON() override {
 		StaticJsonDocument<256> doc;
-		doc[ESPINNER_MODEL_JSONCONFIG] = "ESPINNER_ENCODER";
+		doc[ESPINNER_MODEL_JSONCONFIG] = ESPINNER_ENCODER_JSONCONFIG;
 		doc[ESPINNER_ID_JSONCONFIG] = ESPinner::getID();
 		doc[ESPINNER_GPIO_JSONCONFIG] = getGPIO();
 		return doc;
