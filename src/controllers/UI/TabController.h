@@ -107,8 +107,6 @@ void createPINConfigCallback(Control *sender, int type) {
 			// Remove previous Model in Espinner Selector
 
 			GPIO_UI(parentRef);
-			char *backgroundStyle = getBackground(PENDING_COLOR);
-			ESPUI.setPanelStyle(parentRef, backgroundStyle);
 		}
 #endif
 	}
@@ -229,8 +227,11 @@ void ESPinnerSelector() {
 	}
 
 	// ID Definition linked to ESPinner
-	auto mainText = ESPUI.addControl(Text, ESPINNERID_LABEL, ESPINNERID_VALUE,
-									 Alizarin, mainselector, generalCallback);
+	std::string uniqueID =
+		std::string(ESPINNERID_VALUE) + std::to_string(mainselector);
+	auto mainText =
+		ESPUI.addControl(ControlType::Text, ESPINNERID_LABEL, uniqueID.c_str(),
+						 ControlColor::Alizarin, mainselector, generalCallback);
 
 	uint16_t parentControl = ESPUI.getControl(mainText)->id;
 	uint16_t grandParentControl =
@@ -261,7 +262,7 @@ void saveElement_callback(Control *sender, int type) {
 		if (sender->value == GPIO_LABEL) {
 #ifdef _ESPINNER_GPIO_H
 			GPIO_UI(parentRef);
-			char *backgroundStyle = getBackground(SELECTED_COLOR);
+			char *backgroundStyle = getBackground(PENDING_COLOR);
 			ESPUI.setPanelStyle(parentRef, backgroundStyle);
 #endif
 		}
@@ -305,38 +306,15 @@ void saveElement_callback(Control *sender, int type) {
 
 void removeElement_callback(Control *sender, int type) {
 	if (type == B_UP) {
-		debugCallback(sender, type);
 		uint16_t parentRef = getParentId(elementToParentMap, sender->id);
-
 		std::vector<uint16_t> childrenIds =
 			getChildrenIds(elementToParentMap, parentRef);
-		for (uint16_t childControllerId : childrenIds) {
-			String espinner_value =
-				String(ESPUI.getControl(childControllerId)->value);
-			String espinner_label =
-				String(ESPUI.getControl(childControllerId)->label);
 
-			if (espinner_label == GPIO_PINSELECTOR_LABEL ||
-				espinner_label == GPIO_PININPUT_LABEL) {
-				DUMP("DETACH PIN ", espinner_value.toInt())
-				ESPAllOnPinManager::getInstance().detach(
-					espinner_value.toInt());
-
-				// TODO : Detach ESPinner in Manager by ID
-				ESPinner_Manager::getInstance().detach("ID");
-				// GPIO SELECTOR SHOULD UPDATE GPIO LIST
-				std::string label = ESPAllOnPinManager::getInstance()
-										.pinLabels[espinner_value.toInt() - 1];
-				char *cstr = new char[label.length() + 1];
-				strcpy(cstr, label.c_str());
-				std::pair<uint8_t, const char *> newGPIO = {
-					espinner_value.toInt(), cstr};
-				addGPIOLabelInPinManager(newGPIO);
-			}
-		}
-
-		DUMPLN("ELEMENTS SIZE ", childrenIds.size());
 		if (childrenIds.size() > 1) {
+			uint16_t espinnerID_ref =
+				searchByLabel(parentRef, ESPINNERID_LABEL);
+			Control *IDController = ESPUI.getControl(espinnerID_ref);
+			ESPinner_Manager::getInstance().detach(IDController->value);
 
 			ESPUI.removeControl(parentRef);
 			removeControlId(controlReferences, parentRef);

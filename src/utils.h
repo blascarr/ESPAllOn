@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <ESPUI.h>
 
+#include "models/ESP_Boards.h"
 // ------------------ SERIAL CONFIG --------------------//
 #define PRINTDEBUG true
 #define SERIALDEBUG Serial
@@ -81,10 +82,9 @@ uint16_t getParentId(const std::map<uint16_t, uint16_t> &map,
 					 uint16_t elementId) {
 	auto it = map.find(elementId); // "it" refers to the element found
 	if (it != map.end()) {
-		DUMPLN("PARENT ID ", it->second);
 		return it->second;
 	} else {
-		DUMPSLN("THERE IS NO PARENT HERE");
+		DUMPLN("THERE IS NO PARENT FROM HERE: ", elementId);
 		return 0;
 	}
 }
@@ -107,7 +107,6 @@ void removeControlId(std::vector<uint16_t> &controlRef, uint16_t id) {
 
 void removeValueFromMap(std::map<uint16_t, uint16_t> &elementToParentMap,
 						uint16_t value) {
-	std::vector<uint16_t> keysToRemove;
 	int numErased = elementToParentMap.erase(value);
 	// if (numErased == 0) {
 	// 	DUMPLN("No Element in map : ", numErased);
@@ -140,6 +139,7 @@ uint16_t searchByValue(uint16_t element_id, String value) {
 			return childControllerId;
 		}
 	}
+	DUMPSLN("MEMORY FAIL: VALUE  NOT FOUND");
 	return 0;
 }
 
@@ -153,6 +153,7 @@ uint16_t searchByLabel(uint16_t element_id, String label) {
 			return childControllerId;
 		}
 	}
+	DUMPSLN("MEMORY FAIL: LABEL NOT FOUND");
 	return 0;
 }
 
@@ -161,36 +162,11 @@ char *getBackground(const char *color) {
 	snprintf(buffer, sizeof(buffer), "background-color: %s;", color);
 	return buffer;
 }
-#define PINSIZE 40
-// #define PINSIZE ESP_BoardConf::NUM_PINS
+
+#define PINSIZE ESP_BoardConf::NUM_PINS
 
 bool isNumericString(String str) {
 	return (str.toInt() != 0 && str.toInt() < PINSIZE);
-}
-
-const char *getLabelOnList(std::map<uint8_t, const char *> &list, uint8_t pin) {
-	if (list.find(pin) != list.end()) {
-		return list[pin];
-	} else {
-		return "Pin not found";
-	}
-}
-
-void addLabelOnList(std::map<uint8_t, const char *> &list,
-					std::pair<uint8_t, const char *> labelPair) {
-	list[labelPair.first] = labelPair.second;
-}
-
-void removeLabelOnList(std::map<uint8_t, const char *> &list,
-					   std::pair<uint8_t, const char *> labelPair) {
-	list.erase(labelPair.first);
-}
-
-void removeLabelOnList(std::map<uint8_t, const char *> &list, uint8_t gpio) {
-	auto it = list.find(gpio);
-	if (it != list.end()) {
-		list.erase(it);
-	}
 }
 
 //-------------- UI --------------------//

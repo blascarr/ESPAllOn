@@ -68,8 +68,27 @@ class ESPinner_Manager {
 		}
 	}
 
+	ESPinner *findESPinnerById(const String &id) {
+		for (auto &espinner : ESPinners) {
+			if (espinner->ID == id) {
+				return espinner.get();
+			}
+		}
+		return nullptr;
+	}
+
 	void push(std::unique_ptr<ESPinner> GUIESPinner) {
-		ESPinners.push_back(std::move(GUIESPinner));
+		auto it = std::find_if(
+			ESPinners.begin(), ESPinners.end(),
+			[&GUIESPinner](const std::unique_ptr<ESPinner> &espinner) {
+				return espinner->getID() == GUIESPinner->getID();
+			});
+
+		if (it != ESPinners.end()) {
+			*it = std::move(GUIESPinner);
+		} else {
+			ESPinners.push_back(std::move(GUIESPinner));
+		}
 		saveESPinnersInStorage();
 	}
 

@@ -6,50 +6,6 @@
 #include "../models/ESP_Boards.h"
 #include <PinManager.h>
 
-enum class labelPin {
-	PIN0 = 0,
-	PIN1 = 1,
-	PIN2 = 2,
-	PIN3 = 3,
-	PIN4 = 4,
-	PIN5 = 5,
-	PIN6 = 6,
-	PIN7 = 7,
-	PIN8 = 8,
-	PIN9 = 9,
-	PIN10 = 10,
-	PIN11 = 11,
-	PIN12 = 12,
-	PIN13 = 13,
-	PIN14 = 14,
-	PIN15 = 15,
-	PIN16 = 16,
-	PIN17 = 17,
-	PIN18 = 18,
-	PIN19 = 19,
-	PIN20 = 20,
-	PIN21 = 21,
-	PIN22 = 22,
-	PIN23 = 23,
-	PIN24 = 24,
-	PIN25 = 25,
-	PIN26 = 26,
-	PIN27 = 27,
-	PIN28 = 28,
-	PIN29 = 29,
-	PIN30 = 30,
-	PIN31 = 31,
-	PIN32 = 32,
-	PIN33 = 33,
-	PIN34 = 34,
-	PIN35 = 35,
-	PIN36 = 36,
-	PIN37 = 37,
-	PIN38 = 38,
-	PIN39 = 39,
-	PIN40 = 40,
-};
-
 const std::map<PinType, const char *> pinTypeNames = {
 	{PinType::None, "None"},
 	{PinType::Ethernet, "Ethernet"},
@@ -85,52 +41,48 @@ const std::map<PinType, const char *> pinTypeNames = {
 class ESPAllOnPinManager : public PinManager<ESP_BoardConf, ESP_PinMode> {
 
   public:
-	std::map<uint8_t, std::string> gpioLabels;
-	std::vector<std::string> pinLabels;
-	ESPAllOnPinManager() {
-		pinLabels.reserve(ESP_BoardConf::NUM_PINS);
-		for (int i = 0; i <= ESP_BoardConf::NUM_PINS; i++) {
-			pinLabels.push_back(std::to_string(i));
-			gpioLabels[i] = std::to_string(i);
-		}
-	}
+	// Relation PIN with Selector Reference in ESPAllOn GUI
+	// <uint16_t PIN , uint16_ t SELECTOR>
+	std::map<uint16_t, uint16_t> pinCurrentStatus;
+
+	ESPAllOnPinManager() {}
 
 	static ESPAllOnPinManager &getInstance() {
 		static ESPAllOnPinManager instance;
 		return instance;
 	}
 
-	void printLabels() {
-		for (const std::string &label : pinLabels) {
-			DUMPLN("PIN ", label.c_str());
+	uint16_t getCurrentReference(uint8_t ref) {
+		for (auto &relation : pinCurrentStatus) {
+			if (relation.second == ref) {
+				uint8_t currentPin = relation.first;
+				return currentPin;
+				break;
+			}
+		}
+		return 0;
+	}
+
+	void updateGPIOFromESPUI(ESP_PinMode ESPin, uint16_t ref) {
+		uint16_t sel = getCurrentReference(ref);
+		if (sel == 0) {
+			setPinControlRelation(ESPin.pin, ref);
+			ESPAllOnPinManager::attach(ESPin.pin);
+		} else {
+			ESPAllOnPinManager::detach(sel);
+			ESPAllOnPinManager::attach(ESPin);
+			// Remove ref relation with older Pin
+			pinCurrentStatus.erase(sel);
+			setPinControlRelation(ESPin.pin, ref);
 		}
 	}
+
+	void debugCurrentStatus() { debugMap(pinCurrentStatus); }
+
+	void setPinControlRelation(uint8_t pin, uint16_t espuiControlRef) {
+		pinCurrentStatus[pin] = espuiControlRef;
+	}
 };
-
-const char *getLabelFromPinManager(uint8_t pin) {
-	if (ESPAllOnPinManager::getInstance().gpioLabels.find(pin) !=
-		ESPAllOnPinManager::getInstance().gpioLabels.end()) {
-		return ESPAllOnPinManager::getInstance().gpioLabels[pin].c_str();
-		return "";
-	} else {
-		return "Pin not found";
-	}
-}
-void addGPIOLabelInPinManager(std::pair<uint8_t, const char *> gpioLabelPair) {
-	ESPAllOnPinManager::getInstance().gpioLabels[gpioLabelPair.first] =
-		gpioLabelPair.second;
-}
-void removeGPIOLabelFromPinManager(
-	std::pair<uint8_t, const char *> gpioLabelPair) {
-	ESPAllOnPinManager::getInstance().gpioLabels.erase(gpioLabelPair.first);
-}
-
-void removeGPIOLabelFromPinManager(uint8_t gpio) {
-	auto it = ESPAllOnPinManager::getInstance().gpioLabels.find(gpio);
-	if (it != ESPAllOnPinManager::getInstance().gpioLabels.end()) {
-		ESPAllOnPinManager::getInstance().gpioLabels.erase(it);
-	}
-}
 
 const char *getPinTypeName(PinType pinType) {
 	auto it = pinTypeNames.find(pinType);
@@ -162,6 +114,26 @@ void DUMP_PINOUT() {
 		DUMPLN(" TouchGPIO ", GPIO.isTouchGPIO);
 #endif
 	}
+}
+
+bool isNumericAndInRange(const String value) {
+
+	// Avoid selected pin 0
+	int val = value.toInt();
+	if (val != 0) {
+		String numString = String(val);
+		if (numString.length() != value.length()) {
+			return false;
+		}
+		// Review if Pin is already occupied in ESPinner_PinManager
+		bool is_gpio_attached =
+			ESPAllOnPinManager::getInstance().isPinAttached(val);
+		if (!is_gpio_attached && val > 0 && val < PINSIZE) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 #endif

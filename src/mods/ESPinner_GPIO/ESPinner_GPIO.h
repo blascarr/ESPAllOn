@@ -17,8 +17,10 @@ class ESPinner_GPIO : public ESPinner {
 	uint8_t gpio;
 	GPIOMode GPIO_mode;
 
-	ESPinner_GPIO(ESPinner_Mod espinner_mod) : ESPinner(espinner_mod) {}
-	ESPinner_GPIO() : ESPinner(ESPinner_Mod::GPIO) {}
+	ESPinner_GPIO(GPIOMode espinner_mod)
+		: ESPinner(ESPinner_Mod::GPIO), GPIO_mode(espinner_mod) {}
+	ESPinner_GPIO()
+		: ESPinner(ESPinner_Mod::GPIO), GPIO_mode(GPIOMode::Undefined) {}
 	void setup() override { DUMPSLN("Iniciacion configuración de GPIO..."); }
 	void update() override { DUMPSLN("Update configuración de GPIO..."); }
 	void implement() override {
@@ -106,7 +108,7 @@ class ESPinner_GPIO : public ESPinner {
 void createGPIOMod_callback(Control *sender, int type);
 void saveButtonGPIOCheck(uint16_t parentRef);
 void saveGPIO_callback(Control *sender, int type);
-void createPIN_callback(Control *sender, int type);
+void GPIOSelector_callback(Control *sender, int type);
 void GPIO_Selector(uint16_t PIN_ptr);
 void GPIO_UI(uint16_t GPIO_ptr);
 void GPIO_UIFromESPinner(uint16_t GPIO_ptr);
