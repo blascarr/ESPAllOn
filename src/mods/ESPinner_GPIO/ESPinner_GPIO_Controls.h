@@ -16,7 +16,7 @@ void createGPIOMod_callback(Control *sender, int type) {
 }
 
 void saveButtonGPIOCheck(uint16_t parentRef) {
-	uint16_t GPIOTextInputRef = searchByLabel(parentRef, GPIO_PININPUT_LABEL);
+
 	uint16_t GPIOSelectorRef = searchByLabel(parentRef, GPIO_PINSELECTOR_LABEL);
 
 	String GPIOSelector_value;
@@ -25,11 +25,7 @@ void saveButtonGPIOCheck(uint16_t parentRef) {
 		// TODO if GPIOSelector_value exists -> Check if ESP_PinMode List
 		// related with Container exists. Create new One
 	}
-	if (GPIOTextInputRef != 0) {
-		// TODO if InputRef is checked, we
-		// should update the PinModel in PinManager
-		GPIOSelector_value = ESPUI.getControl(GPIOTextInputRef)->value;
-	}
+
 	uint16_t SaveButtonRef = searchByLabel(parentRef, GPIO_SAVE_LABEL);
 
 	if (isNumericString(GPIOSelector_value)) {
@@ -48,9 +44,11 @@ void saveButtonGPIOCheck(uint16_t parentRef) {
 			DUMPLN("Label ESPinner: ", espinner_label);
 			DUMPLN("Value ESPinner: ", espinner_value);
 			if (espinner_label == GPIO_MODESELECTOR_LABEL) {
-				if (espinner_label == GPIO_ESPINNERINPUT_LABEL) {
+				String espinnerMode_value =
+					String(ESPUI.getControl(childControllerId)->value);
+				if (espinnerMode_value == GPIO_ESPINNERINPUT_LABEL) {
 					espinnerGPIO->setGPIOMode(GPIOMode::Input);
-				} else if (espinner_label == GPIO_ESPINNEROUTPUT_LABEL) {
+				} else if (espinnerMode_value == GPIO_ESPINNEROUTPUT_LABEL) {
 					espinnerGPIO->setGPIOMode(GPIOMode::Output);
 				}
 			}
@@ -59,18 +57,19 @@ void saveButtonGPIOCheck(uint16_t parentRef) {
 				espinnerGPIO->setID(espinner_value);
 			}
 
-			if (espinner_label == GPIO_PININPUT_LABEL ||
-				espinner_label == GPIO_PINSELECTOR_LABEL) {
+			if (espinner_label == GPIO_PINSELECTOR_LABEL) {
 				espinnerGPIO->setGPIO(espinner_value.toInt());
 			}
 		}
-		// Create new ESpinner if model is the first one
+		// Create ESpinner with Configuration
 		ESP_PinMode pinModel = espinnerGPIO->getPinModeConf();
-		ESPAllOnPinManager::getInstance().attach(pinModel);
+		ESPAllOnPinManager::getInstance().updateGPIOFromESPUI(pinModel,
+															  parentRef);
 
 		// TODO Update ESpinner if pin Model was set before.
 		// Save GPIO Instance in Storage
 		ESPinner_Manager::getInstance().push(std::move(espinnerGPIO));
+		// Save GPIO Instance in Storage
 		// TODO Call to Utils in order to recheck Selectors created in other
 		// Containers.
 	} else {
