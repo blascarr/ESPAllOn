@@ -24,6 +24,7 @@
 #endif
 
 #define VERBOSE false
+#define MEMORYDEBUG false
 
 // Settings
 #define SLOW_BOOT 0

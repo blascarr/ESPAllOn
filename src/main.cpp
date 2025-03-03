@@ -11,6 +11,10 @@
 
 #include <TickerFree.h>
 
+#if MEMORYDEBUG
+#include "manager/Memory_Manager.h"
+#endif
+
 // UI handles
 
 void externalAction(uint16_t mode) { Serial.println("EXTERNAL ACTIOOOOON"); }
@@ -43,6 +47,10 @@ void setup() {
 	UI_UpdateTicker.start();
 	wifi.start();
 	wifi.connectWifi();
+
+#if MEMORYDEBUG
+	Memory_Ticker.start();
+#endif
 }
 
 void loop() {
@@ -74,5 +82,9 @@ void loop() {
 #if !defined(ESP32)
 	// We don't need to call this explicitly on ESP32 but we do on 8266
 	MDNS.update();
+#endif
+
+#if MEMORYDEBUG
+	Memory_Ticker.update();
 #endif
 }
