@@ -66,12 +66,9 @@ void saveButtonGPIOCheck(uint16_t parentRef) {
 		ESPAllOnPinManager::getInstance().updateGPIOFromESPUI(pinModel,
 															  parentRef);
 
-		// TODO Update ESpinner if pin Model was set before.
-		// Save GPIO Instance in Storage
 		ESPinner_Manager::getInstance().push(std::move(espinnerGPIO));
 		// Save GPIO Instance in Storage
-		// TODO Call to Utils in order to recheck Selectors created in other
-		// Containers.
+		ESPinner_Manager::getInstance().saveESPinnersInStorage();
 	} else {
 		char *backgroundStyle = getBackground(DANGER_COLOR);
 		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);

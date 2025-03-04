@@ -90,6 +90,41 @@ void removedControl(uint16_t input_ref, const String &label) {
 	TEST_ASSERT_EQUAL_INT16(0, ref);
 }
 
+Persistance ESPinnerManager(nullptr, &storage);
+
+bool compareESPinnerGPIO(const ESPinner_GPIO &expected_ESPinner_GPIO,
+						 const ESPinner_GPIO &actual_ESPinner_GPIO) {
+	return expected_ESPinner_GPIO.gpio == actual_ESPinner_GPIO.gpio &&
+		   expected_ESPinner_GPIO.GPIO_mode == actual_ESPinner_GPIO.GPIO_mode &&
+		   expected_ESPinner_GPIO.mod == actual_ESPinner_GPIO.mod &&
+		   expected_ESPinner_GPIO.ID == actual_ESPinner_GPIO.ID;
+}
+
+void loadStorage(const ESPinner_GPIO expectedList[]) {
+	DynamicJsonDocument doc(256);
+	String serialized = ESPinnerManager.loadData(ESPinner_Path);
+	DUMP("Dataloaded: ", serialized);
+	DeserializationError error = deserializeJson(doc, serialized);
+	uint8_t espinner_index = 0;
+	if (!error) {
+		if (!doc.is<JsonArray>()) {
+			DUMPSLN("ERROR: NO JSON ARRAY FORMAT.");
+			return;
+		}
+		JsonArray array = doc.as<JsonArray>();
+		for (JsonDocument obj : array) {
+			ESPinner_GPIO espinner;
+			String output;
+			serializeJson(obj, output);
+			espinner.deserializeJSON(output);
+
+			TEST_ASSERT_TRUE(
+				compareESPinnerGPIO(expectedList[espinner_index], espinner));
+			espinner_index++;
+		}
+	}
+}
+
 void checkESPinnerState(const String &id, int expectedGpio,
 						ESPinner_Mod expectedType, GPIOMode expectedMode) {
 	ESPinner *espinnerInList =
@@ -164,7 +199,14 @@ void test_saved_GPIOespinner() {
 	TEST_ASSERT_EQUAL_INT8(1, EspinnerListSize);
 	TEST_ASSERT_EQUAL_INT16(2, controlReferences.size());
 
-	checkESPinnerState("TEST_INPUT", 10, ESPinner_Mod::GPIO, GPIOMode::Input);
+	ESPinner_GPIO expected_espinner = ESPinner_GPIO(GPIOMode::Input);
+	expected_espinner.setGPIO(10);
+	expected_espinner.setID("TEST_INPUT");
+	ESPinner_GPIO expectedList[] = {expected_espinner};
+
+	checkESPinnerState(expected_espinner.getID(), expected_espinner.getGPIO(),
+					   expected_espinner.getType(),
+					   expected_espinner.getGPIOMode());
 
 	// -------------------------------------------- //
 	// ---- Check EspAllOn_Pin_manager Status ----- //
@@ -176,6 +218,7 @@ void test_saved_GPIOespinner() {
 	// -------------------------------------------- //
 	// ------ Check ESPinner Saved in memory ------ //
 	// -------------------------------------------- //
+	loadStorage(expectedList);
 }
 
 void test_modified_GPIOespinner() {
@@ -197,7 +240,14 @@ void test_modified_GPIOespinner() {
 	TEST_ASSERT_EQUAL_INT8(1, EspinnerListSize);
 	TEST_ASSERT_EQUAL_INT16(2, controlReferences.size());
 
-	checkESPinnerState("TEST_INPUT", 13, ESPinner_Mod::GPIO, GPIOMode::Input);
+	ESPinner_GPIO expected_espinner = ESPinner_GPIO(GPIOMode::Input);
+	expected_espinner.setGPIO(13);
+	expected_espinner.setID("TEST_INPUT");
+	ESPinner_GPIO expectedList[] = {expected_espinner};
+
+	checkESPinnerState(expected_espinner.getID(), expected_espinner.getGPIO(),
+					   expected_espinner.getType(),
+					   expected_espinner.getGPIOMode());
 
 	DUMPLN("ESPINNER PIN ", typeGPIOController->value.toInt());
 
@@ -214,7 +264,7 @@ void test_modified_GPIOespinner() {
 	// ------ Check ESPinner Saved in memory ------ //
 	// -------------------------------------------- //
 
-	// ESPinner_Manager::getInstance().getStorageModel().loadFromStorage()
+	loadStorage(expectedList);
 }
 
 void test_second_void_GPIOespinner() {
@@ -243,7 +293,6 @@ void test_second_GPIOespinner() {
 		{secondESPinnerSelector, REMOVEESPINNER_LABEL, REMOVEESPINNER_VALUE}};
 
 	assertControlValues(void_GPIO_assertions);
-	// removedControl(secondESPinnerSelector, "Select_GPIO");
 
 	// -------------------------------------------- //
 	// ------ Check Espinner_manager Status ------- //
@@ -252,7 +301,18 @@ void test_second_GPIOespinner() {
 	TEST_ASSERT_EQUAL_INT8(2, EspinnerListSize);
 	TEST_ASSERT_EQUAL_INT16(3, controlReferences.size());
 
-	checkESPinnerState("TEST_OUTPUT", 5, ESPinner_Mod::GPIO, GPIOMode::Output);
+	ESPinner_GPIO first_espinner = ESPinner_GPIO(GPIOMode::Input);
+	first_espinner.setGPIO(13);
+	first_espinner.setID("TEST_INPUT");
+
+	ESPinner_GPIO expected_espinner = ESPinner_GPIO(GPIOMode::Output);
+	expected_espinner.setGPIO(5);
+	expected_espinner.setID("TEST_OUTPUT");
+	ESPinner_GPIO expectedList[] = {first_espinner, expected_espinner};
+
+	checkESPinnerState(expected_espinner.getID(), expected_espinner.getGPIO(),
+					   expected_espinner.getType(),
+					   expected_espinner.getGPIOMode());
 
 	// -------------------------------------------- //
 	// ---- Check EspAllOn_Pin_manager Status ----- //
@@ -266,6 +326,7 @@ void test_second_GPIOespinner() {
 	// -------------------------------------------- //
 	// ------ Check ESPinner Saved in memory ------ //
 	// -------------------------------------------- //
+	loadStorage(expectedList);
 }
 
 void test_firstESPinner_removed() {
