@@ -5,8 +5,8 @@
 #include <Arduino.h>
 #include <ESPUI.h>
 
-void GUI_GPIOSelector(uint16_t parentRef, const char *GPIOLabel,
-					  const char *GPIOValue, UICallback SelectorCallback) {
+uint16_t GUI_GPIOSelector(uint16_t parentRef, const char *GPIOLabel,
+						  const char *GPIOValue, UICallback SelectorCallback) {
 	// Access to current configuration in Board ESP
 	// Just only numbers defined in PinManager Object
 	// Remove broken and not permitted GPIOs
@@ -17,5 +17,6 @@ void GUI_GPIOSelector(uint16_t parentRef, const char *GPIOLabel,
 
 	addElementWithParent(elementToParentMap, GPIOPIN_selector,
 						 parentRef); // Add GPIO Selector to parent
+	return GPIOPIN_selector;
 }
 #endif

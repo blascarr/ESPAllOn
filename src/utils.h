@@ -45,8 +45,8 @@ using UICallback = void (*)(Control *sender, int type);
 
 void removeElement_callback(Control *sender, int type);
 void saveElement_callback(Control *sender, int type);
-void GUI_GPIOSelector(uint16_t parentRef, const char *GPIOLabel,
-					  const char *GPIOValue, UICallback SelectorCallback);
+uint16_t GUI_GPIOSelector(uint16_t parentRef, const char *GPIOLabel,
+						  const char *GPIOValue, UICallback SelectorCallback);
 /*----------------------------------------------------*/
 /*----------------   Vector List  --------------------*/
 /*----------------------------------------------------*/
@@ -197,7 +197,6 @@ void GUIButtons_Elements(uint16_t parentRef, const char *saveLabel,
 						 UICallback removeCallback) {
 	GUI_SaveButton(parentRef, saveLabel, saveValue, saveCallback);
 	GUI_RemoveButton(parentRef, removeLabel, removeValue, removeCallback);
-	// debugMap(elementToParentMap);
 }
 
 void GUI_GPIOSetLabel(uint16_t parentRef, const char *GPIOLabel,

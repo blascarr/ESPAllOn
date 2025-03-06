@@ -146,7 +146,6 @@ class ESPAllOn {
   private:
 	ESPAllOnPinManager *pinManager;
 	int capacity;
-	ESPinner **modules;
 	int size;
 	std::vector<ESPAction> actions;
 	std::map<uint16_t, ESPAction> pinActions;

@@ -314,12 +314,18 @@ void removeElement_callback(Control *sender, int type) {
 			uint16_t espinnerID_ref =
 				searchByLabel(parentRef, ESPINNERID_LABEL);
 			Control *IDController = ESPUI.getControl(espinnerID_ref);
-			ESPinner_Manager::getInstance().detach(IDController->value);
+			ESPinner_Manager::getInstance().debug();
+			if (espinnerID_ref != 0) {
+				ESPinner_Manager::getInstance().detach(IDController->value);
+			} else {
+				DUMPLN("NOT FOUND TO ERASE: ", espinnerID_ref);
+			}
 
 			ESPUI.removeControl(parentRef);
 			removeControlId(controlReferences, parentRef);
 			removeChildrenFromMap(elementToParentMap, parentRef);
 		}
+		ESPinner_Manager::getInstance().saveESPinnersInStorage();
 	}
 }
 

@@ -109,4 +109,10 @@ class ESPinner_Stepper : public ESPinner {
 	};
 };
 
+void createStepper_callback(Control *sender, int type);
+void saveStepper_callback(Control *sender, int type);
+void createStepper_callback(Control *sender, int type);
+void Stepper_Selector(uint16_t PIN_ptr);
+void Stepper_UI(uint16_t GPIO_ptr);
+
 #endif

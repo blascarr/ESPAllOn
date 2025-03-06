@@ -12,6 +12,8 @@ struct ESPinner_GPIOMode {
 const ESPinner_GPIOMode GPIO_mods[] = {
 	{GPIOMode::Input, GPIO_ESPINNERINPUT_LABEL},
 	{GPIOMode::Output, GPIO_ESPINNEROUTPUT_LABEL}};
+
+uint16_t GPIO_ModeSelector(uint16_t GPIO_ptr);
 class ESPinner_GPIO : public ESPinner {
   public:
 	uint8_t gpio;
@@ -23,11 +25,8 @@ class ESPinner_GPIO : public ESPinner {
 		: ESPinner(ESPinner_Mod::GPIO), GPIO_mode(GPIOMode::Undefined) {}
 	void setup() override { DUMPSLN("Iniciacion configuración de GPIO..."); }
 	void update() override { DUMPSLN("Update configuración de GPIO..."); }
-	void implement() override {
-		DUMPSLN("Implementacion configuración de GPIO...");
-	}
-
 	void loader() override { DUMPSLN("Cargando configuración de GPIO..."); }
+	void implement() override;
 
 	void setGPIO(uint8_t gpio_pin) { gpio = gpio_pin; }
 	uint8_t getGPIO() { return gpio; }

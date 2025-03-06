@@ -49,22 +49,19 @@ class ESPinner_Manager {
 					DUMPLN("ESPinner loaded: ", mod);
 					serializeJson(obj, output);
 					espinner->deserializeJSON(output);
-					ESPinners.push_back(std::move(espinner));
 
-					// Get Main Control in Tab
-					// espinner->createGUI();
 					uint16_t parentRef = getTab(TabType::BasicTab);
 					if (mod == ESPINNER_GPIO_JSONCONFIG) {
-						// GPIO_UIFromESPinner(parentRef);
+
+						// Implement Includes GUI and ESPAllOn_PinManager
+						// Configuration
+						espinner->implement();
 					}
-					// createGUIFromStorage(mod);
-					// Create Model
-					// saveElement_callback(tab, B_UP);
+					// Create ESPinner Model in List
+					ESPinners.push_back(std::move(espinner));
+					// ESPinner_Manager::getInstance().debug();
 				}
 			}
-			// TODO: Create ESPinners in UI
-			//
-			// ESPAllOnPinManager::getInstance().attach()
 		}
 	}
 
@@ -92,16 +89,23 @@ class ESPinner_Manager {
 		saveESPinnersInStorage();
 	}
 
+	void debug() {
+		for (auto &espinner : ESPinners) {
+			DUMPLN("ID FROM ESPINNER: ", espinner->getID());
+		}
+	}
+
 	void detach(const String &id) {
-		DUMPSLN("DETACH IN ESPINNER MANAGER");
+
 		auto it =
 			std::find_if(ESPinners.begin(), ESPinners.end(),
 						 [&id](const std::unique_ptr<ESPinner> &espinner) {
 							 return espinner->getID() == id;
 						 });
-
 		if (it != ESPinners.end()) {
 			ESPinners.erase(it);
+		} else {
+			DUMPSLN("ESPINNER NOT ERASED IN DETACH");
 		}
 	}
 
@@ -121,7 +125,6 @@ class ESPinner_Manager {
 	void clearPinConfigInStorage() {
 		ESPinnerManager.getStorageModel()->remove(ESPinner_Path);
 	}
-	// void clearStorage() { ESPinnerManager.getStorageModel()->removeAll(); }
 };
 
 #include "../mods/ESPinner_DC/ESPinner_DC_Controls.h"

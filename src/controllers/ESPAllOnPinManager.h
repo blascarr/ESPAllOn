@@ -116,10 +116,13 @@ void DUMP_PINOUT() {
 	}
 }
 
-bool isNumericAndInRange(const String value) {
-
-	// Avoid selected pin 0
+bool isNumericAndInRange(const String value, uint16_t ref) {
 	int val = value.toInt();
+	int lastValue = ESPAllOnPinManager::getInstance().getCurrentReference(ref);
+	// Avoid selected pin 0
+	if (val == lastValue) {
+		return true;
+	}
 	if (val != 0) {
 		String numString = String(val);
 		if (numString.length() != value.length()) {
