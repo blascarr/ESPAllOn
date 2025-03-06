@@ -45,9 +45,7 @@ TickerFree<> UI_UpdateTicker(uiUpdate, 500, 0, MILLIS);
 class ESPAllOn {
 
   public:
-	ESPAllOn()
-		: capacity(MOD_CAPACITY), size(0),
-		  modules(new ESPinner *[MOD_CAPACITY]) {}
+	ESPAllOn() : capacity(MOD_CAPACITY), size(0) {}
 
 	static ESPAllOn &getInstance() {
 		static ESPAllOn instance;
