@@ -166,7 +166,7 @@ void test_wrong_GPIOespinner() {
 		{firstESPinnerSelector, ESPINNERTYPE_LABEL, "GPIO"},
 		{firstESPinnerSelector, GPIO_MODESELECTOR_LABEL, "INPUT"},
 		{firstESPinnerSelector, ESPINNERID_LABEL, "TEST_INPUT"},
-		{firstESPinnerSelector, GPIO_SELECT_LABEL, "Select"},
+		// {firstESPinnerSelector, GPIO_SELECT_LABEL, "Select"},
 		{firstESPinnerSelector, GPIO_PINSELECTOR_LABEL, "asdfg"},
 		{firstESPinnerSelector, GPIO_SAVE_LABEL, GPIO_SAVE_VALUE},
 		{firstESPinnerSelector, REMOVEESPINNER_LABEL, REMOVEESPINNER_VALUE}};
@@ -398,8 +398,9 @@ void setup() {
 	typeGPIOController->value = "asdfg";
 
 	// Click On save, but not saved because of wrong number in GPIO PIN
-	saveButtonGPIOCheck(firstESPinnerSelector);
 	GPIOSelector_callback(typeGPIOController, B_UP);
+	saveButtonGPIOCheck(firstESPinnerSelector, GPIO_PINSELECTOR_LABEL,
+						gpio_action);
 	RUN_TEST(test_wrong_GPIOespinner);
 
 	// ---------------------------------------------//
@@ -408,6 +409,8 @@ void setup() {
 	// ---------------------------------------------//
 	typeGPIOController->value = "10";
 	GPIOSelector_callback(typeGPIOController, B_UP);
+	saveButtonGPIOCheck(firstESPinnerSelector, GPIO_PINSELECTOR_LABEL,
+						gpio_action);
 	RUN_TEST(test_saved_GPIOespinner);
 
 	// ---------------------------------------------//
@@ -454,7 +457,8 @@ void setup() {
 	typeGPIOController->value = "5";
 
 	// Click On save, but not saved because of wrong number in GPIO PIN
-	saveButtonGPIOCheck(secondESPinnerSelector);
+	saveButtonGPIOCheck(secondESPinnerSelector, GPIO_PINSELECTOR_LABEL,
+						gpio_action);
 	// RUN_TEST([&]() { test_controlReferenceExists(controlReferences, testRef);
 	// });
 	RUN_TEST(test_second_GPIOespinner);

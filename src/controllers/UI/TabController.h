@@ -7,7 +7,13 @@
 
 void ESPinnerSelector();
 
-enum class TabType { BasicTab, AdvancedSettingsTab, LinkedActions, NetworkTab };
+enum class TabType {
+	BasicTab,
+	ControllerTab,
+	AdvancedSettingsTab,
+	LinkedActions,
+	NetworkTab
+};
 
 struct TabController {
 	TabType tab;
@@ -18,6 +24,7 @@ struct TabController {
 };
 
 TabController tabs[] = {{TabType::BasicTab, BASICTAB_LABEL},
+						{TabType::ControllerTab, CONTROLLERTAB_LABEL},
 						{TabType::LinkedActions, LINKACTIONSTAB_LABEL},
 						{TabType::AdvancedSettingsTab, ADVCONFIGTAB_LABEL},
 						{TabType::NetworkTab, WIFITAB_LABEL}};
@@ -55,6 +62,7 @@ void debugCallback(Control *sender, int type) {
 void voidCallback(Control *sender, int type) {}
 void generalCallback(Control *sender, int type);
 void extendedCallback(Control *sender, int type, void *param);
+void ESPINNER_ID_Callback(Control *sender, int type);
 void generalCallback(Control *sender, int type) { debugCallback(sender, type); }
 
 void extendedCallback(Control *sender, int type, void *param) {
@@ -229,9 +237,9 @@ void ESPinnerSelector() {
 	// ID Definition linked to ESPinner
 	std::string uniqueID =
 		std::string(ESPINNERID_VALUE) + std::to_string(mainselector);
-	auto mainText =
-		ESPUI.addControl(ControlType::Text, ESPINNERID_LABEL, uniqueID.c_str(),
-						 ControlColor::Alizarin, mainselector, generalCallback);
+	auto mainText = ESPUI.addControl(ControlType::Text, ESPINNERID_LABEL,
+									 uniqueID.c_str(), ControlColor::Alizarin,
+									 mainselector, ESPINNER_ID_Callback);
 
 	uint16_t parentControl = ESPUI.getControl(mainText)->id;
 	uint16_t grandParentControl =
@@ -266,6 +274,16 @@ void saveElement_callback(Control *sender, int type) {
 			ESPUI.setPanelStyle(parentRef, backgroundStyle);
 #endif
 		}
+
+		if (sender->value == DC_LABEL) {
+#ifdef _ESPINNER_DC_H
+			DC_UI(parentRef);
+			DUMPSLN("DC MOTOR");
+			char *backgroundStyle = getBackground(PENDING_COLOR);
+			ESPUI.setPanelStyle(parentRef, backgroundStyle);
+#endif
+		}
+
 		if (sender->value == NEOPIXEL_LABEL) {
 #ifdef _ESPINNER_NEOPIXEL_H
 			NP_UI(parentRef);
@@ -329,6 +347,14 @@ void removeElement_callback(Control *sender, int type) {
 	}
 }
 
+void detachRemovedPIN(String expected_label, String espinner_label,
+					  String espinner_value) {
+	if (espinner_label == expected_label) {
+
+		DUMP("DETACH PIN ", espinner_value.toInt())
+		ESPAllOnPinManager::getInstance().detach(espinner_value.toInt());
+	}
+}
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/

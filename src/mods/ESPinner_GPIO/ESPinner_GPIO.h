@@ -71,6 +71,7 @@ class ESPinner_GPIO : public ESPinner {
 			return pinMode;
 		}
 	};
+
 	JsonDocument serializeJSON() override {
 		StaticJsonDocument<256> doc;
 		doc[ESPINNER_MODEL_JSONCONFIG] = ESPINNER_GPIO_JSONCONFIG;
@@ -88,13 +89,14 @@ class ESPinner_GPIO : public ESPinner {
 		*/
 		return doc;
 	}
+
 	bool deserializeJSON(const String &data) {
 		StaticJsonDocument<256> doc;
 		DeserializationError error = deserializeJson(doc, data);
 		if (error) {
 			return false;
 		}
-		gpio = doc[ESPINNER_GPIO_JSONCONFIG].as<int>();
+		ESPinner_GPIO::setGPIO(doc[ESPINNER_GPIO_JSONCONFIG].as<int>());
 		String ID = doc[ESPINNER_ID_JSONCONFIG].as<const char *>();
 		ESPinner::setID(ID);
 		String GPIOMODE = doc[ESPINNER_IO_JSONCONFIG].as<const char *>();
@@ -105,10 +107,11 @@ class ESPinner_GPIO : public ESPinner {
 };
 
 void createGPIOMod_callback(Control *sender, int type);
-void saveButtonGPIOCheck(uint16_t parentRef);
 void saveGPIO_callback(Control *sender, int type);
+void removeGPIO_callback(Control *sender, int type);
 void GPIOSelector_callback(Control *sender, int type);
 void GPIO_Selector(uint16_t PIN_ptr);
 void GPIO_UI(uint16_t GPIO_ptr);
-void GPIO_UIFromESPinner(uint16_t GPIO_ptr);
+void GPIOSwitcher_callback(Control *sender, int type);
+
 #endif

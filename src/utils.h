@@ -47,6 +47,8 @@ void removeElement_callback(Control *sender, int type);
 void saveElement_callback(Control *sender, int type);
 uint16_t GUI_GPIOSelector(uint16_t parentRef, const char *GPIOLabel,
 						  const char *GPIOValue, UICallback SelectorCallback);
+void detachRemovedPIN(String expected_label, String espinner_label,
+					  String espinner_value);
 /*----------------------------------------------------*/
 /*----------------   Vector List  --------------------*/
 /*----------------------------------------------------*/
@@ -230,4 +232,31 @@ void saveButtonCheck(uint16_t parentRef, const char *SelectorLabel,
 		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);
 	}
 }
+
+void saveButtonGPIOCheck(uint16_t parentRef, const char *label,
+						 void (*GPIO_Actions)(uint16_t, uint16_t)) {
+
+	uint16_t GPIOSelectorRef = searchByLabel(parentRef, label);
+
+	String GPIOSelector_value;
+	if (GPIOSelectorRef != 0) {
+		GPIOSelector_value = ESPUI.getControl(GPIOSelectorRef)->value;
+		// TODO if GPIOSelector_value exists -> Check if ESP_PinMode List
+		// related with Container exists. Create new One
+	}
+
+	uint16_t SaveButtonRef = searchByLabel(parentRef, GPIO_SAVE_LABEL);
+
+	if (isNumericString(GPIOSelector_value)) {
+		char *backgroundStyle = getBackground(SUCCESS_COLOR);
+		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);
+
+		// Execute Action when save from each mod
+		GPIO_Actions(parentRef, GPIOSelectorRef);
+	} else {
+		char *backgroundStyle = getBackground(DANGER_COLOR);
+		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);
+	}
+}
+
 #endif

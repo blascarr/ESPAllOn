@@ -67,6 +67,8 @@ String ESPinner_Path = "espinners";
 
 // -------- Persistance DC CONFIG --------//
 #define ESPINNER_DC_JSONCONFIG "ESPINNER_DC"
+#define ESPINNER_DCA_JSONCONFIG "ESPINNER_DCA"
+#define ESPINNER_DCB_JSONCONFIG "ESPINNER_DCB"
 
 // -------- Persistance DC CONFIG --------//
 #define ESPINNER_NEOPIXEL_JSONCONFIG "ESPINNER_NEOPIXEL"
@@ -88,6 +90,7 @@ String ESPinner_Path = "espinners";
 
 // --------------- TABS Definition ----------------//
 #define BASICTAB_LABEL "ESPinners"
+#define CONTROLLERTAB_LABEL "Controllers"
 #define LINKACTIONSTAB_LABEL "Link Actions"
 #define ADVANCEDSETTINGSTAB_LABEL "Advanced Settings"
 
@@ -136,6 +139,8 @@ String ESPinner_Path = "espinners";
 #define GPIO_PINSELECTOR_LABEL "GPIO_PinSelector"
 #define GPIO_PINSELECTOR_VALUE "0"
 #define GPIO_MODESELECTOR_LABEL "GPIO_ModeSelector"
+#define GPIO_SWITCH_LABEL "GPIO_Switcher"
+#define GPIO_SWITCH_VALUE "0"
 
 // ------------- Stepper MOD Definition ---------------//
 #define STEPPER_LABEL "Stepper"
@@ -167,12 +172,16 @@ String ESPinner_Path = "espinners";
 #define DC_SAVE_VALUE "Save DC"
 #define DC_REMOVE_LABEL "DC_Remove"
 #define DC_REMOVE_VALUE "Remove"
-#define DC_SELECT_LABEL "Select_DC"
-#define DC_SELECT_VALUE "Select DC"
+#define DC_PINA_SELECT_LABEL "Select_DC"
+#define DC_PINA_SELECT_VALUE "Select DC PIN A"
+#define DC_PINB_SELECT_LABEL "Select_DC"
+#define DC_PINB_SELECT_VALUE "Select DC PIN B"
 #define DC_PININPUT_LABEL "DC_PinInput"
 #define DC_PININPUT_VALUE "Select_DC"
-#define DC_PINSELECTOR_LABEL "DC_PinSelector"
-#define DC_PINSELECTOR_VALUE "0"
+#define DC_PINA_SELECTOR_LABEL "DC_PinSelector"
+#define DC_PINA_SELECTOR_VALUE "0"
+#define DC_PINB_SELECTOR_LABEL "DC_PinSelector"
+#define DC_PINB_SELECTOR_VALUE "0"
 #define DC_MODESELECTOR_LABEL "DC_ModeSelector"
 
 // ------------- NeoPixel MOD Definition --------------//

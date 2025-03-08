@@ -51,12 +51,11 @@ class ESPinner_Manager {
 					espinner->deserializeJSON(output);
 
 					uint16_t parentRef = getTab(TabType::BasicTab);
-					if (mod == ESPINNER_GPIO_JSONCONFIG) {
 
-						// Implement Includes GUI and ESPAllOn_PinManager
-						// Configuration
-						espinner->implement();
-					}
+					// Implement Includes GUI and ESPAllOn_PinManager
+					// Configuration
+					espinner->implement();
+
 					// Create ESPinner Model in List
 					ESPinners.push_back(std::move(espinner));
 					// ESPinner_Manager::getInstance().debug();
@@ -126,6 +125,21 @@ class ESPinner_Manager {
 		ESPinnerManager.getStorageModel()->remove(ESPinner_Path);
 	}
 };
+
+void ESPINNER_ID_Callback(Control *sender, int type) {
+	// Search if ID is already assigned
+	debugCallback(sender, type);
+
+	ESPinner *espinnerInList =
+		ESPinner_Manager::getInstance().findESPinnerById(sender->value);
+	if (espinnerInList == nullptr) {
+		char *backgroundStyle = getBackground(SUCCESS_COLOR);
+		ESPUI.setElementStyle(sender->id, backgroundStyle);
+	} else {
+		char *backgroundStyle = getBackground(DANGER_COLOR);
+		ESPUI.setElementStyle(sender->id, backgroundStyle);
+	}
+}
 
 #include "../mods/ESPinner_DC/ESPinner_DC_Controls.h"
 #include "../mods/ESPinner_Encoder/ESPinner_Encoder_Controls.h"

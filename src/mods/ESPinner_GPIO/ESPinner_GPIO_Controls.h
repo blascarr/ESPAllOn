@@ -11,66 +11,45 @@
  *	GPIOSave
  *	GPIORemove
  */
+
 void createGPIOMod_callback(Control *sender, int type) {
 	DUMPSLN("CREATE GPIO PIN");
 }
 
-void saveButtonGPIOCheck(uint16_t parentRef) {
+void gpio_action(uint16_t parentRef, uint16_t GPIOSelectorRef) {
+	auto espinnerGPIO = std::make_unique<ESPinner_GPIO>();
+	std::vector<uint16_t> childrenIds =
+		getChildrenIds(elementToParentMap, parentRef);
+	for (uint16_t childControllerId : childrenIds) {
+		String espinner_value =
+			String(ESPUI.getControl(childControllerId)->value);
+		String espinner_label =
+			String(ESPUI.getControl(childControllerId)->label);
 
-	uint16_t GPIOSelectorRef = searchByLabel(parentRef, GPIO_PINSELECTOR_LABEL);
-
-	String GPIOSelector_value;
-	if (GPIOSelectorRef != 0) {
-		GPIOSelector_value = ESPUI.getControl(GPIOSelectorRef)->value;
-		// TODO if GPIOSelector_value exists -> Check if ESP_PinMode List
-		// related with Container exists. Create new One
-	}
-
-	uint16_t SaveButtonRef = searchByLabel(parentRef, GPIO_SAVE_LABEL);
-
-	if (isNumericString(GPIOSelector_value)) {
-		char *backgroundStyle = getBackground(SUCCESS_COLOR);
-		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);
-
-		// Save ESPINNER
-		auto espinnerGPIO = std::make_unique<ESPinner_GPIO>();
-		std::vector<uint16_t> childrenIds =
-			getChildrenIds(elementToParentMap, parentRef);
-		for (uint16_t childControllerId : childrenIds) {
-			String espinner_value =
+		if (espinner_label == GPIO_MODESELECTOR_LABEL) {
+			String espinnerMode_value =
 				String(ESPUI.getControl(childControllerId)->value);
-			String espinner_label =
-				String(ESPUI.getControl(childControllerId)->label);
-			if (espinner_label == GPIO_MODESELECTOR_LABEL) {
-				String espinnerMode_value =
-					String(ESPUI.getControl(childControllerId)->value);
-				if (espinnerMode_value == GPIO_ESPINNERINPUT_LABEL) {
-					espinnerGPIO->setGPIOMode(GPIOMode::Input);
-				} else if (espinnerMode_value == GPIO_ESPINNEROUTPUT_LABEL) {
-					espinnerGPIO->setGPIOMode(GPIOMode::Output);
-				}
-			}
-
-			if (espinner_label == ESPINNERID_LABEL) {
-				espinnerGPIO->setID(espinner_value);
-			}
-
-			if (espinner_label == GPIO_PINSELECTOR_LABEL) {
-				espinnerGPIO->setGPIO(espinner_value.toInt());
+			if (espinnerMode_value == GPIO_ESPINNERINPUT_LABEL) {
+				espinnerGPIO->setGPIOMode(GPIOMode::Input);
+			} else if (espinnerMode_value == GPIO_ESPINNEROUTPUT_LABEL) {
+				espinnerGPIO->setGPIOMode(GPIOMode::Output);
 			}
 		}
-		// Create ESpinner with Configuration
-		ESP_PinMode pinModel = espinnerGPIO->getPinModeConf();
-		ESPAllOnPinManager::getInstance().updateGPIOFromESPUI(pinModel,
-															  parentRef);
 
-		ESPinner_Manager::getInstance().push(std::move(espinnerGPIO));
-		// Save GPIO Instance in Storage
-		ESPinner_Manager::getInstance().saveESPinnersInStorage();
-	} else {
-		char *backgroundStyle = getBackground(DANGER_COLOR);
-		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);
+		if (espinner_label == ESPINNERID_LABEL) {
+			espinnerGPIO->setID(espinner_value);
+		}
+
+		if (espinner_label == GPIO_PINSELECTOR_LABEL) {
+			espinnerGPIO->setGPIO(espinner_value.toInt());
+		}
 	}
+	// Create ESpinner with Configuration
+	ESP_PinMode pinModel = espinnerGPIO->getPinModeConf();
+	ESPAllOnPinManager::getInstance().updateGPIOFromESPUI(pinModel,
+														  GPIOSelectorRef);
+	ESPinner_Manager::getInstance().push(std::move(espinnerGPIO));
+	ESPinner_Manager::getInstance().saveESPinnersInStorage();
 }
 
 void saveGPIO_callback(Control *sender, int type) {
@@ -89,7 +68,8 @@ void saveGPIO_callback(Control *sender, int type) {
 			if (isNumericAndInRange(GPIOSelector_value, GPIOSelectorRef)) {
 
 				// modify ESPinnerSelectors and Save
-				saveButtonGPIOCheck(parentRef);
+				saveButtonGPIOCheck(parentRef, GPIO_PINSELECTOR_LABEL,
+									gpio_action);
 				char *backgroundStyle = getBackground(SELECTED_COLOR);
 				ESPUI.setPanelStyle(parentRef, backgroundStyle);
 			} else {
@@ -117,7 +97,7 @@ void GPIOSelector_callback(Control *sender, int type) {
 		if (selectLabelRef != 0) {
 			ESPUI.removeControl(selectLabelRef);
 			removeValueFromMap(elementToParentMap, selectLabelRef);
-			saveButtonGPIOCheck(parentRef);
+			saveButtonGPIOCheck(parentRef, GPIO_PINSELECTOR_LABEL, gpio_action);
 		}
 
 		// Change Selector Control with Text Input for numbers
@@ -135,6 +115,10 @@ void GPIOSelector_callback(Control *sender, int type) {
 			ESPUI.setElementStyle(GPIOSelectorRef, backgroundStyle);
 		}
 	}
+}
+
+void GPIOSwitcher_callback(Control *sender, int type) {
+	DUMPLN("value SWITCH From ", sender->id);
 }
 
 void GPIO_Selector(uint16_t PIN_ptr) {
@@ -158,12 +142,8 @@ void removeGPIO_callback(Control *sender, int type) {
 
 			// Review which Pin is disconnected in order to detach from
 			// ESPinnerManager
-			if (espinner_label == GPIO_PINSELECTOR_LABEL) {
-
-				DUMP("DETACH PIN ", espinner_value.toInt())
-				ESPAllOnPinManager::getInstance().detach(
-					espinner_value.toInt());
-			}
+			detachRemovedPIN(GPIO_PINSELECTOR_LABEL, espinner_label,
+							 espinner_value);
 		}
 		removeElement_callback(sender, type);
 	}
@@ -195,6 +175,17 @@ void GPIO_UI(uint16_t GPIO_ptr) {
 						saveGPIO_callback, removeGPIO_callback);
 }
 
+void GPIO_Controller(uint16_t GPIO_ptr, String label, String value,
+					 String id = "Test") {
+	// Associate Controller to map
+	std::string uniqueID = std::string(GPIO_SWITCH_LABEL) + std::string("1");
+
+	uint16_t controllerTabRef = getTab(TabType::ControllerTab);
+	uint16_t GPIOPIN_Switch = ESPUI.addControl(
+		ControlType::Switcher, GPIO_SWITCH_LABEL, "1", ControlColor::Wetasphalt,
+		controllerTabRef, GPIOSwitcher_callback);
+}
+
 void ESPinner_GPIO::implement() {
 	uint16_t parentRef = getTab(TabType::BasicTab);
 
@@ -213,9 +204,6 @@ void ESPinner_GPIO::implement() {
 		GUI_GPIOSelector(GPIOPIN_selector, GPIO_PINSELECTOR_LABEL, gpio.c_str(),
 						 GPIOSelector_callback);
 
-	ESPAllOnPinManager::getInstance().setPinControlRelation(
-		ESPinner_GPIO::getGPIO(), gpio_ref);
-
 	GUIButtons_Elements(GPIOPIN_selector, GPIO_SAVE_LABEL, GPIO_SAVE_VALUE,
 						REMOVEESPINNER_LABEL, REMOVEESPINNER_VALUE,
 						saveGPIO_callback, removeGPIO_callback);
@@ -223,5 +211,7 @@ void ESPinner_GPIO::implement() {
 	ESPAllOnPinManager::getInstance().setPinControlRelation(
 		ESPinner_GPIO::getGPIO(), gpio_ref);
 	ESPAllOnPinManager::getInstance().attach(ESPinner_GPIO::getGPIO());
+
+	GPIO_Controller(parentRef, GPIO_SWITCH_LABEL, GPIO_SWITCH_VALUE);
 }
 #endif

@@ -61,5 +61,10 @@ bool existsFileInLittleFS(String filename) {
 	return false;
 }
 
-bool deleteAll() { return FILESYSTEM.format(); }
+bool deleteAll() {
+	if (FILESYSTEM.begin()) {
+		return FILESYSTEM.format();
+	}
+	return false;
+}
 #endif
