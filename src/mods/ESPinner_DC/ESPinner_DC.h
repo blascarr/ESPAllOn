@@ -25,6 +25,7 @@ class ESPinner_DC : public ESPinner {
 		if (pinType == DCPin::PinB) {
 			return gpioB;
 		}
+		return 0; // GPIO 0 should not be used, but configured in final return
 	}
 
 	uint8_t getGPIOA() { return getGPIO(DCPin::PinA); }

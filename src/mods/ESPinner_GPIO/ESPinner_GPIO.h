@@ -49,6 +49,7 @@ class ESPinner_GPIO : public ESPinner {
 		if (GPIO_mode == GPIOMode::Output) {
 			return ESPINNER_OUTPUT_CONFIG;
 		}
+		return "";
 	}
 
 	ESP_PinMode getPinModeConf() {
