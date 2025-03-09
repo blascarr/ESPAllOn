@@ -14,6 +14,8 @@ unique_ptr<T> make_unique(Args &&...args) {
 }
 } // namespace std
 
+#endif
+
 std::unique_ptr<ESPinner> ESPinner::create(const String &type) {
 	if (type == "ESPINNER_GPIO") {
 		auto ptr = std::make_unique<ESPinner_GPIO>();
@@ -57,7 +59,5 @@ std::unique_ptr<ESPinner> ESPinner::create(const String &type) {
 	}
 	return nullptr;
 }
-
-#endif
 
 #endif
