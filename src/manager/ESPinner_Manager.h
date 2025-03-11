@@ -15,7 +15,12 @@ class ESPinner_Manager {
 	Persistance ESPinnerManager;
 	ESPAllOnPinManager *pinManager;
 
+	// Relation between controller in ESPinner
+	// Controller Selector - ESPinner Selector  ( Espinner could have several
+	// controllers)
+
   public:
+	std::map<uint16_t, uint16_t> ESPinnerController;
 	ESPinner_Manager() : ESPinnerManager(nullptr, &storage) {
 		storage.setRoot(ESPinner_File);
 		pinManager = &ESPAllOnPinManager::getInstance();
@@ -73,6 +78,17 @@ class ESPinner_Manager {
 		return nullptr;
 	}
 
+	uint16_t findBySelectorId(uint16_t selectorId) {
+		return ESPinnerController[selectorId];
+	}
+
+	void debugController() {
+		for (const auto &pair : ESPinnerController) {
+			DUMPLN("ID FROM ESPINNER: ", pair.first);
+			DUMPLN("ID FROM CONTROLLER: ", pair.second);
+		}
+	}
+
 	void push(std::unique_ptr<ESPinner> GUIESPinner) {
 		auto it = std::find_if(
 			ESPinners.begin(), ESPinners.end(),
@@ -123,6 +139,10 @@ class ESPinner_Manager {
 
 	void clearPinConfigInStorage() {
 		ESPinnerManager.getStorageModel()->remove(ESPinner_Path);
+	}
+
+	void addControllerRelation(uint16_t espinnerId, uint16_t controllerId) {
+		ESPinnerController[controllerId] = espinnerId;
 	}
 };
 

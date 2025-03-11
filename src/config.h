@@ -141,6 +141,7 @@ String ESPinner_Path = "espinners";
 #define GPIO_MODESELECTOR_LABEL "GPIO_ModeSelector"
 #define GPIO_SWITCH_LABEL "GPIO_Switcher"
 #define GPIO_SWITCH_VALUE "0"
+#define GPIO_SWITCH_ID_LABEL "GPIO_Switcher"
 
 // ------------- Stepper MOD Definition ---------------//
 #define STEPPER_LABEL "Stepper"
