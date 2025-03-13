@@ -258,8 +258,19 @@ void test_modified_GPIOespinner() {
 		typeGPIOController->value.toInt()));
 
 	// Previous PIN is detached
-	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(10));
 
+	// ----- Controllers Review ------ //
+	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(10));
+	TEST_ASSERT_EQUAL(
+		1, ESPinner_Manager::getInstance().getControllerMap().size());
+	TEST_ASSERT_EQUAL(
+		1, ESPinner_Manager::getInstance().getUIRelationIDMap().size());
+
+	uint16_t controllerId =
+		getParentId(elementToParentMap, firstESPinnerSelector);
+
+	TEST_ASSERT_NOT_EQUAL(
+		0, ESPinner_Manager::getInstance().findRefByControllerId(controllerId));
 	// -------------------------------------------- //
 	// ------ Check ESPinner Saved in memory ------ //
 	// -------------------------------------------- //
@@ -282,6 +293,12 @@ void test_second_void_GPIOespinner() {
 	uint8_t EspinnerListSize = ESPinner_Manager::getInstance().espinnerSize();
 	TEST_ASSERT_EQUAL_INT8(1, EspinnerListSize);
 	TEST_ASSERT_EQUAL_INT16(3, controlReferences.size());
+
+	// ----- Controllers Review ------ //
+	TEST_ASSERT_EQUAL(
+		1, ESPinner_Manager::getInstance().getControllerMap().size());
+	TEST_ASSERT_EQUAL(
+		1, ESPinner_Manager::getInstance().getUIRelationIDMap().size());
 }
 
 void test_second_GPIOespinner() {
@@ -323,6 +340,14 @@ void test_second_GPIOespinner() {
 	TEST_ASSERT_TRUE(ESPAllOnPinManager::getInstance().isPinAttached(13));
 	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(10));
 
+	// ----- Controllers Review ------ //
+	ESPinner_Manager::getInstance().debugController();
+	ESPinner_Manager::getInstance().debugUIRelation();
+	TEST_ASSERT_EQUAL(
+		2, ESPinner_Manager::getInstance().getControllerMap().size());
+	TEST_ASSERT_EQUAL(
+		2, ESPinner_Manager::getInstance().getUIRelationIDMap().size());
+
 	// -------------------------------------------- //
 	// ------ Check ESPinner Saved in memory ------ //
 	// -------------------------------------------- //
@@ -348,6 +373,14 @@ void test_firstESPinner_removed() {
 		typeGPIOController->value.toInt()));
 	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(13));
 	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(10));
+
+	// ----- Controllers Review ------ //
+	ESPinner_Manager::getInstance().debugController();
+	ESPinner_Manager::getInstance().debugUIRelation();
+	TEST_ASSERT_EQUAL(
+		1, ESPinner_Manager::getInstance().getControllerMap().size());
+	TEST_ASSERT_EQUAL(
+		1, ESPinner_Manager::getInstance().getUIRelationIDMap().size());
 }
 
 void setup() {
@@ -356,6 +389,7 @@ void setup() {
 	// debugMap(elementToParentMap);
 	RUN_TEST(test_no_elementsInParentMap);
 	ESPAllOn::getInstance().setup(); // Executes ESPinnerSelector()
+
 	// debugMap(elementToParentMap);
 
 	RUN_TEST(test_firstSelectorOrderInelementParentMap);
@@ -411,6 +445,7 @@ void setup() {
 	GPIOSelector_callback(typeGPIOController, B_UP);
 	saveButtonGPIOCheck(firstESPinnerSelector, GPIO_PINSELECTOR_LABEL,
 						gpio_action);
+	debugMap(elementToParentMap);
 	RUN_TEST(test_saved_GPIOespinner);
 
 	// ---------------------------------------------//
@@ -419,6 +454,7 @@ void setup() {
 	// ---------------------------------------------//
 	typeGPIOController->value = "13";
 	saveGPIO_callback(typeGPIOController, B_UP);
+	debugMap(elementToParentMap);
 	RUN_TEST(test_modified_GPIOespinner);
 
 	// -------------------------------------------- //
@@ -456,11 +492,14 @@ void setup() {
 	typeGPIOController = ESPUI.getControl(second_gpio_ref);
 	typeGPIOController->value = "5";
 
-	// Click On save, but not saved because of wrong number in GPIO PIN
+	// Click On save for GPIO PIN
 	saveButtonGPIOCheck(secondESPinnerSelector, GPIO_PINSELECTOR_LABEL,
 						gpio_action);
+	saveGPIO_callback(second_typeController, B_UP);
+	// saveElement_callback(second_typeController, B_UP);
 	// RUN_TEST([&]() { test_controlReferenceExists(controlReferences, testRef);
 	// });
+	debugMap(elementToParentMap);
 	RUN_TEST(test_second_GPIOespinner);
 
 	// Define GPIO as OUTPUT and ID = TEST_OUTPUT

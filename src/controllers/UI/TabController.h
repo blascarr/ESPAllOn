@@ -340,6 +340,17 @@ void removeElement_callback(Control *sender, int type) {
 			}
 
 			ESPUI.removeControl(parentRef);
+			uint16_t controllerRef =
+				ESPinner_Manager::getInstance().findUIRelationRefByID(
+					parentRef);
+			if (controllerRef != 0) {
+				ESPUI.removeControl(controllerRef);
+
+				ESPinner_Manager::getInstance().removeAllControllersBySelector(
+					parentRef);
+				ESPinner_Manager::getInstance().removeAllUIRelationBySelector(
+					parentRef);
+			}
 			removeControlId(controlReferences, parentRef);
 			removeChildrenFromMap(elementToParentMap, parentRef);
 		}

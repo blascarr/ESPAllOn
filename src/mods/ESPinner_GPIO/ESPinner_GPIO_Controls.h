@@ -58,7 +58,7 @@ void GPIOSwitcher_callback(Control *sender, int type) {
 
 	int switchValue = String(sender->value).toInt();
 	int parentRef =
-		ESPinner_Manager::getInstance().findBySelectorId(sender->id);
+		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
 
 	uint16_t PINSelectorRef = searchByLabel(parentRef, GPIO_PINSELECTOR_LABEL);
 	uint8_t associatedPin =
@@ -73,7 +73,7 @@ void GPIOSwitcher_callback(Control *sender, int type) {
 	}
 }
 
-uint16_t GPIO_Controller(String ID_LABEL) {
+void GPIO_Controller(String ID_LABEL, uint16_t parentRef) {
 
 	uint16_t controllerTabRef = getTab(TabType::ControllerTab);
 	uint16_t GPIOPIN_ID = ESPUI.addControl(
@@ -84,7 +84,14 @@ uint16_t GPIO_Controller(String ID_LABEL) {
 	uint16_t GPIOPIN_Switch = ESPUI.addControl(
 		ControlType::Switcher, GPIO_SWITCH_LABEL, "0", ControlColor::Wetasphalt,
 		GPIOPIN_ID, GPIOSwitcher_callback);
-	return GPIOPIN_Switch;
+	ESPinner_Manager::getInstance().addControllerRelation(parentRef,
+														  GPIOPIN_Switch);
+
+	ESPinner_Manager::getInstance().addUIRelation(parentRef, GPIOPIN_ID);
+}
+
+void removeController(uint16_t CONTROLLER_LABEL) {
+	ESPUI.removeControl(CONTROLLER_LABEL);
 }
 
 void saveGPIO_callback(Control *sender, int type) {
@@ -107,10 +114,9 @@ void saveGPIO_callback(Control *sender, int type) {
 				saveButtonGPIOCheck(parentRef, GPIO_PINSELECTOR_LABEL,
 									gpio_action);
 
-				uint16_t switchId =
-					GPIO_Controller(ESPUI.getControl(GPIOIDRef)->value);
-				ESPinner_Manager::getInstance().addControllerRelation(parentRef,
-																	  switchId);
+				// ----- Create Controllers ------ //
+				GPIO_Controller(ESPUI.getControl(GPIOIDRef)->value, parentRef);
+
 				char *backgroundStyle = getBackground(SELECTED_COLOR);
 				ESPUI.setPanelStyle(parentRef, backgroundStyle);
 			} else {
@@ -251,9 +257,7 @@ void ESPinner_GPIO::implement() {
 		ESPAllOnPinManager::getInstance().attach(pinModel);
 	}
 
-	uint16_t switchId = GPIO_Controller(ESPinner_GPIO::getID());
-	ESPinner_Manager::getInstance().addControllerRelation(GPIOPIN_selector,
-														  switchId);
-	ESPinner_Manager::getInstance().debugController();
+	// ------- Create Controllers ----------- //
+	GPIO_Controller(ESPinner_GPIO::getID(), GPIOPIN_selector);
 }
 #endif

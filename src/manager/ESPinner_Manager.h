@@ -16,11 +16,14 @@ class ESPinner_Manager {
 	ESPAllOnPinManager *pinManager;
 
 	// Relation between controller in ESPinner
-	// Controller Selector - ESPinner Selector  ( Espinner could have several
-	// controllers)
+	// Controller Selector - ESPinner Selector
+	// ( Espinner could have several controllers)
+	std::map<uint16_t, uint16_t> ESPinnerPINController;
+
+	// External Ref - Parent Ref
+	std::map<uint16_t, uint16_t> UI_relationID;
 
   public:
-	std::map<uint16_t, uint16_t> ESPinnerController;
 	ESPinner_Manager() : ESPinnerManager(nullptr, &storage) {
 		storage.setRoot(ESPinner_File);
 		pinManager = &ESPAllOnPinManager::getInstance();
@@ -31,6 +34,11 @@ class ESPinner_Manager {
 	}
 	size_t espinnerSize() const { return ESPinners.size(); }
 	void clearESPinners() { ESPinners.clear(); }
+
+	std::map<uint16_t, uint16_t> &getControllerMap() {
+		return ESPinnerPINController;
+	}
+	std::map<uint16_t, uint16_t> &getUIRelationIDMap() { return UI_relationID; }
 
 	void loadFromStorage() {
 		DynamicJsonDocument doc(256);
@@ -69,6 +77,71 @@ class ESPinner_Manager {
 		}
 	}
 
+	void saveESPinnersInStorage() {
+		DynamicJsonDocument doc(1024);
+		JsonArray JSONESPinner_array = doc.to<JsonArray>();
+		for (const auto &espinner : ESPinners) {
+			JsonDocument JSONEspinner = espinner->serializeJSON();
+			JSONESPinner_array.add(JSONEspinner);
+		}
+
+		String data;
+		serializeJson(doc, data);
+		ESPinnerManager.getStorageModel()->save(data, ESPinner_Path);
+	}
+
+	void clearPinConfigInStorage() {
+		ESPinnerManager.getStorageModel()->remove(ESPinner_Path);
+	}
+
+	// ------------------------------------- //
+	// -------- CONTROLLER REF MAP --------- //
+	// ------------------------------------- //
+
+	uint16_t findRefByControllerId(uint16_t controllerId) {
+		return getParentId(ESPinnerPINController, controllerId);
+	}
+
+	void addControllerRelation(uint16_t espinnerId, uint16_t controllerId) {
+		addElementWithParent(ESPinnerPINController, espinnerId, controllerId);
+	}
+
+	void removeController(uint16_t controller) {
+		removeValueFromMap(ESPinnerPINController, controller);
+	}
+
+	void removeAllControllersBySelector(uint16_t selector) {
+		removeKeyFromMap(ESPinnerPINController, selector);
+	}
+
+	void debugController() { debugMap(ESPinnerPINController); }
+
+	// ------------------------------------- //
+	// ---------- UI RELATION MAP ---------- //
+	// ------------------------------------- //
+
+	uint16_t findUIRelationRefByID(uint16_t controllerId) {
+		return getParentId(UI_relationID, controllerId);
+	}
+
+	void addUIRelation(uint16_t parentRefID, uint16_t UI_ID) {
+		addElementWithParent(UI_relationID, parentRefID, UI_ID);
+	}
+
+	void removeUIRelation(uint16_t UI_ID) {
+		removeValueFromMap(UI_relationID, UI_ID);
+	}
+
+	void removeAllUIRelationBySelector(uint16_t selector) {
+		removeKeyFromMap(UI_relationID, selector);
+	}
+
+	void debugUIRelation() { debugMap(UI_relationID); }
+
+	// ------------------------------------- //
+	// ---------- ESPINNER METHODS --------- //
+	// ------------------------------------- //
+
 	ESPinner *findESPinnerById(const String &id) {
 		for (auto &espinner : ESPinners) {
 			if (espinner->ID == id) {
@@ -76,17 +149,6 @@ class ESPinner_Manager {
 			}
 		}
 		return nullptr;
-	}
-
-	uint16_t findBySelectorId(uint16_t selectorId) {
-		return ESPinnerController[selectorId];
-	}
-
-	void debugController() {
-		for (const auto &pair : ESPinnerController) {
-			DUMPLN("ID FROM ESPINNER: ", pair.first);
-			DUMPLN("ID FROM CONTROLLER: ", pair.second);
-		}
 	}
 
 	void push(std::unique_ptr<ESPinner> GUIESPinner) {
@@ -111,7 +173,6 @@ class ESPinner_Manager {
 	}
 
 	void detach(const String &id) {
-
 		auto it =
 			std::find_if(ESPinners.begin(), ESPinners.end(),
 						 [&id](const std::unique_ptr<ESPinner> &espinner) {
@@ -122,27 +183,6 @@ class ESPinner_Manager {
 		} else {
 			DUMPSLN("ESPINNER NOT ERASED IN DETACH");
 		}
-	}
-
-	void saveESPinnersInStorage() {
-		DynamicJsonDocument doc(1024);
-		JsonArray JSONESPinner_array = doc.to<JsonArray>();
-		for (const auto &espinner : ESPinners) {
-			JsonDocument JSONEspinner = espinner->serializeJSON();
-			JSONESPinner_array.add(JSONEspinner);
-		}
-
-		String data;
-		serializeJson(doc, data);
-		ESPinnerManager.getStorageModel()->save(data, ESPinner_Path);
-	}
-
-	void clearPinConfigInStorage() {
-		ESPinnerManager.getStorageModel()->remove(ESPinner_Path);
-	}
-
-	void addControllerRelation(uint16_t espinnerId, uint16_t controllerId) {
-		ESPinnerController[controllerId] = espinnerId;
 	}
 };
 

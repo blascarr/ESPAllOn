@@ -67,30 +67,6 @@ std::vector<uint16_t> controlReferences;
 
 std::map<uint16_t, uint16_t> elementToParentMap;
 
-void addElementWithParent(std::map<uint16_t, uint16_t> &map, uint16_t elementId,
-						  uint16_t parentId) {
-	map[elementId] = parentId;
-}
-
-void debugMap(std::map<uint16_t, uint16_t> &map) {
-	DUMPLN("SIZE MAP: ", map.size());
-	for (auto it = map.begin(); it != map.end(); ++it) {
-		DUMP(" Key: ", it->first);
-		DUMP(" Value: ", it->second);
-	}
-}
-
-uint16_t getParentId(const std::map<uint16_t, uint16_t> &map,
-					 uint16_t elementId) {
-	auto it = map.find(elementId); // "it" refers to the element found
-	if (it != map.end()) {
-		return it->second;
-	} else {
-		DUMPLN("THERE IS NO PARENT FROM HERE: ", elementId);
-		return 0;
-	}
-}
-
 std::vector<uint16_t> getChildrenIds(const std::map<uint16_t, uint16_t> &map,
 									 uint16_t parentId) {
 	std::vector<uint16_t> childrenIds;
@@ -102,14 +78,38 @@ std::vector<uint16_t> getChildrenIds(const std::map<uint16_t, uint16_t> &map,
 	return childrenIds;
 }
 
+template <typename K, typename V>
+void addElementWithParent(std::map<K, V> &map, K elementId, V parentId) {
+	map[elementId] = parentId;
+}
+
+template <typename K, typename V> void debugMap(const std::map<K, V> &map) {
+	DUMPLN("SIZE MAP: ", map.size());
+	for (const auto &it : map) {
+		DUMP(" Key: ", it.first);
+		DUMP(" Value: ", it.second);
+	}
+}
+
+template <typename K, typename V>
+V getParentId(const std::map<K, V> &map, K elementId) {
+	auto it = map.find(elementId); // "it" refers to the element found
+	if (it != map.end()) {
+		return it->second;
+	} else {
+		DUMPLN("THERE IS NO PARENT FROM HERE: ", elementId);
+		return 0;
+	}
+}
+
 void removeControlId(std::vector<uint16_t> &controlRef, uint16_t id) {
 	auto newEnd = std::remove(controlRef.begin(), controlRef.end(), id);
 	controlRef.erase(newEnd, controlRef.end());
 }
 
-void removeValueFromMap(std::map<uint16_t, uint16_t> &elementToParentMap,
-						uint16_t value) {
-	int numErased = elementToParentMap.erase(value);
+template <typename K, typename V>
+void removeValueFromMap(std::map<K, V> &elementToParentMap, K key) {
+	int numErased = elementToParentMap.erase(key);
 	// if (numErased == 0) {
 	// 	DUMPLN("No Element in map : ", numErased);
 	// } else {
@@ -117,18 +117,23 @@ void removeValueFromMap(std::map<uint16_t, uint16_t> &elementToParentMap,
 	// }
 }
 
-void removeChildrenFromMap(std::map<uint16_t, uint16_t> &elementToParentMap,
-						   uint16_t value) {
-	std::vector<uint16_t> keysToRemove;
+template <typename K, typename V>
+void removeChildrenFromMap(std::map<K, V> &elementToParentMap, V value) {
+	std::vector<K> keysToRemove;
 	for (const auto &pair : elementToParentMap) {
 		if (pair.second == value) {
 			keysToRemove.push_back(pair.first);
 		}
 	}
 
-	for (uint16_t key : keysToRemove) {
+	for (K key : keysToRemove) {
 		elementToParentMap.erase(key);
 	}
+}
+
+template <typename K, typename V>
+void removeKeyFromMap(std::map<K, V> &elementToParentMap, K key) {
+	elementToParentMap.erase(key);
 }
 
 uint16_t searchByValue(uint16_t element_id, String value) {
