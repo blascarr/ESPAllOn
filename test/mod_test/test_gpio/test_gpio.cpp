@@ -185,7 +185,7 @@ void test_saved_GPIOespinner() {
 		{firstESPinnerSelector, ESPINNERTYPE_LABEL, "GPIO"},
 		{firstESPinnerSelector, GPIO_MODESELECTOR_LABEL, "INPUT"},
 		{firstESPinnerSelector, ESPINNERID_LABEL, "TEST_INPUT"},
-		{firstESPinnerSelector, GPIO_PINSELECTOR_LABEL, "10"},
+		{firstESPinnerSelector, GPIO_PINSELECTOR_LABEL, "12"},
 		{firstESPinnerSelector, GPIO_SAVE_LABEL, GPIO_SAVE_VALUE},
 		{firstESPinnerSelector, REMOVEESPINNER_LABEL, REMOVEESPINNER_VALUE}};
 
@@ -200,7 +200,7 @@ void test_saved_GPIOespinner() {
 	TEST_ASSERT_EQUAL_INT16(2, controlReferences.size());
 
 	ESPinner_GPIO expected_espinner = ESPinner_GPIO(GPIOMode::Input);
-	expected_espinner.setGPIO(10);
+	expected_espinner.setGPIO(12);
 	expected_espinner.setID("TEST_INPUT");
 	ESPinner_GPIO expectedList[] = {expected_espinner};
 
@@ -260,17 +260,20 @@ void test_modified_GPIOespinner() {
 	// Previous PIN is detached
 
 	// ----- Controllers Review ------ //
-	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(10));
+	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(12));
 	TEST_ASSERT_EQUAL(
 		1, ESPinner_Manager::getInstance().getControllerMap().size());
 	TEST_ASSERT_EQUAL(
 		1, ESPinner_Manager::getInstance().getUIRelationIDMap().size());
 
-	uint16_t controllerId =
-		getParentId(elementToParentMap, firstESPinnerSelector);
-
-	TEST_ASSERT_NOT_EQUAL(
-		0, ESPinner_Manager::getInstance().findRefByControllerId(controllerId));
+	uint16_t parentRef = getParentId(elementToParentMap, firstESPinnerSelector);
+	uint16_t controllerId = searchByLabel(parentRef, GPIO_SWITCH_LABEL);
+	uint16_t controllerRef =
+		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
+						   parentRef, GPIO_SWITCH_LABEL);
+	TEST_ASSERT_EQUAL(
+		parentRef,
+		ESPinner_Manager::getInstance().findRefByControllerId(controllerRef));
 	// -------------------------------------------- //
 	// ------ Check ESPinner Saved in memory ------ //
 	// -------------------------------------------- //
@@ -338,7 +341,7 @@ void test_second_GPIOespinner() {
 	TEST_ASSERT_TRUE(ESPAllOnPinManager::getInstance().isPinAttached(
 		typeGPIOController->value.toInt()));
 	TEST_ASSERT_TRUE(ESPAllOnPinManager::getInstance().isPinAttached(13));
-	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(10));
+	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(12));
 
 	// ----- Controllers Review ------ //
 	ESPinner_Manager::getInstance().debugController();
@@ -372,13 +375,17 @@ void test_firstESPinner_removed() {
 	TEST_ASSERT_TRUE(ESPAllOnPinManager::getInstance().isPinAttached(
 		typeGPIOController->value.toInt()));
 	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(13));
-	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(10));
+	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(12));
 
 	// ----- Controllers Review ------ //
 	ESPinner_Manager::getInstance().debugController();
 	ESPinner_Manager::getInstance().debugUIRelation();
+
+	DUMPLN("CONTROLLER SIZE: ",
+		   ESPinner_Manager::getInstance().getControllerMap().size());
 	TEST_ASSERT_EQUAL(
 		1, ESPinner_Manager::getInstance().getControllerMap().size());
+
 	TEST_ASSERT_EQUAL(
 		1, ESPinner_Manager::getInstance().getUIRelationIDMap().size());
 }
@@ -441,7 +448,7 @@ void setup() {
 	// Select a correct Number
 	// Click On Save GPIO
 	// ---------------------------------------------//
-	typeGPIOController->value = "10";
+	typeGPIOController->value = "12";
 	GPIOSelector_callback(typeGPIOController, B_UP);
 	saveButtonGPIOCheck(firstESPinnerSelector, GPIO_PINSELECTOR_LABEL,
 						gpio_action);

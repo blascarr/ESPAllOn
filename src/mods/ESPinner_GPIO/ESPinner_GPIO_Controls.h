@@ -16,7 +16,7 @@ void createGPIOMod_callback(Control *sender, int type) {
 	DUMPSLN("CREATE GPIO PIN");
 }
 
-void gpio_action(uint16_t parentRef, uint16_t GPIOSelectorRef) {
+void gpio_action(uint16_t parentRef) {
 	auto espinnerGPIO = std::make_unique<ESPinner_GPIO>();
 	std::vector<uint16_t> childrenIds =
 		getChildrenIds(elementToParentMap, parentRef);
@@ -42,19 +42,19 @@ void gpio_action(uint16_t parentRef, uint16_t GPIOSelectorRef) {
 
 		if (espinner_label == GPIO_PINSELECTOR_LABEL) {
 			espinnerGPIO->setGPIO(espinner_value.toInt());
+			ESP_PinMode pinModel = espinnerGPIO->getPinModeConf();
+			ESPAllOnPinManager::getInstance().updateGPIOFromESPUI(
+				pinModel, childControllerId);
 		}
 	}
 	// Create ESpinner with Configuration
-	ESP_PinMode pinModel = espinnerGPIO->getPinModeConf();
-	ESPAllOnPinManager::getInstance().updateGPIOFromESPUI(pinModel,
-														  GPIOSelectorRef);
+
 	ESPinner_Manager::getInstance().push(std::move(espinnerGPIO));
 
 	ESPinner_Manager::getInstance().saveESPinnersInStorage();
 }
 
 void GPIOSwitcher_callback(Control *sender, int type) {
-	ESPinner_Manager::getInstance().debugController();
 
 	int switchValue = String(sender->value).toInt();
 	int parentRef =
@@ -65,11 +65,8 @@ void GPIOSwitcher_callback(Control *sender, int type) {
 		ESPAllOnPinManager::getInstance().getCurrentReference(PINSelectorRef);
 
 	if (associatedPin != 0) {
-		if (switchValue == 1) {
-			digitalWrite(associatedPin, HIGH);
-		} else {
-			digitalWrite(associatedPin, LOW);
-		}
+		int pwmValue = switchValue ? 255 : 0;
+		analogWrite(associatedPin, pwmValue);
 	}
 }
 
@@ -80,12 +77,13 @@ void GPIO_Controller(String ID_LABEL, uint16_t parentRef) {
 		ControlType::Text, GPIO_SWITCH_ID_LABEL, ID_LABEL.c_str(),
 		ControlColor::Wetasphalt, controllerTabRef, debugCallback);
 	ESPUI.getControl(GPIOPIN_ID)->enabled = false;
-
+	DUMPLN("GPIOPIN_ID CREATION CONTROLLER : ", GPIOPIN_ID);
 	uint16_t GPIOPIN_Switch = ESPUI.addControl(
 		ControlType::Switcher, GPIO_SWITCH_LABEL, "0", ControlColor::Wetasphalt,
 		GPIOPIN_ID, GPIOSwitcher_callback);
-	ESPinner_Manager::getInstance().addControllerRelation(parentRef,
-														  GPIOPIN_Switch);
+	DUMPLN("GPIOPIN_SWITCH CREATION CONTROLLER : ", GPIOPIN_Switch);
+	ESPinner_Manager::getInstance().addControllerRelation(GPIOPIN_Switch,
+														  parentRef);
 
 	ESPinner_Manager::getInstance().addUIRelation(parentRef, GPIOPIN_ID);
 }
@@ -247,13 +245,13 @@ void ESPinner_GPIO::implement() {
 	//-------- ATTACH GPIO AND PINMODE CONFIG --------//
 	//------------------------------------------------//
 	if (ESPinner_GPIO::getGPIOMode() == GPIOMode::Input) {
-		ESP_PinMode pinModel = ESP_PinMode(ESPinner_GPIO::getGPIO(),
-										   OutputPin(), PinType::BusDigital);
+		ESP_PinMode pinModel =
+			ESP_PinMode(ESPinner_GPIO::getGPIO(), OutputPin(), PinType::BusPWM);
 		ESPAllOnPinManager::getInstance().attach(pinModel);
 	}
 	if (ESPinner_GPIO::getGPIOMode() == GPIOMode::Output) {
-		ESP_PinMode pinModel = ESP_PinMode(ESPinner_GPIO::getGPIO(), InputPin(),
-										   PinType::BusDigital);
+		ESP_PinMode pinModel =
+			ESP_PinMode(ESPinner_GPIO::getGPIO(), InputPin(), PinType::BusPWM);
 		ESPAllOnPinManager::getInstance().attach(pinModel);
 	}
 

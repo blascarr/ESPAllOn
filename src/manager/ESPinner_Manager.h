@@ -99,7 +99,7 @@ class ESPinner_Manager {
 	// ------------------------------------- //
 
 	uint16_t findRefByControllerId(uint16_t controllerId) {
-		return getParentId(ESPinnerPINController, controllerId);
+		return ESPinnerPINController.find(controllerId)->second;
 	}
 
 	void addControllerRelation(uint16_t espinnerId, uint16_t controllerId) {
@@ -112,6 +112,10 @@ class ESPinner_Manager {
 
 	void removeAllControllersBySelector(uint16_t selector) {
 		removeKeyFromMap(ESPinnerPINController, selector);
+	}
+
+	void removeAllControllersByParent(uint16_t parentRef) {
+		removeChildrenFromMap(ESPinnerPINController, parentRef);
 	}
 
 	void debugController() { debugMap(ESPinnerPINController); }
@@ -194,7 +198,7 @@ void ESPINNER_ID_Callback(Control *sender, int type) {
 		ESPinner_Manager::getInstance().findESPinnerById(sender->value);
 	if (espinnerInList == nullptr) {
 		char *backgroundStyle = getBackground(SUCCESS_COLOR);
-		ESPUI.setElementStyle(sender->id, backgroundStyle);
+		// ESPUI.setElementStyle(sender->id, backgroundStyle);
 	} else {
 		char *backgroundStyle = getBackground(DANGER_COLOR);
 		ESPUI.setElementStyle(sender->id, backgroundStyle);

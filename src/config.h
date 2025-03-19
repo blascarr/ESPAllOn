@@ -30,7 +30,7 @@
 #define SLOW_BOOT 0
 #define HOSTNAME "ESPAllOn"
 #define FORCE_USE_HOTSPOT 0
-#define DEBUG true
+#define DEBUG false
 
 #define HARDCODED_CREDENTIALS true
 #define HARDCODED_SSID "ZMS"
@@ -139,9 +139,10 @@ String ESPinner_Path = "espinners";
 #define GPIO_PINSELECTOR_LABEL "GPIO_PinSelector"
 #define GPIO_PINSELECTOR_VALUE "0"
 #define GPIO_MODESELECTOR_LABEL "GPIO_ModeSelector"
+
+#define GPIO_SWITCH_ID_LABEL "GPIO_ID_Switcher"
 #define GPIO_SWITCH_LABEL "GPIO_Switcher"
 #define GPIO_SWITCH_VALUE "0"
-#define GPIO_SWITCH_ID_LABEL "GPIO_Switcher"
 
 // ------------- Stepper MOD Definition ---------------//
 #define STEPPER_LABEL "Stepper"
@@ -173,17 +174,25 @@ String ESPinner_Path = "espinners";
 #define DC_SAVE_VALUE "Save DC"
 #define DC_REMOVE_LABEL "DC_Remove"
 #define DC_REMOVE_VALUE "Remove"
-#define DC_PINA_SELECT_LABEL "Select_DC"
+#define DC_PINA_SELECT_LABEL "Select_DC_PINA"
 #define DC_PINA_SELECT_VALUE "Select DC PIN A"
-#define DC_PINB_SELECT_LABEL "Select_DC"
+#define DC_PINB_SELECT_LABEL "Select_DC_PINB"
 #define DC_PINB_SELECT_VALUE "Select DC PIN B"
 #define DC_PININPUT_LABEL "DC_PinInput"
 #define DC_PININPUT_VALUE "Select_DC"
-#define DC_PINA_SELECTOR_LABEL "DC_PinSelector"
+#define DC_PINA_SELECTOR_LABEL "DC_PINA_Selector"
 #define DC_PINA_SELECTOR_VALUE "0"
-#define DC_PINB_SELECTOR_LABEL "DC_PinSelector"
+#define DC_PINB_SELECTOR_LABEL "DC_PINB_Selector"
 #define DC_PINB_SELECTOR_VALUE "0"
 #define DC_MODESELECTOR_LABEL "DC_ModeSelector"
+
+#define DC_ID_LABEL "DC_CONTROLLER"
+#define DC_SWITCH_DIR_LABEL "DC_Switcher"
+#define DC_SWITCH_DIR_VALUE "0"
+#define DC_SWITCH_RUN_LABEL "STOP"
+#define DC_SWITCH_RUN_VALUE "0"
+#define DC_SLIDER_VEL_LABEL "DC_VEL"
+#define DC_SLIDER_VEL_VALUE "50"
 
 // ------------- NeoPixel MOD Definition --------------//
 #define NEOPIXEL_LABEL "Neopixel"

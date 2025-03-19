@@ -6,8 +6,10 @@
 #include "models/ESP_Boards.h"
 // ------------------ SERIAL CONFIG --------------------//
 #define PRINTDEBUG true
-#define SERIALDEBUG Serial
 
+#if PRINTDEBUG
+
+#define SERIALDEBUG Serial
 #define DUMPS(s)                                                               \
 	{                                                                          \
 		SERIALDEBUG.print(F(s));                                               \
@@ -35,6 +37,28 @@
 		DUMPS(s);                                                              \
 		DUMPV(v);                                                              \
 	}
+
+#else
+#define DUMPS(s)                                                               \
+	{                                                                          \
+	}
+#define DUMPSLN(s)                                                             \
+	{                                                                          \
+	}
+#define DUMPPRINTLN()                                                          \
+	{                                                                          \
+	}
+#define DUMPV(v)                                                               \
+	{                                                                          \
+	}
+#define DUMPLN(s, v)                                                           \
+	{                                                                          \
+	}
+#define DUMP(s, v)                                                             \
+	{                                                                          \
+	}
+
+#endif
 
 #define DANGER_COLOR "#cc3333"
 #define SUCCESS_COLOR "#33cc66"
@@ -136,32 +160,50 @@ void removeKeyFromMap(std::map<K, V> &elementToParentMap, K key) {
 	elementToParentMap.erase(key);
 }
 
-uint16_t searchByValue(uint16_t element_id, String value) {
-	std::vector<uint16_t> childrenIds =
-		getChildrenIds(elementToParentMap, element_id);
-	for (uint16_t childControllerId : childrenIds) {
-		String childController_value =
-			String(ESPUI.getControl(childControllerId)->value);
-		if (childController_value == value) {
-			return childControllerId;
-		}
-	}
-	DUMPSLN("MEMORY FAIL: VALUE  NOT FOUND");
-	return 0;
-}
+template <typename K, typename V>
+uint16_t searchInMapByLabel(const std::map<K, V> &relationMap,
+							uint16_t element_id, String label) {
 
-uint16_t searchByLabel(uint16_t element_id, String label) {
-	std::vector<uint16_t> childrenIds =
-		getChildrenIds(elementToParentMap, element_id);
+	std::vector<uint16_t> childrenIds = getChildrenIds(relationMap, element_id);
+
 	for (uint16_t childControllerId : childrenIds) {
 		String childController_label =
 			String(ESPUI.getControl(childControllerId)->label);
 		if (childController_label == label) {
-			return childControllerId;
+			return childControllerId; // Retornar ID si encuentra coincidencia
 		}
 	}
+
 	DUMPSLN("MEMORY FAIL: LABEL NOT FOUND");
 	return 0;
+}
+
+template <typename K, typename V>
+uint16_t searchInMapByValue(const std::map<K, V> &relationMap,
+							uint16_t element_id, String value) {
+	// Obtener los hijos del elemento en el mapa especificado
+	std::vector<uint16_t> childrenIds = getChildrenIds(relationMap, element_id);
+
+	// Buscar en la lista de hijos comparando el `value`
+	for (uint16_t childControllerId : childrenIds) {
+		String childController_value =
+			String(ESPUI.getControl(childControllerId)->value);
+		if (childController_value == value) {
+			return childControllerId; // Retornar ID si encuentra coincidencia
+		}
+	}
+
+	// Mensaje de error si no se encuentra el valor
+	DUMPSLN("MEMORY FAIL: VALUE NOT FOUND");
+	return 0;
+}
+
+uint16_t searchByValue(uint16_t element_id, String value) {
+	return searchInMapByValue(elementToParentMap, element_id, value);
+}
+
+uint16_t searchByLabel(uint16_t element_id, String label) {
+	return searchInMapByLabel(elementToParentMap, element_id, label);
 }
 
 char *getBackground(const char *color) {
@@ -239,7 +281,7 @@ void saveButtonCheck(uint16_t parentRef, const char *SelectorLabel,
 }
 
 void saveButtonGPIOCheck(uint16_t parentRef, const char *label,
-						 void (*GPIO_Actions)(uint16_t, uint16_t)) {
+						 void (*GPIO_Actions)(uint16_t)) {
 
 	uint16_t GPIOSelectorRef = searchByLabel(parentRef, label);
 
@@ -257,7 +299,7 @@ void saveButtonGPIOCheck(uint16_t parentRef, const char *label,
 		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);
 
 		// Execute Action when save from each mod
-		GPIO_Actions(parentRef, GPIOSelectorRef);
+		GPIO_Actions(parentRef);
 	} else {
 		char *backgroundStyle = getBackground(DANGER_COLOR);
 		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);

@@ -345,8 +345,7 @@ void removeElement_callback(Control *sender, int type) {
 					parentRef);
 			if (controllerRef != 0) {
 				ESPUI.removeControl(controllerRef);
-
-				ESPinner_Manager::getInstance().removeAllControllersBySelector(
+				ESPinner_Manager::getInstance().removeAllControllersByParent(
 					parentRef);
 				ESPinner_Manager::getInstance().removeAllUIRelationBySelector(
 					parentRef);

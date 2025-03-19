@@ -61,14 +61,14 @@ class ESPinner_GPIO : public ESPinner {
 			return pinMode;
 		}
 		case GPIOMode::Output: {
-			OutputPin model = OutputPin(false);
-			ESP_PinMode pinMode = {this->getGPIO(), model, PinType::BusDigital};
+			OutputPin model = OutputPin(true);
+			ESP_PinMode pinMode = {this->getGPIO(), model, PinType::BusPWM};
 			return pinMode;
 		}
 		// If no GPIO_Mode is configured, return as Output by default
 		default:
-			ESP_PinMode pinMode = {this->getGPIO(), OutputPin(false),
-								   PinType::BusDigital};
+			ESP_PinMode pinMode = {this->getGPIO(), OutputPin(true),
+								   PinType::BusPWM};
 			return pinMode;
 		}
 	};

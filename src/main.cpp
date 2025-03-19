@@ -40,9 +40,11 @@ void setup() {
 	ESPAllOn::getInstance().addAction(ACTION);
 	ESPAllOn::getInstance().addAction(ACTION2);
 
+	ESPAllOnPinManager::getInstance();
+
 	ESPAllOn::getInstance().setup();
 	ESPAllOn::getInstance().begin();
-	ESPAllOnPinManager::getInstance();
+
 	ESPinner_Manager::getInstance().loadFromStorage();
 	UI_UpdateTicker.start();
 	wifi.start();

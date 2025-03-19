@@ -13,7 +13,7 @@ void createDC_callback(Control *sender, int type) {}
  *	DC_Remove
  */
 
-void DC_save_action(uint16_t parentRef, uint16_t GPIOSelectorRef) {
+void DC_action(uint16_t parentRef) {
 	auto espinnerDC = std::make_unique<ESPinner_DC>();
 	std::vector<uint16_t> childrenIds =
 		getChildrenIds(elementToParentMap, parentRef);
@@ -22,70 +22,37 @@ void DC_save_action(uint16_t parentRef, uint16_t GPIOSelectorRef) {
 			String(ESPUI.getControl(childControllerId)->value);
 		String espinner_label =
 			String(ESPUI.getControl(childControllerId)->label);
-
 		if (espinner_label == ESPINNERID_LABEL) {
 			espinnerDC->setID(espinner_value);
 		}
 
 		if (espinner_label == DC_PINA_SELECTOR_LABEL) {
 			espinnerDC->setGPIOA(espinner_value.toInt());
+			ESP_PinMode pinModelA = espinnerDC->getPinModeConf(DCPin::PinA);
+			ESPAllOnPinManager::getInstance().updateGPIOFromESPUI(
+				pinModelA, childControllerId);
 		}
 		if (espinner_label == DC_PINB_SELECTOR_LABEL) {
+
 			espinnerDC->setGPIOB(espinner_value.toInt());
+			ESP_PinMode pinModelB = espinnerDC->getPinModeConf(DCPin::PinB);
+			ESPAllOnPinManager::getInstance().updateGPIOFromESPUI(
+				pinModelB, childControllerId);
 		}
 	}
 	// Create ESpinner with Configuration
-	ESP_PinMode pinModelA = espinnerDC->getPinModeConf(DCPin::PinA);
-	ESPAllOnPinManager::getInstance().updateGPIOFromESPUI(pinModelA,
-														  GPIOSelectorRef);
-	ESP_PinMode pinModelB = espinnerDC->getPinModeConf(DCPin::PinB);
-	ESPAllOnPinManager::getInstance().updateGPIOFromESPUI(pinModelB,
-														  GPIOSelectorRef);
 	ESPinner_Manager::getInstance().push(std::move(espinnerDC));
 	ESPinner_Manager::getInstance().saveESPinnersInStorage();
-}
-
-void saveDC_callback(Control *sender, int type) {
-	// Save Button --> Save ESPINNER
-	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
-	if (type == B_UP) {
-		uint16_t DCSelectorRefA =
-			searchByLabel(parentRef, DC_PINA_SELECTOR_LABEL);
-		uint16_t DCSelectorRefB =
-			searchByLabel(parentRef, DC_PINB_SELECTOR_LABEL);
-		DUMPLN("IS THERE DC A PIN ", DCSelectorRefA);
-		DUMPLN("IS THERE DC B PIN ", DCSelectorRefB);
-		if (DCSelectorRefA != 0 && DCSelectorRefB != 0) {
-			String DCSelector_valueA = ESPUI.getControl(DCSelectorRefA)->value;
-			String DCSelector_valueB = ESPUI.getControl(DCSelectorRefA)->value;
-
-			// If Text Input --> Check if number
-			if (isNumericAndInRange(DCSelector_valueA, DCSelectorRefA) &&
-				isNumericAndInRange(DCSelector_valueB, DCSelectorRefB)) {
-
-				saveButtonGPIOCheck(parentRef, DC_PINA_SELECTOR_LABEL,
-									DC_save_action);
-				saveButtonGPIOCheck(parentRef, DC_PINB_SELECTOR_LABEL,
-									DC_save_action);
-				// saveButtonCheck(parentRef, DC_PININPUT_LABEL, DC_SAVE_LABEL);
-				char *backgroundStyle = getBackground(SELECTED_COLOR);
-				ESPUI.setPanelStyle(parentRef, backgroundStyle);
-			} else {
-				char *backgroundStyle = getBackground(PENDING_COLOR);
-				ESPUI.setPanelStyle(parentRef, backgroundStyle);
-			}
-		}
-	}
 }
 
 void DC_Selector(uint16_t PIN_ptr) {
 	GUI_GPIOSetLabel(PIN_ptr, DC_PINA_SELECT_LABEL, DC_PINA_SELECT_VALUE);
 	GUI_GPIOSelector(PIN_ptr, DC_PINA_SELECTOR_LABEL, DC_PINA_SELECTOR_VALUE,
-					 GPIOSelector_callback);
+					 DCSelector_callback);
 
 	GUI_GPIOSetLabel(PIN_ptr, DC_PINB_SELECT_LABEL, DC_PINB_SELECT_VALUE);
 	GUI_GPIOSelector(PIN_ptr, DC_PINB_SELECTOR_LABEL, DC_PINB_SELECTOR_VALUE,
-					 GPIOSelector_callback);
+					 DCSelector_callback);
 }
 
 void removeDC_callback(Control *sender, int type) {
@@ -119,24 +86,183 @@ void DC_UI(uint16_t DC_ptr) {
 						removeElement_callback);
 }
 
+void DCSelector_callback(Control *sender, int type) {
+	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
+	if (isNumericAndInRange(sender->value, parentRef)) {
+
+		bool isPinA = (String(sender->label) == DC_PINA_SELECTOR_LABEL);
+		bool isPinB = (String(sender->label) == DC_PINB_SELECTOR_LABEL);
+
+		if (isPinA) {
+			uint16_t selectLabelRefA =
+				searchByLabel(parentRef, DC_PINA_SELECT_LABEL);
+			if (selectLabelRefA != 0) {
+				ESPUI.removeControl(selectLabelRefA);
+				removeValueFromMap(elementToParentMap, selectLabelRefA);
+			}
+		}
+
+		if (isPinB) {
+			uint16_t selectLabelRefB =
+				searchByLabel(parentRef, DC_PINB_SELECT_LABEL);
+			if (selectLabelRefB != 0) {
+				ESPUI.removeControl(selectLabelRefB);
+				removeValueFromMap(elementToParentMap, selectLabelRefB);
+			}
+		}
+
+		char *backgroundStyle = getBackground(SUCCESS_COLOR);
+		ESPUI.setElementStyle(sender->id, backgroundStyle);
+
+	} else {
+		char *backgroundStyle = getBackground(DANGER_COLOR);
+		ESPUI.setElementStyle(sender->id, backgroundStyle);
+	}
+}
+
+void moveDC(uint8_t pinA, uint8_t pinB, int pwmValue, bool CW) {
+	uint8_t pwmV = CW ? pwmValue : 255 - pwmValue;
+	analogWrite(pinA, pwmV);
+	analogWrite(pinB, 255 - pwmV);
+}
+
+void updateDCMotorState(uint16_t parentRef) {
+	uint16_t PINASelectorRef = searchByLabel(parentRef, DC_PINA_SELECT_LABEL);
+	uint16_t PINBSelectorRef = searchByLabel(parentRef, DC_PINB_SELECT_LABEL);
+
+	uint8_t associatedPinA =
+		ESPAllOnPinManager::getInstance().getCurrentReference(PINASelectorRef);
+	uint8_t associatedPinB =
+		ESPAllOnPinManager::getInstance().getCurrentReference(PINBSelectorRef);
+	DUMPLN("PINA: ", associatedPinA);
+	DUMPLN("PINB: ", associatedPinB);
+	uint16_t RUNSwitchRef = searchByLabel(parentRef, DC_SWITCH_RUN_LABEL);
+	bool runValue = ESPUI.getControl(RUNSwitchRef)->value.toInt() == 1;
+
+	if (runValue == 0) {
+
+		analogWrite(associatedPinA, 0);
+		analogWrite(associatedPinB, 0);
+	} else {
+
+		uint16_t VSliderRef = searchByLabel(parentRef, DC_SLIDER_VEL_LABEL);
+		int pwmValue = ESPUI.getControl(VSliderRef)->value.toInt();
+
+		uint16_t DIRSwitchRef = searchByLabel(parentRef, DC_SWITCH_DIR_LABEL);
+		bool DIRValue = ESPUI.getControl(DIRSwitchRef)->value.toInt() == 1;
+
+		moveDC(associatedPinA, associatedPinB, pwmValue, DIRValue);
+	}
+}
+
+void DC_VEL_Slider_callback(Control *sender, int type) {
+	uint16_t parentRef =
+		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
+	DUMPLN("Parent Ref: ", parentRef);
+	ESPinner_Manager::getInstance().debugController();
+	// updateDCMotorState(parentRef);
+}
+
+void DC_DIR_Switcher_callback(Control *sender, int type) {
+	uint16_t parentRef =
+		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
+	// updateDCMotorState(parentRef);
+	DUMPLN("DIR SWITCH Ref: ", parentRef);
+	ESPinner_Manager::getInstance().debugController();
+}
+
+void DC_RUN_Switcher_callback(Control *sender, int type) {
+	uint16_t parentRef =
+		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
+	// updateDCMotorState(parentRef);
+	DUMPLN("RUN SWITCH Ref: ", parentRef);
+	ESPinner_Manager::getInstance().debugController();
+}
+
+void DC_Controller(String ID_LABEL, uint16_t parentRef) {
+
+	uint16_t controllerTabRef = getTab(TabType::ControllerTab);
+	uint16_t DCPIN_ID = ESPUI.addControl(
+		ControlType::Text, DC_ID_LABEL, ID_LABEL.c_str(),
+		ControlColor::Wetasphalt, controllerTabRef, debugCallback);
+	ESPUI.getControl(DCPIN_ID)->enabled = false;
+
+	uint16_t DC_DIR_Switch = ESPUI.addControl(
+		ControlType::Switcher, DC_SWITCH_DIR_LABEL, DC_SWITCH_DIR_VALUE,
+		ControlColor::Wetasphalt, DCPIN_ID, DC_DIR_Switcher_callback);
+
+	uint16_t DC_RUN_Switch = ESPUI.addControl(
+		ControlType::Switcher, DC_SWITCH_RUN_LABEL, DC_SWITCH_RUN_VALUE,
+		ControlColor::Wetasphalt, DCPIN_ID, DC_RUN_Switcher_callback);
+
+	uint16_t DC_VEL_Slider = ESPUI.addControl(
+		ControlType::Slider, DC_SLIDER_VEL_LABEL, DC_SLIDER_VEL_VALUE,
+		ControlColor::Wetasphalt, DCPIN_ID, DC_VEL_Slider_callback);
+
+	ESPinner_Manager::getInstance().addControllerRelation(DC_DIR_Switch,
+														  parentRef);
+	ESPinner_Manager::getInstance().addControllerRelation(DC_RUN_Switch,
+														  parentRef);
+	ESPinner_Manager::getInstance().addControllerRelation(DC_VEL_Slider,
+														  parentRef);
+
+	ESPinner_Manager::getInstance().addUIRelation(parentRef, DCPIN_ID);
+}
+
+void saveDC_callback(Control *sender, int type) {
+
+	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
+	if (type == B_UP) {
+		uint16_t DCSelectorRefA =
+			searchByLabel(parentRef, DC_PINA_SELECTOR_LABEL);
+		uint16_t DCSelectorRefB =
+			searchByLabel(parentRef, DC_PINB_SELECTOR_LABEL);
+		uint16_t DCIDRef = searchByLabel(parentRef, ESPINNERID_LABEL);
+		if (DCSelectorRefA != 0 && DCSelectorRefB != 0) {
+			String DCSelector_valueA = ESPUI.getControl(DCSelectorRefA)->value;
+			String DCSelector_valueB = ESPUI.getControl(DCSelectorRefB)->value;
+
+			if (isNumericAndInRange(DCSelector_valueA, DCSelectorRefA) &&
+				isNumericAndInRange(DCSelector_valueB, DCSelectorRefB)) {
+
+				DC_action(parentRef);
+
+				// ----- Create Controllers ------ //
+				uint16_t controller = getParentId(
+					ESPinner_Manager::getInstance().getUIRelationIDMap(),
+					parentRef);
+				if (controller == 0) {
+					DC_Controller(ESPUI.getControl(DCIDRef)->value, parentRef);
+				}
+
+				char *backgroundStyle = getBackground(SELECTED_COLOR);
+				ESPUI.setPanelStyle(parentRef, backgroundStyle);
+			} else {
+				char *backgroundStyle = getBackground(PENDING_COLOR);
+				ESPUI.setPanelStyle(parentRef, backgroundStyle);
+			}
+		}
+	}
+}
+
 void ESPinner_DC::implement() {
 	uint16_t parentRef = getTab(TabType::BasicTab);
 
 	uint16_t DCPIN_selector = ESPUI.addControl(
 		ControlType::Text, ESPINNERID_LABEL, ESPinner_DC::getID(),
-		ControlColor::Wetasphalt, parentRef, GPIOSelector_callback);
+		ControlColor::Wetasphalt, parentRef, DCSelector_callback);
 	ESPUI.getControl(DCPIN_selector)->enabled = false;
 	addElementWithParent(elementToParentMap, DCPIN_selector, DCPIN_selector);
 
 	String gpioA = String(ESPinner_DC::getGPIOA());
 	uint16_t gpioA_ref =
 		GUI_GPIOSelector(DCPIN_selector, DC_PINA_SELECTOR_LABEL, gpioA.c_str(),
-						 GPIOSelector_callback);
+						 DCSelector_callback);
 
-	String gpioB = String(ESPinner_DC::getGPIOA());
+	String gpioB = String(ESPinner_DC::getGPIOB());
 	uint16_t gpioB_ref =
 		GUI_GPIOSelector(DCPIN_selector, DC_PINB_SELECTOR_LABEL, gpioB.c_str(),
-						 GPIOSelector_callback);
+						 DCSelector_callback);
 
 	GUIButtons_Elements(DCPIN_selector, GPIO_SAVE_LABEL, GPIO_SAVE_VALUE,
 						REMOVEESPINNER_LABEL, REMOVEESPINNER_VALUE,
@@ -146,8 +272,16 @@ void ESPinner_DC::implement() {
 		ESPinner_DC::getGPIOA(), gpioA_ref);
 	ESPAllOnPinManager::getInstance().setPinControlRelation(
 		ESPinner_DC::getGPIOB(), gpioB_ref);
-	ESPAllOnPinManager::getInstance().attach(ESPinner_DC::getGPIOA());
-	ESPAllOnPinManager::getInstance().attach(ESPinner_DC::getGPIOB());
+
+	ESP_PinMode pinModelA =
+		ESP_PinMode(ESPinner_DC::getGPIOA(), OutputPin(), PinType::BusPWM);
+	ESPAllOnPinManager::getInstance().attach(pinModelA);
+	ESP_PinMode pinModelB =
+		ESP_PinMode(ESPinner_DC::getGPIOB(), OutputPin(), PinType::BusPWM);
+	ESPAllOnPinManager::getInstance().attach(pinModelB);
+
+	// ------- Create Controllers ----------- //
+	DC_Controller(ESPinner_DC::getID(), DCPIN_selector);
 }
 
 #endif

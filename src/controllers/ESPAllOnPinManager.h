@@ -45,7 +45,14 @@ class ESPAllOnPinManager : public PinManager<ESP_BoardConf, ESP_PinMode> {
 	// <uint16_t PIN , uint16_ t SELECTOR>
 	std::map<uint16_t, uint16_t> pinCurrentStatus;
 
-	ESPAllOnPinManager() {}
+	ESPAllOnPinManager() {
+		for (const auto &config : ESP_BoardConf::PINOUT) {
+			if (config.isBroken) {
+				// Broken Pins should be occupied in list
+				pinCurrentStatus[config.pin] = 10000;
+			}
+		}
+	}
 
 	static ESPAllOnPinManager &getInstance() {
 		static ESPAllOnPinManager instance;
@@ -118,22 +125,34 @@ void DUMP_PINOUT() {
 
 bool isNumericAndInRange(const String value, uint16_t ref) {
 	int val = value.toInt();
-	int lastValue = ESPAllOnPinManager::getInstance().getCurrentReference(ref);
-	// Avoid selected pin 0
-	if (val == lastValue) {
-		return true;
+	ESPAllOnPinManager::getInstance().debugCurrentStatus();
+	uint16_t pinRef = ESPAllOnPinManager::getInstance().pinCurrentStatus[val];
+	if (val == 0 || pinRef == 10000) {
+		return false;
 	}
-	if (val != 0) {
-		String numString = String(val);
-		if (numString.length() != value.length()) {
-			return false;
-		}
-		// Review if Pin is already occupied in ESPinner_PinManager
-		bool is_gpio_attached =
-			ESPAllOnPinManager::getInstance().isPinAttached(val);
-		if (!is_gpio_attached && val > 0 && val < PINSIZE) {
+
+	if (ESPAllOnPinManager::getInstance().isPinOK(val)) {
+		int lastValue =
+			ESPAllOnPinManager::getInstance().getCurrentReference(ref);
+
+		// Avoid selected pin 0
+		if (val == lastValue) {
 			return true;
 		}
+		if (val != 0) {
+			String numString = String(val);
+			if (numString.length() != value.length()) {
+				return false;
+			}
+			// Review if Pin is already occupied in ESPinner_PinManager
+			bool is_gpio_attached =
+				ESPAllOnPinManager::getInstance().isPinAttached(val);
+			if (!is_gpio_attached && val > 0 && val < PINSIZE) {
+				return true;
+			}
+		}
+	} else {
+		DUMPLN("PIN IS BROKEN ", val);
 	}
 
 	return false;
