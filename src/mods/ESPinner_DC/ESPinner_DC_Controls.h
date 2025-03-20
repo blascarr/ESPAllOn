@@ -70,10 +70,14 @@ void removeDC_callback(Control *sender, int type) {
 
 			// Review which Pin is disconnected in order to detach from
 			// ESPinnerManager
-			detachRemovedPIN(DC_PINA_SELECTOR_LABEL, espinner_label,
-							 espinner_value);
-			detachRemovedPIN(DC_PINB_SELECTOR_LABEL, espinner_label,
-							 espinner_value);
+			if (espinner_label == DC_PINA_SELECTOR_LABEL) {
+				detachRemovedPIN(DC_PINA_SELECTOR_LABEL, espinner_label,
+								 espinner_value);
+			}
+			if (espinner_label == DC_PINB_SELECTOR_LABEL) {
+				detachRemovedPIN(DC_PINB_SELECTOR_LABEL, espinner_label,
+								 espinner_value);
+			}
 		}
 		removeElement_callback(sender, type);
 	}
@@ -88,7 +92,7 @@ void DC_UI(uint16_t DC_ptr) {
 
 void DCSelector_callback(Control *sender, int type) {
 	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
-	if (isNumericAndInRange(sender->value, parentRef)) {
+	if (isNumericAndInRange(sender->value, sender->id)) {
 
 		bool isPinA = (String(sender->label) == DC_PINA_SELECTOR_LABEL);
 		bool isPinB = (String(sender->label) == DC_PINB_SELECTOR_LABEL);
@@ -121,34 +125,41 @@ void DCSelector_callback(Control *sender, int type) {
 }
 
 void moveDC(uint8_t pinA, uint8_t pinB, int pwmValue, bool CW) {
-	uint8_t pwmV = CW ? pwmValue : 255 - pwmValue;
-	analogWrite(pinA, pwmV);
-	analogWrite(pinB, 255 - pwmV);
+	uint8_t pwmVA = CW ? map(pwmValue, 0, 100, 0, 255) : 0;
+	uint8_t pwmVB = CW ? 0 : map(pwmValue, 0, 100, 0, 255);
+
+	analogWrite(pinA, pwmVA);
+	analogWrite(pinB, pwmVB);
 }
 
 void updateDCMotorState(uint16_t parentRef) {
-	uint16_t PINASelectorRef = searchByLabel(parentRef, DC_PINA_SELECT_LABEL);
-	uint16_t PINBSelectorRef = searchByLabel(parentRef, DC_PINB_SELECT_LABEL);
+	uint16_t PINASelectorRef = searchByLabel(parentRef, DC_PINA_SELECTOR_LABEL);
+	uint16_t PINBSelectorRef = searchByLabel(parentRef, DC_PINB_SELECTOR_LABEL);
 
 	uint8_t associatedPinA =
 		ESPAllOnPinManager::getInstance().getCurrentReference(PINASelectorRef);
 	uint8_t associatedPinB =
 		ESPAllOnPinManager::getInstance().getCurrentReference(PINBSelectorRef);
-	DUMPLN("PINA: ", associatedPinA);
-	DUMPLN("PINB: ", associatedPinB);
-	uint16_t RUNSwitchRef = searchByLabel(parentRef, DC_SWITCH_RUN_LABEL);
-	bool runValue = ESPUI.getControl(RUNSwitchRef)->value.toInt() == 1;
 
+	uint16_t RUNSwitchRef =
+		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
+						   parentRef, DC_SWITCH_RUN_LABEL);
+
+	bool runValue = ESPUI.getControl(RUNSwitchRef)->value.toInt() == 1;
 	if (runValue == 0) {
 
 		analogWrite(associatedPinA, 0);
 		analogWrite(associatedPinB, 0);
 	} else {
+		uint16_t VELSwitchRef = searchInMapByLabel(
+			ESPinner_Manager::getInstance().getControllerMap(), parentRef,
+			DC_SLIDER_VEL_LABEL);
 
-		uint16_t VSliderRef = searchByLabel(parentRef, DC_SLIDER_VEL_LABEL);
-		int pwmValue = ESPUI.getControl(VSliderRef)->value.toInt();
+		uint16_t DIRSwitchRef = searchInMapByLabel(
+			ESPinner_Manager::getInstance().getControllerMap(), parentRef,
+			DC_SWITCH_DIR_LABEL);
 
-		uint16_t DIRSwitchRef = searchByLabel(parentRef, DC_SWITCH_DIR_LABEL);
+		int pwmValue = ESPUI.getControl(VELSwitchRef)->value.toInt();
 		bool DIRValue = ESPUI.getControl(DIRSwitchRef)->value.toInt() == 1;
 
 		moveDC(associatedPinA, associatedPinB, pwmValue, DIRValue);
@@ -158,25 +169,19 @@ void updateDCMotorState(uint16_t parentRef) {
 void DC_VEL_Slider_callback(Control *sender, int type) {
 	uint16_t parentRef =
 		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
-	DUMPLN("Parent Ref: ", parentRef);
-	ESPinner_Manager::getInstance().debugController();
-	// updateDCMotorState(parentRef);
+	updateDCMotorState(parentRef);
 }
 
 void DC_DIR_Switcher_callback(Control *sender, int type) {
 	uint16_t parentRef =
 		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
-	// updateDCMotorState(parentRef);
-	DUMPLN("DIR SWITCH Ref: ", parentRef);
-	ESPinner_Manager::getInstance().debugController();
+	updateDCMotorState(parentRef);
 }
 
 void DC_RUN_Switcher_callback(Control *sender, int type) {
 	uint16_t parentRef =
 		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
-	// updateDCMotorState(parentRef);
-	DUMPLN("RUN SWITCH Ref: ", parentRef);
-	ESPinner_Manager::getInstance().debugController();
+	updateDCMotorState(parentRef);
 }
 
 void DC_Controller(String ID_LABEL, uint16_t parentRef) {
@@ -264,9 +269,9 @@ void ESPinner_DC::implement() {
 		GUI_GPIOSelector(DCPIN_selector, DC_PINB_SELECTOR_LABEL, gpioB.c_str(),
 						 DCSelector_callback);
 
-	GUIButtons_Elements(DCPIN_selector, GPIO_SAVE_LABEL, GPIO_SAVE_VALUE,
+	GUIButtons_Elements(DCPIN_selector, DC_SAVE_LABEL, DC_SAVE_VALUE,
 						REMOVEESPINNER_LABEL, REMOVEESPINNER_VALUE,
-						saveGPIO_callback, removeDC_callback);
+						saveDC_callback, removeDC_callback);
 
 	ESPAllOnPinManager::getInstance().setPinControlRelation(
 		ESPinner_DC::getGPIOA(), gpioA_ref);

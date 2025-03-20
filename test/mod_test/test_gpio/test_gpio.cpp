@@ -50,6 +50,16 @@ void test_firstSelectorOrderInelementParentMap() {
 
 	// The parent is the same as the selector ( in this case "ESPinnerType")
 	TEST_ASSERT_EQUAL_INT16(elementToParentMap.begin()->second, ref);
+
+#if defined(ESP32)
+	TEST_ASSERT_EQUAL_INT16(
+		7, ESPAllOnPinManager::getInstance().getPINMap().size());
+#endif
+
+#if defined(ESP8266)
+	TEST_ASSERT_EQUAL_INT16(
+		7, ESPAllOnPinManager::getInstance().getPINMap().size());
+#endif
 }
 
 void test_no_elementsInParentMap() {
@@ -215,6 +225,16 @@ void test_saved_GPIOespinner() {
 	TEST_ASSERT_TRUE(ESPAllOnPinManager::getInstance().isPinAttached(
 		typeGPIOController->value.toInt()));
 
+#if defined(ESP32)
+	TEST_ASSERT_EQUAL_INT16(
+		8, ESPAllOnPinManager::getInstance().getPINMap().size());
+#endif
+
+#if defined(ESP8266)
+	TEST_ASSERT_EQUAL_INT16(
+		8, ESPAllOnPinManager::getInstance().getPINMap().size());
+#endif
+
 	// -------------------------------------------- //
 	// ------ Check ESPinner Saved in memory ------ //
 	// -------------------------------------------- //
@@ -256,6 +276,16 @@ void test_modified_GPIOespinner() {
 	// -------------------------------------------- //
 	TEST_ASSERT_TRUE(ESPAllOnPinManager::getInstance().isPinAttached(
 		typeGPIOController->value.toInt()));
+
+#if defined(ESP32)
+	TEST_ASSERT_EQUAL_INT16(
+		8, ESPAllOnPinManager::getInstance().getPINMap().size());
+#endif
+
+#if defined(ESP8266)
+	TEST_ASSERT_EQUAL_INT16(
+		8, ESPAllOnPinManager::getInstance().getPINMap().size());
+#endif
 
 	// Previous PIN is detached
 
@@ -343,6 +373,16 @@ void test_second_GPIOespinner() {
 	TEST_ASSERT_TRUE(ESPAllOnPinManager::getInstance().isPinAttached(13));
 	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(12));
 
+#if defined(ESP32)
+	TEST_ASSERT_EQUAL_INT16(
+		9, ESPAllOnPinManager::getInstance().getPINMap().size());
+#endif
+
+#if defined(ESP8266)
+	TEST_ASSERT_EQUAL_INT16(
+		9, ESPAllOnPinManager::getInstance().getPINMap().size());
+#endif
+
 	// ----- Controllers Review ------ //
 	ESPinner_Manager::getInstance().debugController();
 	ESPinner_Manager::getInstance().debugUIRelation();
@@ -377,6 +417,15 @@ void test_firstESPinner_removed() {
 	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(13));
 	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(12));
 
+#if defined(ESP32)
+	TEST_ASSERT_EQUAL_INT16(
+		8, ESPAllOnPinManager::getInstance().getPINMap().size());
+#endif
+
+#if defined(ESP8266)
+	TEST_ASSERT_EQUAL_INT16(
+		8, ESPAllOnPinManager::getInstance().getPINMap().size());
+#endif
 	// ----- Controllers Review ------ //
 	ESPinner_Manager::getInstance().debugController();
 	ESPinner_Manager::getInstance().debugUIRelation();

@@ -59,6 +59,8 @@ class ESPAllOnPinManager : public PinManager<ESP_BoardConf, ESP_PinMode> {
 		return instance;
 	}
 
+	std::map<uint16_t, uint16_t> &getPINMap() { return pinCurrentStatus; }
+
 	uint16_t getCurrentReference(uint8_t ref) {
 		for (auto &relation : pinCurrentStatus) {
 			if (relation.second == ref) {
@@ -122,6 +124,9 @@ void DUMP_PINOUT() {
 #endif
 	}
 }
+
+// Ref should be checked with the selector in Pin for
+// std::map<uint16_t, uint16_t> pinCurrentStatus;
 
 bool isNumericAndInRange(const String value, uint16_t ref) {
 	int val = value.toInt();

@@ -131,7 +131,7 @@ void GPIOSelector_callback(Control *sender, int type) {
 	DUMP(") '", sender->label);
 	DUMP("' = ", sender->value);
 	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
-	if (isNumericAndInRange(sender->value, parentRef)) {
+	if (isNumericAndInRange(sender->value, sender->id)) {
 
 		// Remove Select GPIO LABEL
 		uint16_t parentRef = getParentId(elementToParentMap, sender->id);
@@ -183,8 +183,10 @@ void removeGPIO_callback(Control *sender, int type) {
 
 			// Review which Pin is disconnected in order to detach from
 			// ESPinnerManager
-			detachRemovedPIN(GPIO_PINSELECTOR_LABEL, espinner_label,
-							 espinner_value);
+			if (espinner_label == GPIO_PINSELECTOR_LABEL) {
+				detachRemovedPIN(GPIO_PINSELECTOR_LABEL, espinner_label,
+								 espinner_value);
+			}
 		}
 		removeElement_callback(sender, type);
 	}

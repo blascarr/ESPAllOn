@@ -362,6 +362,8 @@ void detachRemovedPIN(String expected_label, String espinner_label,
 	if (espinner_label == expected_label) {
 
 		DUMP("DETACH PIN ", espinner_value.toInt())
+		removeValueFromMap(ESPAllOnPinManager::getInstance().getPINMap(),
+						   static_cast<uint16_t>(espinner_value.toInt()));
 		ESPAllOnPinManager::getInstance().detach(espinner_value.toInt());
 	}
 }
