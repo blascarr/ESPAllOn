@@ -21,10 +21,6 @@ class ESPinner_DC : public ESPinner {
 
 	void loader() override { DUMPSLN("Cargando configuración de DC..."); }
 
-	void setDirection(bool dir) { direction = dir; }
-	void setRunning(bool run) { running = run; }
-	void setSpeed(int spd) { speed = constrain(spd, 0, 255); }
-
 	uint8_t getGPIO(DCPin pinType) {
 		if (pinType == DCPin::PinA) {
 			return gpioA;
@@ -74,7 +70,6 @@ class ESPinner_DC : public ESPinner {
 };
 
 void createDCMod_callback(Control *sender, int type);
-void saveButtonDCCheck(uint16_t parentRef);
 void saveDC_callback(Control *sender, int type);
 void removeDC_callback(Control *sender, int type);
 void DCSelector_callback(Control *sender, int type);
