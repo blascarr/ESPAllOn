@@ -6,6 +6,11 @@
 struct ESP_BoardConf {
 	static constexpr size_t NUM_PINS = 40;
 	static ESP_PinMode PINOUT[NUM_PINS];
+#if DEBUG
+	static constexpr size_t INITIAL_PINS = 7;
+#else
+	static constexpr size_t INITIAL_PINS = 9;
+#endif
 };
 
 ESP_PinMode ESP_BoardConf::PINOUT[ESP_BoardConf::NUM_PINS] = {
