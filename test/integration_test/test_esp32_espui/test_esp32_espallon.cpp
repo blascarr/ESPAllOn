@@ -1,10 +1,11 @@
 #include <Arduino.h>
 #include <unity.h>
 
-#include "../../../src/controllers/ESPAllOn_Wifi.h"
 #include "../../config.h"
-#include "../../utils/socket_utils.h"
+#include "../../utils/dump_utils.h"
 #include "../../utils/testTicker.h"
+
+#include "../../../src/controllers/ESPAllOn_Wifi.h"
 
 // UI handles
 void endTest() { UNITY_END(); }

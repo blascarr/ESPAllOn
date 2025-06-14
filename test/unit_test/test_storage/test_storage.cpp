@@ -38,7 +38,7 @@ void setup() {
 	espinnerGPIO_2->setID("ESPINNER GPIO 2");
 
 	auto espinnerDC = std::make_unique<ESPinner_DC>();
-	espinnerDC->setGPIO(11);
+	espinnerDC->setGPIOA(11);
 	espinnerDC->setID("ESPINNER DC");
 
 	// ESPinnerTestList.push_back(std::move(espinnerGPIO_1));

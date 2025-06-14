@@ -4,6 +4,7 @@
 #include "../config.h"
 #include "Storage_Manager.h"
 #include <Persistance.h>
+#include <list>
 
 #include "../controllers/ESPinner.h"
 
