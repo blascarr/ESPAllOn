@@ -84,9 +84,10 @@ void Stepper_action(uint16_t parentRef) {
 	ESPinner_Manager::getInstance().saveESPinnersInStorage();
 }
 
-void Stepper_driverSelector(uint16_t PIN_ptr) {
+uint16_t Stepper_driverSelector(uint16_t PIN_ptr) {
+	String currentDriver = "UNKNOWN";
 	uint16_t driverSelect = ESPUI.addControl(
-		ControlType::Select, STEPPER_MODESELECTOR_LABEL, "TMC2130",
+		ControlType::Select, STEPPER_MODESELECTOR_LABEL, currentDriver,
 		ControlColor::Wetasphalt, PIN_ptr, debugCallback);
 
 	ESPUI.addControl(ControlType::Option, "TMC2130",
@@ -101,12 +102,22 @@ void Stepper_driverSelector(uint16_t PIN_ptr) {
 	ESPUI.addControl(ControlType::Option, "TMC2160",
 					 getDriverName(Stepper_Driver::TMC2160), None,
 					 driverSelect);
-	ESPUI.addControl(ControlType::Option, "TMC2224",
-					 getDriverName(Stepper_Driver::TMC2224), None,
+	ESPUI.addControl(ControlType::Option, "TMC2660",
+					 getDriverName(Stepper_Driver::TMC2660), None,
+					 driverSelect);
+	ESPUI.addControl(ControlType::Option, "TMC5130",
+					 getDriverName(Stepper_Driver::TMC5130), None,
+					 driverSelect);
+	ESPUI.addControl(ControlType::Option, "TMC5160",
+					 getDriverName(Stepper_Driver::TMC5160), None,
 					 driverSelect);
 	ESPUI.addControl(ControlType::Option, "A4988",
 					 getDriverName(Stepper_Driver::A4988), None, driverSelect);
+	ESPUI.addControl(ControlType::Option, "UNKNOWN",
+					 getDriverName(Stepper_Driver::UNKNOWN), None,
+					 driverSelect);
 	addElementWithParent(elementToParentMap, driverSelect, PIN_ptr);
+	return driverSelect;
 }
 
 void Stepper_Selector(uint16_t PIN_ptr) {
@@ -188,6 +199,17 @@ void removeStepper_callback(Control *sender, int type) {
 			if (espinner_label == STEPPER_DIAG1_SELECTOR_LABEL) {
 				detachRemovedPIN(STEPPER_DIAG1_SELECTOR_LABEL, espinner_label,
 								 espinner_value);
+			}
+			if (espinner_label == STEPPER_MODESELECTOR_LABEL) {
+				// TODO: Review if this is the correct way to reset the stepper
+				ESPinner *espinner =
+					ESPinner_Manager::getInstance().findESPinnerById(
+						espinner_label);
+				if (espinner) {
+					ESPinner_Stepper *espinnerStepper =
+						static_cast<ESPinner_Stepper *>(espinner);
+					espinnerStepper->stepper.reset();
+				}
 			}
 		}
 		removeElement_callback(sender, type);
@@ -417,7 +439,8 @@ void ESPinner_Stepper::implement() {
 	addElementWithParent(elementToParentMap, Stepper_PIN_selector,
 						 Stepper_PIN_selector);
 
-	Stepper_driverSelector(Stepper_PIN_selector);
+	uint16_t driverSelector = Stepper_driverSelector(Stepper_PIN_selector);
+	ESPUI.updateSelect(driverSelector, ESPinner_Stepper::get_driverName());
 
 	String gpioDIR = String(ESPinner_Stepper::getDIR());
 	uint16_t gpioDIR_ref =

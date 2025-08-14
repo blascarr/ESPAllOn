@@ -11,8 +11,9 @@ enum class Stepper_Driver {
 	TMC2209,
 	TMC2130,
 	TMC2160,
-	TMC2224,
 	TMC2660,
+	TMC5130,
+	TMC5160,
 	A4988,
 	UNKNOWN
 };
@@ -20,7 +21,8 @@ enum class Stepper_Driver {
 const std::map<Stepper_Driver, const String> driverName = {
 	{Stepper_Driver::TMC2208, "TMC2208"}, {Stepper_Driver::TMC2209, "TMC2209"},
 	{Stepper_Driver::TMC2130, "TMC2130"}, {Stepper_Driver::TMC2160, "TMC2160"},
-	{Stepper_Driver::TMC2224, "TMC2224"}, {Stepper_Driver::A4988, "A4988"},
+	{Stepper_Driver::TMC2660, "TMC2660"}, {Stepper_Driver::TMC5130, "TMC5130"},
+	{Stepper_Driver::TMC5160, "TMC5160"}, {Stepper_Driver::A4988, "A4988"},
 	{Stepper_Driver::UNKNOWN, "UNKNOWN"}};
 
 enum class StepperPin { STEP, DIR, EN, CS, DIAG0, DIAG1 };
@@ -45,10 +47,12 @@ class ESPinner_Stepper : public ESPinner {
   public:
 	uint8_t DIR, STEP, EN;
 	uint8_t CS, DIAG0, DIAG1;
+	uint8_t R_SENSE = 0.11f;
+
 	bool isSPI = false;
 	bool isDIAG = false;
-	Stepper_Driver driver = Stepper_Driver::TMC2130;
-	std::unique_ptr<TMCStepper> tmc;
+	Stepper_Driver driver = Stepper_Driver::UNKNOWN;
+	std::unique_ptr<TMCStepper> stepper;
 
 	ESPinner_Stepper(ESPinner_Mod espinner_mod) : ESPinner(espinner_mod) {}
 	ESPinner_Stepper() : ESPinner(ESPinner_Mod::Stepper) {}
@@ -85,7 +89,42 @@ class ESPinner_Stepper : public ESPinner {
 	void setDriver(const String &name) {
 		Stepper_Driver foundDriver = findDriverByName(name);
 		if (foundDriver != Stepper_Driver::UNKNOWN) {
-			driver = foundDriver;
+			setDriver(foundDriver);
+			if (driver == Stepper_Driver::TMC2130) {
+				stepper = std::make_unique<TMC2130Stepper>(CS, R_SENSE);
+				DUMPSLN("TMC2130 Stepper created");
+			}
+			if (driver == Stepper_Driver::TMC2208) {
+				// TODO: RX, TX by serial Port
+				uint8_t RX = 2;
+				uint8_t TX = 3;
+				stepper = std::make_unique<TMC2208Stepper>(RX, TX, R_SENSE);
+			}
+			if (driver == Stepper_Driver::TMC2209) {
+				// TODO: RX, TX by serial Port
+				uint8_t RX = 2;
+				uint8_t TX = 3;
+				uint8_t DRIVER_ADDRESS = 0b00;
+				stepper = std::make_unique<TMC2209Stepper>(RX, TX, R_SENSE,
+														   DRIVER_ADDRESS);
+			}
+			if (driver == Stepper_Driver::TMC2160) {
+				stepper = std::make_unique<TMC2160Stepper>(CS, R_SENSE);
+			}
+			if (driver == Stepper_Driver::TMC2660) {
+				// stepper = std::make_unique<TMC2660Stepper>(CS);
+				// stepper = std::make_unique<TMC2660Stepper>CS_PIN, R_SENSE,
+				// SW_MOSI, SW_MISO, SW_SCK);
+			}
+			if (driver == Stepper_Driver::TMC5130) {
+				stepper = std::make_unique<TMC5130Stepper>(CS, R_SENSE);
+			}
+			if (driver == Stepper_Driver::TMC5160) {
+				stepper = std::make_unique<TMC5160Stepper>(CS, R_SENSE);
+			}
+			if (driver == Stepper_Driver::A4988) {
+				// stepper = std::make_unique<A4988Stepper>(CS, R_SENSE);
+			}
 		} else {
 			// std::cerr << "Driver not found: " << name << std::endl;
 		}
