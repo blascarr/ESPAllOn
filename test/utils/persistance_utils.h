@@ -1,8 +1,7 @@
 #ifndef _ESP32_PERSISTANCE_UTILS_H
 #define _ESP32_PERSISTANCE_UTILS_H
 #define NVS
-#include "nvs.h"
-#include "nvs_flash.h"
+
 #include <Persistance.h>
 
 bool existsKey(const String &key) {

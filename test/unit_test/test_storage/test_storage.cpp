@@ -39,6 +39,7 @@ void setup() {
 
 	auto espinnerDC = std::make_unique<ESPinner_DC>();
 	espinnerDC->setGPIOA(11);
+	espinnerDC->setGPIOB(12);
 	espinnerDC->setID("ESPINNER DC");
 
 	// ESPinnerTestList.push_back(std::move(espinnerGPIO_1));
