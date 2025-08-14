@@ -45,6 +45,10 @@ void Stepper_action(uint16_t parentRef) {
 				pinModelEN, childControllerId);
 		}
 
+		if (espinner_label == STEPPER_MODESELECTOR_LABEL) {
+			espinnerStepper->setDriver(espinner_value);
+		}
+
 		if (espinner_label == STEPPER_CS_SELECTOR_LABEL) {
 
 			espinnerStepper->setCS(espinner_value.toInt());
@@ -80,7 +84,34 @@ void Stepper_action(uint16_t parentRef) {
 	ESPinner_Manager::getInstance().saveESPinnersInStorage();
 }
 
+void Stepper_driverSelector(uint16_t PIN_ptr) {
+	uint16_t driverSelect = ESPUI.addControl(
+		ControlType::Select, STEPPER_MODESELECTOR_LABEL, "TMC2130",
+		ControlColor::Wetasphalt, PIN_ptr, debugCallback);
+
+	ESPUI.addControl(ControlType::Option, "TMC2130",
+					 getDriverName(Stepper_Driver::TMC2130), None,
+					 driverSelect);
+	ESPUI.addControl(ControlType::Option, "TMC2208",
+					 getDriverName(Stepper_Driver::TMC2208), None,
+					 driverSelect);
+	ESPUI.addControl(ControlType::Option, "TMC2209",
+					 getDriverName(Stepper_Driver::TMC2209), None,
+					 driverSelect);
+	ESPUI.addControl(ControlType::Option, "TMC2160",
+					 getDriverName(Stepper_Driver::TMC2160), None,
+					 driverSelect);
+	ESPUI.addControl(ControlType::Option, "TMC2224",
+					 getDriverName(Stepper_Driver::TMC2224), None,
+					 driverSelect);
+	ESPUI.addControl(ControlType::Option, "A4988",
+					 getDriverName(Stepper_Driver::A4988), None, driverSelect);
+	addElementWithParent(elementToParentMap, driverSelect, PIN_ptr);
+}
+
 void Stepper_Selector(uint16_t PIN_ptr) {
+
+	Stepper_driverSelector(PIN_ptr);
 
 	GUI_GPIOSetLabel(PIN_ptr, STEPPER_STEP_SELECT_LABEL,
 					 STEPPER_STEP_SELECT_VALUE);
@@ -237,6 +268,58 @@ void Stepper_RUN_Switcher_callback(Control *sender, int type) {
 	// updateDCMotorState(parentRef);
 }
 
+void Stepper_Pad_callback(Control *sender, int type) {
+	debugCallback(sender, type);
+
+	uint16_t parentRef =
+		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
+	if (parentRef == 0)
+		return;
+
+	uint16_t runRef =
+		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
+						   parentRef, STEPPER_SWITCH_RUN_LABEL);
+	uint16_t dirRef =
+		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
+						   parentRef, STEPPER_SWITCH_DIR_LABEL);
+	uint16_t velRef =
+		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
+						   parentRef, STEPPER_SLIDER_VEL_LABEL);
+
+	switch (type) {
+	case P_CENTER_DOWN: // toggle RUN
+		if (runRef) {
+			String v = ESPUI.getControl(runRef)->value;
+			ESPUI.updateSwitcher(runRef, v == "1" ? 0 : 1);
+		}
+		break;
+	case P_LEFT_DOWN: // DIR = 0
+		if (dirRef)
+			ESPUI.updateSwitcher(dirRef, 0);
+		break;
+	case P_RIGHT_DOWN: // DIR = 1
+		if (dirRef)
+			ESPUI.updateSwitcher(dirRef, 1);
+		break;
+	case P_FOR_DOWN: // ++VEL
+		if (velRef) {
+			int val = ESPUI.getControl(velRef)->value.toInt();
+			val = constrain(val + 5, 0, 100);
+			ESPUI.updateSlider(velRef, val);
+		}
+		break;
+	case P_BACK_DOWN: // --VEL
+		if (velRef) {
+			int val = ESPUI.getControl(velRef)->value.toInt();
+			val = constrain(val - 5, 0, 100);
+			ESPUI.updateSlider(velRef, val);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
 void Stepper_Controller(String ID_LABEL, uint16_t parentRef) {
 
 	uint16_t controllerTabRef = getTab(TabType::ControllerTab);
@@ -259,11 +342,17 @@ void Stepper_Controller(String ID_LABEL, uint16_t parentRef) {
 		ControlType::Slider, STEPPER_SLIDER_VEL_LABEL, STEPPER_SLIDER_VEL_VALUE,
 		ControlColor::Wetasphalt, STEPPER_PIN_ID, Stepper_VEL_Slider_callback);
 
+	uint16_t STEPPER_PAD = ESPUI.addControl(
+		ControlType::PadWithCenter, "Stepper Pad", "0",
+		ControlColor::Wetasphalt, STEPPER_PIN_ID, Stepper_Pad_callback);
+
 	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_DIR_Switch,
 														  parentRef);
 	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_RUN_Switch,
 														  parentRef);
 	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_VEL_Slider,
+														  parentRef);
+	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_PAD,
 														  parentRef);
 
 	ESPinner_Manager::getInstance().addUIRelation(parentRef, STEPPER_PIN_ID);
@@ -327,6 +416,8 @@ void ESPinner_Stepper::implement() {
 	ESPUI.getControl(Stepper_PIN_selector)->enabled = false;
 	addElementWithParent(elementToParentMap, Stepper_PIN_selector,
 						 Stepper_PIN_selector);
+
+	Stepper_driverSelector(Stepper_PIN_selector);
 
 	String gpioDIR = String(ESPinner_Stepper::getDIR());
 	uint16_t gpioDIR_ref =

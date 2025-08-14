@@ -25,6 +25,22 @@ const std::map<Stepper_Driver, const String> driverName = {
 
 enum class StepperPin { STEP, DIR, EN, CS, DIAG0, DIAG1 };
 
+String getDriverName(Stepper_Driver driverType) {
+	auto it = driverName.find(driverType);
+	if (it != driverName.end()) {
+		return it->second;
+	}
+	return "Unknown";
+}
+
+Stepper_Driver findDriverByName(const String &name) {
+	for (const auto &pair : driverName) {
+		if (pair.second == name) {
+			return pair.first;
+		}
+	}
+	return Stepper_Driver::UNKNOWN;
+}
 class ESPinner_Stepper : public ESPinner {
   public:
 	uint8_t DIR, STEP, EN;
@@ -32,6 +48,7 @@ class ESPinner_Stepper : public ESPinner {
 	bool isSPI = false;
 	bool isDIAG = false;
 	Stepper_Driver driver = Stepper_Driver::TMC2130;
+	std::unique_ptr<TMCStepper> tmc;
 
 	ESPinner_Stepper(ESPinner_Mod espinner_mod) : ESPinner(espinner_mod) {}
 	ESPinner_Stepper() : ESPinner(ESPinner_Mod::Stepper) {}
@@ -39,8 +56,8 @@ class ESPinner_Stepper : public ESPinner {
 		DUMPSLN("Iniciacion configuración de Stepper ...");
 	}
 	void update() override { DUMPSLN("Update configuración de Stepper ..."); }
-	void implement() override;
 	void loader() override { DUMPSLN("Cargando configuración de Stepper ..."); }
+	void implement() override;
 
 	uint8_t getGPIO(StepperPin pinType) {
 		if (pinType == StepperPin::STEP) {
@@ -63,6 +80,19 @@ class ESPinner_Stepper : public ESPinner {
 		}
 		return 0; // GPIO 0 should not be used, but configured in final return
 	}
+
+	void setDriver(Stepper_Driver StepperDriver) { driver = StepperDriver; }
+	void setDriver(const String &name) {
+		Stepper_Driver foundDriver = findDriverByName(name);
+		if (foundDriver != Stepper_Driver::UNKNOWN) {
+			driver = foundDriver;
+		} else {
+			// std::cerr << "Driver not found: " << name << std::endl;
+		}
+	}
+
+	Stepper_Driver getDriver() { return driver; }
+	String get_driverName() { return getDriverName(getDriver()); }
 
 	void setDIR(uint8_t dir) { DIR = dir; }
 	uint8_t getDIR() { return DIR; }
@@ -89,35 +119,6 @@ class ESPinner_Stepper : public ESPinner {
 		return pinMode;
 	};
 
-	const String getPinDriverName(Stepper_Driver driverType) {
-		auto it = driverName.find(driverType);
-		if (it != driverName.end()) {
-			return it->second;
-		}
-		return "Unknown";
-	}
-
-	Stepper_Driver findDriverByName(const String &name) {
-		for (const auto &pair : driverName) {
-			if (pair.second == name) {
-				return pair.first;
-			}
-		}
-		return Stepper_Driver::UNKNOWN;
-	}
-
-	void setDriver(Stepper_Driver stepper_driver) { driver = stepper_driver; }
-	void setDriver(const String &name) {
-		Stepper_Driver foundDriver = findDriverByName(name);
-		if (foundDriver != Stepper_Driver::UNKNOWN) {
-			driver = foundDriver;
-		} else {
-			// std::cerr << "Driver not found: " << name << std::endl;
-		}
-	}
-	Stepper_Driver getDriver() { return driver; }
-	String get_driver() { return getPinDriverName(driver); }
-
 	JsonDocument serializeJSON() override {
 		StaticJsonDocument<256> doc;
 		doc[ESPINNER_MODEL_JSONCONFIG] = ESPINNER_STEPPER_JSONCONFIG;
@@ -125,7 +126,7 @@ class ESPinner_Stepper : public ESPinner {
 		doc[ESPINNER_STEPPER_STEP_CONFIG] = getSTEP();
 		doc[ESPINNER_STEPPER_DIR_CONFIG] = getDIR();
 		doc[ESPINNER_STEPPER_EN_CONFIG] = getEN();
-		doc[ESPINNER_STEPPER_DRIVER_CONFIG] = get_driver();
+		doc[ESPINNER_STEPPER_DRIVER_CONFIG] = get_driverName();
 		if (getSPI()) {
 			doc[ESPINNER_STEPPER_ISSPI_CONFIG] = getSPI();
 			doc[ESPINNER_STEPPER_CS_CONFIG] = getCS();
