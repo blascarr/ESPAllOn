@@ -216,6 +216,37 @@ void removeStepper_callback(Control *sender, int type) {
 	}
 }
 
+void updateStepperMotorState(uint16_t parentRef) {
+	uint16_t PINSTEPSelectorRef =
+		searchByLabel(parentRef, STEPPER_SWITCH_RUN_LABEL);
+	uint16_t PINDIRSelectorRef =
+		searchByLabel(parentRef, STEPPER_SWITCH_DIR_LABEL);
+
+	uint8_t associatedPinSTEP =
+		ESPAllOnPinManager::getInstance().getCurrentReference(
+			PINSTEPSelectorRef);
+	uint8_t associatedPinDIR =
+		ESPAllOnPinManager::getInstance().getCurrentReference(
+			PINDIRSelectorRef);
+
+	DUMPSLN("Movement Begin: ");
+	const int PIN_DIR = 12;
+	const int PIN_STEP = 13;
+	const int PIN_EN = 15;
+
+	pinMode(PIN_EN, OUTPUT);
+	digitalWrite(PIN_EN, HIGH);
+	A4988 stepper(200, PIN_DIR, PIN_STEP);
+	// AccelStepper stepper(AccelStepper::DRIVER, PIN_STEP, PIN_DIR);
+	digitalWrite(PIN_EN, LOW);
+	// stepper.setMaxSpeed(1000);
+	// stepper.setAcceleration(500);
+
+	// stepper.setCurrentPosition(0);
+	// stepper.moveTo(2000);
+	DUMPSLN("EndMovement: ");
+}
+
 void Stepper_UI(uint16_t Stepper_ptr) {
 	Stepper_Selector(Stepper_ptr);
 	GUIButtons_Elements(Stepper_ptr, STEPPER_SAVE_LABEL, STEPPER_SAVE_VALUE,
@@ -281,13 +312,13 @@ void Stepper_VEL_Slider_callback(Control *sender, int type) {
 void Stepper_DIR_Switcher_callback(Control *sender, int type) {
 	uint16_t parentRef =
 		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
-	// updateDCMotorState(parentRef);
+	updateStepperMotorState(parentRef);
 }
 
 void Stepper_RUN_Switcher_callback(Control *sender, int type) {
 	uint16_t parentRef =
 		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
-	// updateDCMotorState(parentRef);
+	updateStepperMotorState(parentRef);
 }
 
 void Stepper_Pad_callback(Control *sender, int type) {
