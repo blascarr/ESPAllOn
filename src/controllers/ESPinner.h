@@ -5,22 +5,24 @@
 #include <ESPUI.h>
 #include <Persistance.h>
 
+/**
+ * Enumeration of available ESPinner module types
+ */
 enum class ESPinner_Mod {
-	VOID,
-	GPIO,
-	Stepper,
-	RFID,
-	NeoPixel,
-	DC,
-	MPU,
-	Encoder,
-	TFT,
-	LCD
+	GPIO,	  // Basic GPIO input/output
+	Stepper,  // Stepper motor control
+	RFID,	  // RFID reader module
+	NeoPixel, // Addressable LED strips
+	VOID,	  // Empty/undefined module
+	DC,		  // DC motor control
+	MPU,	  // Motion processing unit (accelerometer/gyroscope)
+	Encoder,  // Rotary encoder input
+	TFT,	  // TFT display module
+	LCD		  // LCD display module
 };
-
 struct ESPinner_Module {
-	ESPinner_Mod model;
-	String name;
+	ESPinner_Mod model; // Module type enumeration
+	String name;		// Human-readable module name
 };
 
 const ESPinner_Module mods[] = {{ESPinner_Mod::VOID, VOID_LABEL},
@@ -34,37 +36,96 @@ const ESPinner_Module mods[] = {{ESPinner_Mod::VOID, VOID_LABEL},
 								{ESPinner_Mod::TFT, TFT_LABEL},
 								{ESPinner_Mod::LCD, LCD_LABEL}};
 
+/**
+ * Abstract interface for all ESPinner modules
+ * Defines the common interface that all ESPinner implementations
+ */
 class IESPinner {
   public:
 	IESPinner() {}
-	// Inicialización
+
+	/**
+	 * Initialize the ESPinner module
+	 * Called once during system startup to configure hardware
+	 */
 	virtual void setup() = 0;
-	// Updates
+
+	/**
+	 * Called periodically to handle ongoing operations
+	 */
 	virtual void update() = 0;
-	// Accion de carga del modelo en interfaz
+
+	/**
+	 * Load the module's interface
+	 * Called to set up the user interface elements
+	 */
 	virtual void loader() = 0;
 
-	// implementacion
+	/**
+	 * Implement the module functionality
+	 * Called to activate the module and integrate it with the system
+	 */
 	virtual void implement() = 0;
+
 	virtual ~IESPinner() {}
 };
 
+/**
+ * Base implementation of ESPinner with JSON serialization support
+ * It implements the IESPinner interface and adds JSON serialization
+ * capabilities for persistent storage. Each ESPinner has a unique ID and module
+ * type.
+ */
 class ESPinner : public IESPinner, public IJSONSerializable {
   public:
-	ESPinner_Mod mod;
-	String ID;
+	ESPinner_Mod mod; // Module type of this ESPinner
+	String ID;		  // Unique identifier for this ESPinner instance
+
+	/**
+	 * Factory method to create ESPinner instances based on type string
+	 * @param type String representation of the ESPinner type
+	 * @return Unique pointer to the created ESPinner instance
+	 */
 	static std::unique_ptr<ESPinner> create(const String &type);
 
+	/**
+	 * Constructor with specific module type
+	 * @param espinner_mod Type of ESPinner module to create
+	 */
 	ESPinner(ESPinner_Mod espinner_mod) : mod(espinner_mod) {};
+
+	/**
+	 * Constructor - creates VOID type ESPinner
+	 */
 	ESPinner() : mod(ESPinner_Mod::VOID) {}
+
 	void setup() override {}
 	void update() override {}
 	void implement() override {}
 	void loader() override {}
 
+	/**
+	 * Sets the module type
+	 * @param espinner_mod New module type
+	 */
 	void setType(ESPinner_Mod espinner_mod) { mod = espinner_mod; }
+
+	/**
+	 * Gets the module type
+	 * @return Current module type
+	 */
 	ESPinner_Mod getType() { return mod; }
+
+	/**
+	 * Sets the unique identifier
+	 * @param espinner_ID New unique identifier
+	 */
 	void setID(String espinner_ID) { ID = espinner_ID; }
+
+	/**
+	 * Gets the unique identifier
+	 * @return Current unique identifier
+	 */
 	String getID() { return ID; }
 };
 

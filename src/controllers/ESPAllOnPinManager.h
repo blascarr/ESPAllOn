@@ -6,6 +6,7 @@
 #include "../models/ESP_Boards.h"
 #include <PinManager.h>
 
+/** Mapping of pin types to their string representations */
 const std::map<PinType, const char *> pinTypeNames = {
 	{PinType::None, "None"},
 	{PinType::Ethernet, "Ethernet"},
@@ -29,22 +30,27 @@ const std::map<PinType, const char *> pinTypeNames = {
 	{PinType::VSPI_CLK, "VSPI_CLK"},
 	{PinType::VSPI_CS, "VSPI_CS"}};
 
-// ---------------------------------------------------------- //
-// --------------------ESPAllOnPinManager-------------------- //
-// ---------------------------------------------------------- //
-/*	ESPAllOnPinManager define a structure where PIN Labels works with GUI
- *	in order to review which Pins can be used in different ESPinner Mods.
- *	ESPAllOn Object will manage ESPAllOnPinManager with a pointer reference.
- *	But maybe is not necessary, because ESPAllOnPinManager has an instance
- * 	in order to check it as a SingleTon Pattern.
+/**
+ * ESPAllOnPinManager extends the base PinManager to provide ESP-specific
+ * functionality and integration with the ESPUI library. It manages pin
+ * assignments, tracks pin usage, and provides validation for pin operations.
+ *
+ * The class implements the Singleton pattern to ensure only one instance
+ * manages the pins throughout the application lifecycle.
  */
+
 class ESPAllOnPinManager : public PinManager<ESP_BoardConf, ESP_PinMode> {
 
   public:
-	// Relation PIN with Selector Reference in ESPAllOn GUI
-	// <uint16_t PIN , uint16_ t SELECTOR>
+	/** Map relating PIN with Selector Reference in ESPAllOn GUI < uint16_t PIN,
+	 * uint16_ t SELECTOR_ID>
+	 */
 	std::map<uint16_t, uint16_t> pinCurrentStatus;
 
+	/**
+	 * Marks all broken pins as occupied with a special value (10000)
+	 * to prevent them from being used in the system.
+	 */
 	ESPAllOnPinManager() {
 		for (const auto &config : ESP_BoardConf::PINOUT) {
 			if (config.isBroken) {
@@ -54,13 +60,26 @@ class ESPAllOnPinManager : public PinManager<ESP_BoardConf, ESP_PinMode> {
 		}
 	}
 
+	/**
+	 * Gets the singleton instance of ESPAllOnPinManager
+	 * @return Reference to the singleton instance
+	 */
 	static ESPAllOnPinManager &getInstance() {
 		static ESPAllOnPinManager instance;
 		return instance;
 	}
 
+	/**
+	 * Gets reference to the PIN mapping
+	 * @return Reference to the map containing pin-to-selector relationships
+	 */
 	std::map<uint16_t, uint16_t> &getPINMap() { return pinCurrentStatus; }
 
+	/**
+	 * Gets the current pin number for a given reference ID
+	 * @param ref Reference ID to search for
+	 * @return Pin number if found, 0 otherwise
+	 */
 	uint16_t getCurrentReference(uint8_t ref) {
 		for (auto &relation : pinCurrentStatus) {
 			if (relation.second == ref) {
@@ -72,6 +91,11 @@ class ESPAllOnPinManager : public PinManager<ESP_BoardConf, ESP_PinMode> {
 		return 0;
 	}
 
+	/**
+	 * Updates GPIO configuration from ESPUI interface
+	 * @param ESPin ESP board Pin configuration model
+	 * @param ref UI control reference
+	 */
 	void updateGPIOFromESPUI(ESP_PinMode ESPin, uint16_t ref) {
 		uint16_t sel = getCurrentReference(ref);
 		if (sel == 0) {
@@ -86,13 +110,24 @@ class ESPAllOnPinManager : public PinManager<ESP_BoardConf, ESP_PinMode> {
 		}
 	}
 
+	/**
+	 * Debug function to print current pin status
+	 */
 	void debugCurrentStatus() { debugMap(pinCurrentStatus); }
 
+	/**
+	 * Sets the relationship between a pin and its UI control reference
+	 * @param pin Pin number
+	 * @param espuiControlRef UI control reference ID
+	 */
 	void setPinControlRelation(uint8_t pin, uint16_t espuiControlRef) {
 		pinCurrentStatus[pin] = espuiControlRef;
 	}
 };
 
+/**
+ * Gets the string name for a given pin type
+ */
 const char *getPinTypeName(PinType pinType) {
 	auto it = pinTypeNames.find(pinType);
 	if (it != pinTypeNames.end()) {
@@ -101,7 +136,9 @@ const char *getPinTypeName(PinType pinType) {
 	return "Unknown";
 }
 
-// DUMP PINOUT LIST
+/**
+ * Debug function to dump complete pinout information
+ */
 void DUMP_PINOUT() {
 	for (int i = 0; i < ESP_BoardConf::NUM_PINS; i++) {
 		PinType GPIOType = ESPAllOnPinManager::getInstance().getPinType(i);
@@ -125,9 +162,16 @@ void DUMP_PINOUT() {
 	}
 }
 
-// Ref should be checked with the selector in Pin for
-// std::map<uint16_t, uint16_t> pinCurrentStatus;
-
+/**
+ * Validates if a string value represents a valid and available pin
+ *
+ * This function performs comprehensive validation including:
+ * - Numeric validation
+ * - Range checking
+ * - Broken pin detection
+ * - Availability checking
+ * - Current assignment validation
+ */
 bool isNumericAndInRange(const String value, uint16_t ref) {
 	int val = value.toInt();
 	ESPAllOnPinManager::getInstance().debugCurrentStatus();

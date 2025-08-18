@@ -15,9 +15,24 @@
 #include "manager/Memory_Manager.h"
 #endif
 
+/**
+ * Main setup and loop functions for the ESPAllOn
+ * project, which provides a web-based interface for configuring ESP32/ESP8266
+ * pins and managing various hardware modules through the ESPUI library.
+ */
+
 // UI handles
 
+/**
+ * External action callback function for MQTT message sending
+ * @param mode Action mode parameter
+ */
 void externalAction(uint16_t mode) { Serial.println("EXTERNAL ACTIOOOOON"); }
+
+/**
+ * External action callback function for blocked door handling
+ * @param mode Action mode parameter
+ */
 void externalAction2(uint16_t mode) { Serial.println("Blocked Door"); }
 
 String nameAction = "Send MQTT Message";
@@ -26,6 +41,12 @@ ESPAction ACTION2("BLocked Door", "ACTION2", externalAction2);
 
 ESPALLON_Wifi wifi = ESPALLON_Wifi::getInstance();
 
+/**
+ * Setup initializes all system components
+ *
+ * Configures serial communication, WiFi connection, UI components,
+ * pin management, and loads saved ESPinner configurations from storage.
+ */
 void setup() {
 	randomSeed(0);
 	Serial.begin(115200);
@@ -55,6 +76,11 @@ void setup() {
 #endif
 }
 
+/**
+ * Main loop function - handles UI updates, WiFi management, and serial
+ * Continuously updates the UI ticker, manages WiFi connection, and processes
+ * serial commands for debugging and configuration purposes.
+ */
 void loop() {
 
 	UI_UpdateTicker.update();
