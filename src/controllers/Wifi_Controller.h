@@ -6,8 +6,13 @@
 #include <DNSServer.h>
 #include <EEPROM.h>
 
+/** DNS server instance for captive portal functionality */
 DNSServer dnsServer;
 
+/**
+ * Callback for saving WiFi credentials to EEPROM
+ * Saves SSID and password from UI controls to persistent storage
+ */
 void enterWifiDetailsCallback(Control *sender, int type) {
 	if (type == B_UP) {
 		DUMPSLN("Saving credentials to EEPROM...");

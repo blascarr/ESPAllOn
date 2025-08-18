@@ -5,30 +5,47 @@
 
 #include "../../utils.h"
 
+/** ESPinner selector function pre-declared */
 void ESPinnerSelector();
 
+/**
+ * Enumeration of available tab types in the UI
+ */
 enum class TabType {
-	BasicTab,
-	ControllerTab,
-	AdvancedSettingsTab,
-	LinkedActions,
-	NetworkTab
+	BasicTab,			 // Main ESPinners configuration tab
+	ControllerTab,		 // Controllers management tab
+	AdvancedSettingsTab, // Advanced system settings
+	LinkedActions,		 // Action linking interface
+	NetworkTab			 // WiFi and network configuration
 };
 
+/**
+ * Structure representing a tab controller in the UI
+ */
 struct TabController {
-	TabType tab;
+	TabType tab; // Tab type enumeration
 	const char *description;
-	uint16_t tabRef = 0;
+	uint16_t tabRef = 0; // UI Tab reference ID
+
+	/**
+	 * Constructor for TabController
+	 */
 	TabController(TabType t, const char *desc, uint16_t ref = 0)
 		: tab(t), description(desc), tabRef(ref) {}
 };
 
+/** Array of available tabs with their configurations */
 TabController tabs[] = {{TabType::BasicTab, BASICTAB_LABEL},
 						{TabType::ControllerTab, CONTROLLERTAB_LABEL},
 						{TabType::LinkedActions, LINKACTIONSTAB_LABEL},
 						{TabType::AdvancedSettingsTab, ADVCONFIGTAB_LABEL},
 						{TabType::NetworkTab, WIFITAB_LABEL}};
 
+/**
+ * Gets or creates a tab by type
+ * @param tabType Type of tab to retrieve
+ * @return UI reference ID for the tab
+ */
 uint16_t getTab(const TabType &tabType) {
 
 	for (auto &tabElement : tabs) {
@@ -51,6 +68,9 @@ uint16_t getTab(const TabType &tabType) {
 /*-------------------CallBacks------------------------*/
 /*----------------------------------------------------*/
 
+/**
+ * Debug callback that prints control information
+ */
 void debugCallback(Control *sender, int type) {
 	DUMPPRINTLN();
 	DUMP("CB: id(", sender->id);
@@ -59,17 +79,30 @@ void debugCallback(Control *sender, int type) {
 	DUMPLN("' = ", sender->value);
 }
 
+/** Empty callback function for controls that don't need processing */
 void voidCallback(Control *sender, int type) {}
+
+/** Predeclared callback functions */
 void generalCallback(Control *sender, int type);
 void extendedCallback(Control *sender, int type, void *param);
 void ESPINNER_ID_Callback(Control *sender, int type);
+
+/** General callback that uses debug functionality */
 void generalCallback(Control *sender, int type) { debugCallback(sender, type); }
 
+/**
+ * Extended callback with parameter support
+ */
 void extendedCallback(Control *sender, int type, void *param) {
 	debugCallback(sender, type);
 	DUMPLN("param = ", String((int)param));
 }
 
+/**
+ * Finds an ESPinner module by name
+ * @param name Name of the module to find
+ * @return Pointer to the module or nullptr if not found
+ */
 const ESPinner_Module *findModByName(const String &name) {
 	for (const auto &module : mods) {
 		if (module.name == name) {
@@ -81,6 +114,10 @@ const ESPinner_Module *findModByName(const String &name) {
 
 #include "../../manager/ESPinner_Manager.h"
 
+/**
+ * Callback for creating PIN configuration interfaces.
+ * Dynamically creates UI based on selected ESPinner type
+ */
 void createPINConfigCallback(Control *sender, int type) {
 	debugCallback(sender, type);
 
@@ -219,8 +256,11 @@ void createPINConfigCallback(Control *sender, int type) {
 	}
 }
 
-// Create a selector Espinner Type and it executes callback to introduce a new
-// Espinner Object.
+/**
+ * Creates ESPinner type selector and executes callback to introduce new
+ * ESPinner objects setting up the main interface for creating and configuring
+ * ESPinner modules
+ */
 void ESPinnerSelector() {
 	uint16_t basicTabRef = getTab(TabType::BasicTab);
 	int numMods = sizeof(mods) / sizeof(mods[0]);
@@ -261,6 +301,10 @@ void ESPinnerSelector() {
 						 grandParentControl); // Add Save Button to parent
 }
 
+/**
+ * Callback for saving ESPinner elements
+ * Creates new ESPinner selector and processes the save operation
+ */
 void saveElement_callback(Control *sender, int type) {
 	if (type == B_UP) {
 		ESPinnerSelector();
@@ -322,6 +366,10 @@ void saveElement_callback(Control *sender, int type) {
 	}
 }
 
+/**
+ * Callback for removing ESPinner elements
+ * Removes ESPinner from manager and cleans up UI references
+ */
 void removeElement_callback(Control *sender, int type) {
 	if (type == B_UP) {
 		uint16_t parentRef = getParentId(elementToParentMap, sender->id);
@@ -357,6 +405,12 @@ void removeElement_callback(Control *sender, int type) {
 	}
 }
 
+/**
+ * Detaches a removed PIN from the pin manager
+ * @param expected_label Expected label for validation
+ * @param espinner_label ESPinner label to check
+ * @param espinner_value Pin value to detach
+ */
 void detachRemovedPIN(String expected_label, String espinner_label,
 					  String espinner_value) {
 	if (espinner_label == expected_label) {

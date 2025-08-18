@@ -8,32 +8,55 @@
 #include <DNSServer.h>
 #include <EEPROM.h>
 
+/**
+ * Abstract interface for WiFi functionality
+ */
 class WiFiInterface {
   public:
+	/** Check if WiFi connection is active */
 	virtual bool checkWifiConnection() = 0;
 };
 
+/**
+ * WiFi management class for ESPAllOn system
+ * Handles WiFi connection, configuration, and status monitoring
+ */
 class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
   public:
 	uint16_t wifi_ssid_text, wifi_pass_text;
 	bool wifiStatus = false;
 
+	/**
+	 * Constructor sets up the connection tick callback
+	 */
 	ESPALLON_Wifi() {
 		ESPALLON_Controller::setCallback(
 			std::bind(&ESPALLON_Wifi::connectTick, this));
 	}
 
+	/**
+	 * Gets the singleton instance of ESPALLON_Wifi
+	 * @return Reference to the singleton instance
+	 */
 	static ESPALLON_Wifi &getInstance() {
 		static ESPALLON_Wifi instance;
 		return instance;
 	}
 
+	/**
+	 * Initialize WiFi controller
+	 * Configures WiFi, starts controller, and scans for networks
+	 */
 	void begin() override {
 		wifiConfig();
 		ESPALLON_Controller::start();
 		wifiScan();
 	}
 
+	/**
+	 * Check if WiFi connection is active
+	 * @return True if connected, false otherwise
+	 */
 	bool checkWifiConnection() override {
 		if (WiFi.status() != WL_CONNECTED) {
 			// DUMPSLN("Error: Board could not connect to WiFi.");
@@ -45,6 +68,10 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 		return wifiStatus;
 	}
 
+	/**
+	 * Configure WiFi with hardcoded credentials
+	 * Sets up station mode and network configuration
+	 */
 	void wifiConfig() {
 		DUMPSLN("Wi-Fi ...");
 		WiFi.mode(WIFI_STA);
@@ -56,6 +83,10 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 		}
 	}
 
+	/**
+	 * Connection tick handler
+	 * Monitors connection attempts and switches to status when connected
+	 */
 	void connectTick() override {
 		if (ESPALLON_Controller::state() == RUNNING) {
 			DUMPLN("Counter: ", counter());
@@ -70,6 +101,10 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 		}
 	}
 
+	/**
+	 * Reset WiFi connection
+	 * Stops controller, reconfigures WiFi, and restarts
+	 */
 	void resetConnection() {
 		ESPALLON_Controller::stop();
 		wifiConfig();
@@ -78,8 +113,13 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 		ESPALLON_Controller::start();
 	}
 
+	/** Get current status - placeholder function */
 	void getCurrentStatus() {}
 
+	/**
+	 * Check if connected and print network information
+	 * @return Current WiFi status
+	 */
 	bool connected() {
 		if (wifiStatus) {
 			DUMPSLN("");
@@ -90,6 +130,10 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 		return wifiStatus;
 	}
 
+	/**
+	 * Scan for available WiFi networks
+	 * Prints list of found networks with signal strength
+	 */
 	void wifiScan() {
 		int n = WiFi.scanNetworks();
 		DUMPLN("Redes wifi:", String(n));
@@ -101,11 +145,20 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 		}
 	}
 
+	/**
+	 * Disconnect from WiFi and update status
+	 */
 	void disconnect() {
 		WiFi.disconnect();
 		checkWifiConnection();
 	}
 
+	/**
+	 * Read string from EEPROM
+	 * @param buf Buffer to store the string
+	 * @param baseaddress Starting address in EEPROM
+	 * @param size Maximum size to read
+	 */
 	void readStringFromEEPROM(String &buf, int baseaddress, int size) {
 		buf.reserve(size);
 		for (int i = baseaddress; i < baseaddress + size; i++) {
@@ -116,6 +169,10 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 		}
 	}
 
+	/**
+	 * Connect to WiFi network
+	 * Attempts connection with stored/hardcoded credentials or creates AP
+	 */
 	void connectWifi() {
 		int connect_timeout;
 

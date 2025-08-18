@@ -60,37 +60,69 @@
 
 #endif
 
+/** Color scheme definitions for UI elements */
 #define DANGER_COLOR "#cc3333"
 #define SUCCESS_COLOR "#33cc66"
 #define PENDING_COLOR "#6633dd"
 #define SELECTED_COLOR "#1165aa"
 
+/** Type alias for UI callback functions */
 using UICallback = void (*)(Control *sender, int type);
 
+/**
+ * Callback function for removing UI elements
+ */
 void removeElement_callback(Control *sender, int type);
+
+/**
+ * Callback function for saving UI elements
+ */
 void saveElement_callback(Control *sender, int type);
+
+/**
+ * Creates a GPIO selector GUI element
+ * @param parentRef Reference to the parent UI control
+ * @param GPIOLabel Label for the GPIO selector
+ * @param GPIOValue Default value for the GPIO selector
+ * @param SelectorCallback Callback function for the selector
+ * @return Control ID of the created GPIO selector
+ */
 uint16_t GUI_GPIOSelector(uint16_t parentRef, const char *GPIOLabel,
 						  const char *GPIOValue, UICallback SelectorCallback);
+
+/**
+ * Detaches a removed PIN from the system
+ * @param expected_label Expected label for validation
+ * @param espinner_label ESPinner label
+ * @param espinner_value ESPinner value containing pin number
+ */
 void detachRemovedPIN(String expected_label, String espinner_label,
 					  String espinner_value);
 /*----------------------------------------------------*/
 /*----------------   Vector List  --------------------*/
 /*----------------------------------------------------*/
 
-// Array List of Containers inside mainSelector in Mod Tabs
+/** Array list of container references inside main selector in module tabs */
 std::vector<uint16_t> controlReferences;
 
-// Map list to link children elements to parent container < child , parent >
 /**
+ * Map to link children elements to parent container <child, parent>
+ *
+ * Structure:
  *            o ( child UID )
  *           /
  *  Parent  O
  *           \
  *            o ( child GPIO )
  */
-
 std::map<uint16_t, uint16_t> elementToParentMap;
 
+/**
+ * Gets all child IDs for a given parent ID from the map
+ * @param map Map containing child-parent relationships
+ * @param parentId ID of the parent to search for
+ * @return Vector containing all child IDs
+ */
 std::vector<uint16_t> getChildrenIds(const std::map<uint16_t, uint16_t> &map,
 									 uint16_t parentId) {
 	std::vector<uint16_t> childrenIds;
@@ -102,11 +134,18 @@ std::vector<uint16_t> getChildrenIds(const std::map<uint16_t, uint16_t> &map,
 	return childrenIds;
 }
 
+/**
+ * Adds an element with its parent to a map
+ */
 template <typename K, typename V>
 void addElementWithParent(std::map<K, V> &map, K elementId, V parentId) {
 	map[elementId] = parentId;
 }
 
+/**
+ * Debug function to print map contents
+ * @param map Map to debug
+ */
 template <typename K, typename V> void debugMap(const std::map<K, V> &map) {
 	DUMPLN("SIZE MAP: ", map.size());
 	for (const auto &it : map) {
@@ -115,6 +154,13 @@ template <typename K, typename V> void debugMap(const std::map<K, V> &map) {
 	}
 }
 
+/**
+ * Gets parent ID from a generic map where K is the key and V is the
+ * value
+ * @param map Map to search in
+ * @param elementId Element ID to find parent for
+ * @return Parent ID if found, 0 otherwise
+ */
 template <typename K, typename V>
 V getParentId(const std::map<K, V> &map, K elementId) {
 	auto it = map.find(elementId); // "it" refers to the element found
@@ -126,11 +172,18 @@ V getParentId(const std::map<K, V> &map, K elementId) {
 	}
 }
 
+/**
+ * Removes control ID from vector of control references
+ * @param controlRef Vector of control references
+ * @param id ID to remove from the vector
+ */
 void removeControlId(std::vector<uint16_t> &controlRef, uint16_t id) {
 	auto newEnd = std::remove(controlRef.begin(), controlRef.end(), id);
 	controlRef.erase(newEnd, controlRef.end());
 }
 
+// Remove Key from generic Map template <K, V> where K is the key and V is the
+// value. ElementId is the key and remove the key from the map.
 template <typename K, typename V>
 void removeValueFromMap(std::map<K, V> &elementToParentMap, K key) {
 	int numErased = elementToParentMap.erase(key);
@@ -141,6 +194,8 @@ void removeValueFromMap(std::map<K, V> &elementToParentMap, K key) {
 	// }
 }
 
+// Remove Children from generic Map template <K, V> .
+// ElementId is the key and remove the children from the map.
 template <typename K, typename V>
 void removeChildrenFromMap(std::map<K, V> &elementToParentMap, V value) {
 	std::vector<K> keysToRemove;
@@ -155,6 +210,8 @@ void removeChildrenFromMap(std::map<K, V> &elementToParentMap, V value) {
 	}
 }
 
+// Remove Key from generic Map template <K, V>.
+// ElementId is the key and remove the key from the map.
 template <typename K, typename V>
 void removeKeyFromMap(std::map<K, V> &elementToParentMap, K key) {
 	elementToParentMap.erase(key);
@@ -206,6 +263,11 @@ uint16_t searchByLabel(uint16_t element_id, String label) {
 	return searchInMapByLabel(elementToParentMap, element_id, label);
 }
 
+/**
+ * Generates CSS background color style string
+ * @param color Color code in hexadecimal format (e.g., "#ff0000")
+ * @return CSS style string for background color
+ */
 char *getBackground(const char *color) {
 	static char buffer[40];
 	snprintf(buffer, sizeof(buffer), "background-color: %s;", color);
@@ -214,12 +276,24 @@ char *getBackground(const char *color) {
 
 #define PINSIZE ESP_BoardConf::NUM_PINS
 
+/**
+ * Checks if a string represents a valid numeric pin value
+ * @param str String to check
+ * @return True if string is numeric and within valid pin range
+ */
 bool isNumericString(String str) {
 	return (str.toInt() != 0 && str.toInt() < PINSIZE);
 }
 
 //-------------- UI --------------------//
 
+/**
+ * Creates a save button for GUI elements
+ * @param parentRef Reference to the parent UI control
+ * @param saveLabel Label for the save button
+ * @param saveValue Value for the save button
+ * @param saveCallback Callback function for save action
+ */
 void GUI_SaveButton(uint16_t parentRef, const char *saveLabel,
 					const char *saveValue, UICallback saveCallback) {
 	// Save Element Button
@@ -229,6 +303,13 @@ void GUI_SaveButton(uint16_t parentRef, const char *saveLabel,
 	addElementWithParent(elementToParentMap, GPIOAdd_selector,
 						 parentRef); // Add Save Button to parent
 }
+/**
+ * Creates a remove button for GUI elements
+ * @param parentRef Reference to the parent UI control
+ * @param removeLabel Label for the remove button
+ * @param removeValue Value for the remove button
+ * @param removeCallback Callback function for remove action
+ */
 void GUI_RemoveButton(uint16_t parentRef, const char *removeLabel,
 					  const char *removeValue, UICallback removeCallback) {
 	// Remove Element Button
@@ -240,6 +321,16 @@ void GUI_RemoveButton(uint16_t parentRef, const char *removeLabel,
 						 parentRef); // Add Remove Button to parent
 }
 
+/**
+ * Creates both save and remove buttons for GUI elements
+ * @param parentRef Reference to the parent UI control
+ * @param saveLabel Label for the save button
+ * @param saveValue Value for the save button
+ * @param removeLabel Label for the remove button
+ * @param removeValue Value for the remove button
+ * @param saveCallback Callback function for save action
+ * @param removeCallback Callback function for remove action
+ */
 void GUIButtons_Elements(uint16_t parentRef, const char *saveLabel,
 						 const char *saveValue, const char *removeLabel,
 						 const char *removeValue, UICallback saveCallback,
