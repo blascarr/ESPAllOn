@@ -1,4 +1,21 @@
 
+/**
+ * GPIO Module Test
+ *
+ * This comprehensive test validates the ESPinner_GPIO module functionality.
+ *
+ * Test Steps:
+ * 1. Initialize system and validate empty state
+ * 2. Create first GPIO ESPinner (INPUT mode) and validate UI elements
+ * 3. Test invalid pin input handling and validation
+ * 4. Save valid GPIO configuration and verify pin manager attachment
+ * 5. Modify GPIO pin assignment and test pin detachment/attachment
+ * 6. Create second GPIO ESPinner (OUTPUT mode) with different pin
+ * 7. Validate multiple ESPinners coexistence and pin exclusivity
+ * 8. Remove first ESPinner and verify cleanup operations
+ * 9. Validate storage persistence throughout all operations
+ */
+
 #include <Arduino.h>
 #include <config.h>
 #include <set>

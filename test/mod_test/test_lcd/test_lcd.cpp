@@ -1,4 +1,18 @@
 
+/**
+ * LCD Display Module Test
+ *
+ * This basic test validates the ESPinner_LCD module initialization and UI
+ * creation.
+ *
+ * Test Steps:
+ * 1. Initialize system and validate empty UI state
+ * 2. Set up ESPAllOn system and create initial UI structure
+ * 3. Validate UI element creation and parent-child relationships
+ * 4. Create LCD ESPinner through UI selection
+ * 5. Validate LCD-specific UI elements are properly created
+ */
+
 #include <Arduino.h>
 #include <config.h>
 #include <utils.h>

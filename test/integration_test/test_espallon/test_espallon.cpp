@@ -1,3 +1,25 @@
+/**
+ * ESPAllOn Complete System Integration Test
+ *
+ * This comprehensive integration test validates ESPAllOn
+ * WiFi connectivity, UI functionality, ESPinner management, and
+ * external browser automation.
+ *
+ * Test Steps:
+ * 1. Initialize system with WiFi connectivity and UI setup
+ * 2. Create GPIO ESPinner through UI simulation
+ * 3. Create RFID ESPinner through UI simulation
+ * 4. Create Stepper ESPinner through UI simulation
+ * 5. Create additional GPIO ESPinner for multi-device testing
+ * 6. Load ESPinners from persistent storage
+ * 7. Start UI update ticker and WiFi management
+ * 8. Run periodic tests using ticker system
+ * 9. Execute browser automation testing (external thread)
+ * 10. Validate system stability and functionality
+ *
+ * This test serves as the primary validation for complete system deployment.
+ */
+
 #include <Arduino.h>
 #include <config.h>
 #include <utils.h>
@@ -10,12 +32,15 @@
 
 #include "../../utils/testTicker.h"
 
+/**
+ * Browser automation execution with system initialization delay
+ * Uses ticker-based delay instead of threads for ESP compatibility
+ */
 void executeDelayedCommand() {
-	// Espera 10 segundos
 	std::this_thread::sleep_for(std::chrono::seconds(10));
-	// Ejecuta el comando después de la espera
+	// Execute Puppeteer browser automation test
 	int returnCode = system("node ../node_test/src_test/puppeteer_test.js");
-	std::cout << "Código de retorno: " << returnCode << std::endl;
+	std::cout << "Browser test return code: " << returnCode << std::endl;
 }
 
 int main() {
@@ -53,6 +78,10 @@ void test_no_elementsInParentMap() {
 	TEST_ASSERT_EQUAL_INT16(0, elementToParentMap.size());
 }
 
+/**
+ * Add GPIO ESPinner through UI simulation
+ * Simulates user creating a GPIO ESPinner via web interface
+ */
 void addGPIOESPinner() {
 	uint16_t gpio_ref =
 		searchByLabel(elementToParentMap.begin()->second, "ESPinnerType");
@@ -61,6 +90,10 @@ void addGPIOESPinner() {
 	saveElement_callback(typeGPIOController, B_UP);
 }
 
+/**
+ * Add Stepper ESPinner through UI simulation
+ * Simulates user creating a Stepper motor ESPinner via web interface
+ */
 void addStepperESPinner() {
 	uint16_t stepper_ref =
 		searchByLabel(elementToParentMap.begin()->second, "ESPinnerType");
@@ -69,6 +102,10 @@ void addStepperESPinner() {
 	saveElement_callback(typeStepperController, B_UP);
 }
 
+/**
+ * Add RFID ESPinner through UI simulation
+ * Simulates user creating an RFID reader ESPinner via web interface
+ */
 void addRFIDESPinner() {
 	uint16_t rfid_ref =
 		searchByLabel(elementToParentMap.begin()->second, "ESPinnerType");

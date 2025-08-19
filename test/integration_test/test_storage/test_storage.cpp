@@ -1,3 +1,19 @@
+/**
+ * Storage Integration Test
+ *
+ * This integration test validates the persistent storage functionality in a
+ * real system environment.
+ *
+ * Test Steps:
+ * 1. Initialize complete ESPAllOn system with WiFi and UI
+ * 2. Create multiple ESPinner objects programmatically
+ * 3. Push ESPinners to manager and validate storage
+ * 4. Test UI-based ESPinner creation through ticker system
+ * 5. Validate storage persistence across system operations
+ * 6. Test storage retrieval and ESPinner reconstruction
+ * 7. Validate system stability with multiple ESPinners
+ */
+
 #include <Arduino.h>
 #include <config.h>
 #include <utils.h>
@@ -13,6 +29,9 @@
 TickerFree<> test_runTicker(runTest, 2000, 0, MILLIS);
 ESPALLON_Wifi wifi = ESPALLON_Wifi::getInstance();
 
+/**
+ * Add GPIO ESPinner through UI for storage testing
+ */
 void addGPIOESPinner() {
 	uint16_t gpio_ref =
 		searchByLabel(elementToParentMap.begin()->second, "ESPinnerType");

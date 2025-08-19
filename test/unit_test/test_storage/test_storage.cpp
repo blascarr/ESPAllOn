@@ -1,3 +1,19 @@
+/**
+ * Storage Unit Test
+ *
+ * This test validates the persistent storage functionality for ESPinner objects
+ * using the Non-Volatile Storage (NVS) system. It tests storage, retrieval,
+ * and management of ESPinner configurations in memory and persistent storage.
+ *
+ * Test Steps:
+ * 1. Create multiple ESPinner objects (GPIO and DC types)
+ * 2. Push ESPinners to the manager and validate list size
+ * 3. Test storage persistence by checking NVS for saved data
+ * 4. Load ESPinners from storage and validate restoration
+ * 5. Clear storage and verify data removal
+ * 6. Validate empty storage state after cleanup
+ */
+
 #include "../../config.h"
 
 #include "../../../src/manager/ESPinner_Manager.h"
@@ -7,16 +23,28 @@
 
 std::list<std::unique_ptr<ESPinner>> ESPinnerTestList;
 
+/**
+ * Test that ESPinner data exists in NVS storage
+ * Validates that previously saved ESPinner configurations are present
+ */
 void test_is_there_espinner_in_file() {
 	bool isThereAnyESPinner = isThereAnyInfoInNVS(ESPinner_Path);
 	TEST_ASSERT_TRUE(isThereAnyESPinner);
 }
 
+/**
+ * Test that no ESPinner data exists in NVS storage
+ * Validates that storage is empty after cleanup operations
+ */
 void test_not_any_espinner_in_file() {
 	bool isThereAnyESPinner = isThereAnyInfoInNVS(ESPinner_Path);
 	TEST_ASSERT_FALSE(isThereAnyESPinner);
 }
 
+/**
+ * Test ESPinner manager size validation
+ * Confirms that exactly 3 ESPinners are loaded in the manager
+ */
 void test_espinners_size() {
 	size_t ESPinnersLength = ESPinner_Manager::getInstance().espinnerSize();
 	// size_t es un alias de unsigned int

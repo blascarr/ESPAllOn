@@ -1,4 +1,19 @@
 
+/**
+ * MPU (Motion Processing Unit) Module Test
+ *
+ * This basic test validates the ESPinner_MPU module initialization and UI
+ * creation.
+ *
+ * Test Steps:
+ * 1. Initialize system and validate empty UI state
+ * 2. Set up ESPAllOn system and create initial UI structure
+ * 3. Validate UI element creation and parent-child relationships
+ * 4. Create MPU ESPinner through UI selection
+ * 5. Validate MPU-specific UI elements are properly created
+
+ */
+
 #include <Arduino.h>
 #include <config.h>
 #include <utils.h>

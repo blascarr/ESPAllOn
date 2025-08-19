@@ -1,4 +1,24 @@
 
+/**
+ * DC Motor Module Test
+ *
+ * This comprehensive test validates the ESPinner_DC module functionality for
+ * DC motor control.
+ *
+ * Test Steps:
+ * 1. Initialize system and validate empty state
+ * 2. Create first DC ESPinner and validate UI structure
+ * 3. Test invalid pin input handling for Motor A pin
+ * 4. Configure valid pin assignments for both Motor A and B
+ * 5. Save DC configuration and verify pin manager attachments
+ * 6. Modify pin assignments and test pin detachment/reattachment
+ * 7. Validate DC motor controller creation (direction and velocity)
+ * 8. Create second DC ESPinner with different pin configuration
+ * 9. Test multiple DC motors coexistence and pin exclusivity
+ * 10. Remove first DC ESPinner and verify complete cleanup
+ * 11. Validate storage persistence and controller cleanup
+ */
+
 #include <Arduino.h>
 #include <config.h>
 #include <set>
@@ -58,6 +78,15 @@ void test_no_elementsInParentMap() {
 	TEST_ASSERT_EQUAL_INT16(0, elementToParentMap.size());
 }
 
+/**
+ * Assert that a UI control has the expected value
+ *
+ * Code Steps:
+ * 1. Search for control by label within input reference scope
+ * 2. If control found, get its current value from ESPUI
+ * 3. Compare actual value with expected value using Unity assertion
+ * 4. If control not found, fail test with descriptive message
+ */
 void assertControlValue(uint16_t input_ref, const String &label,
 						const String &expectedValue) {
 	uint16_t ref = searchByLabel(input_ref, label.c_str());
@@ -79,6 +108,15 @@ struct ControlAssertion {
 	String expectedValue;
 };
 
+/**
+ * Execute multiple control value assertions
+ *
+ * Code Steps:
+ * 1. Iterate through vector of ControlAssertion structures
+ * 2. For each assertion, extract selector, label, and expected value
+ * 3. Call assertControlValue() to validate each control
+ * 4. Accumulate all assertion results for comprehensive validation
+ */
 void assertControlValues(const std::vector<ControlAssertion> &assertions) {
 	for (const auto &assertion : assertions) {
 		assertControlValue(assertion.selector, assertion.label,
@@ -126,6 +164,18 @@ void loadStorage(const ESPinner_DC expectedList[]) {
 	}
 }
 
+/**
+ * Validate ESPinner_DC state in memory
+ *
+ * Code Steps:
+ * 1. Search for ESPinner by ID in manager's list
+ * 2. Cast generic ESPinner pointer to ESPinner_DC type
+ * 3. Validate GPIO A pin assignment matches expected value
+ * 4. Validate GPIO B pin assignment matches expected value
+ * 5. Verify ESPinner ID string matches expected ID
+ * 6. Confirm ESPinner type is DC module type
+ * 7. Report errors if ESPinner not found or wrong type
+ */
 void checkESPinnerState(const String &id, int expectedDC_A, int expectedDC_B,
 						ESPinner_Mod expectedType) {
 	ESPinner *espinnerInList =
@@ -145,6 +195,19 @@ void checkESPinnerState(const String &id, int expectedDC_A, int expectedDC_B,
 	}
 }
 
+/**
+ * Test void/empty DC ESPinner state after creation
+ *
+ * Code Steps:
+ * 1. Create assertion vector with expected default UI values
+ *    - ESPinner type should be "DC"
+ *    - Both GPIO pins should default to "0" (unassigned)
+ *    - Save and Remove buttons should have correct labels
+ * 2. Execute assertControlValues() to validate all UI elements
+ * 3. Get current ESPinner list size from manager
+ * 4. Assert no ESPinners exist in manager (size = 0)
+ * 5. Assert control references count is 2 (main + current selector)
+ */
 void test_void_DCespinner() {
 	std::vector<ControlAssertion> void_DC_assertions = {
 		{firstESPinnerSelector, ESPINNERTYPE_LABEL, "DC"},
@@ -161,6 +224,20 @@ void test_void_DCespinner() {
 	TEST_ASSERT_EQUAL_INT16(2, controlReferences.size());
 }
 
+/**
+ * Test DC ESPinner with invalid pin input handling
+ *
+ * Code Steps:
+ * 1. Create assertion vector with invalid pin value "asdfg" for GPIO A
+ *    - Type should be "DC", ID should be "TEST_DC"
+ *    - GPIO A has invalid string "asdfg" (non-numeric)
+ *    - GPIO B remains valid at "0"
+ * 2. Execute assertControlValues() to validate UI shows invalid input
+ * 3. Verify ESPinner manager rejects invalid configuration
+ * 4. Assert ESPinner list remains empty (invalid data not saved)
+ * 5. Assert pin manager has no pin attachments (validation failed)
+ * 6. Confirm control references remain at 2 (no new ESPinner created)
+ */
 void test_wrong_DCespinner() {
 	std::vector<ControlAssertion> wrong_DC_assertions = {
 		{firstESPinnerSelector, ESPINNERTYPE_LABEL, "DC"},
@@ -179,6 +256,23 @@ void test_wrong_DCespinner() {
 	TEST_ASSERT_EQUAL_INT16(2, controlReferences.size());
 }
 
+/**
+ * Test successfully saved DC ESPinner with valid configuration
+ *
+ * Code Steps:
+ * 1. Create assertion vector with valid DC configuration
+ *    - Type: "DC", ID: "TEST_DC"
+ *    - GPIO A: pin 14, GPIO B: pin 15
+ *    - Save/Remove buttons with correct values
+ * 2. Execute assertControlValues() to validate UI state
+ * 3. Verify GPIO selector controls are removed (UI cleanup after save)
+ * 4. Check ESPinner manager contains exactly 1 ESPinner
+ * 5. Assert control references count remains at 2
+ * 6. Create expected ESPinner object for comparison
+ * 7. Execute checkESPinnerState() to validate ESPinner in memory
+ * 8. Verify pin manager has both pins attached (GPIO 14 and 15)
+ * 9. Execute loadStorage() to validate persistent storage
+ */
 void test_saved_DCespinner() {
 	std::vector<ControlAssertion> saved_DC_assertions = {
 		{firstESPinnerSelector, ESPINNERTYPE_LABEL, "DC"},
@@ -223,6 +317,28 @@ void test_saved_DCespinner() {
 	loadStorage(expectedList);
 }
 
+/**
+ * Test DC ESPinner pin modification and pin detachment/attachment
+ *
+ * Code Steps:
+ * 1. Create assertion vector with modified pin configuration
+ *    - Same ESPinner ID "TEST_DC" but different pins
+ *    - GPIO A changed from 14 to 16, GPIO B from 15 to 18
+ * 2. Execute assertControlValues() to validate UI updates
+ * 3. Verify GPIO selector controls are removed after modification
+ * 4. Assert ESPinner manager still contains exactly 1 ESPinner
+ * 5. Create expected ESPinner object with new pin values
+ * 6. Execute checkESPinnerState() to validate updated ESPinner
+ * 7. Debug output current pin assignments
+ * 8. Verify pin manager has new pins attached (GPIO 16 and 18)
+ * 9. Assert previous pins are detached (GPIO 14 and 15)
+ * 10. Validate DC motor controller creation:
+ *     - 3 controllers: DIR switch, RUN switch, VEL slider
+ *     - 1 UI relation mapping ESPinner to parent reference
+ * 11. Search and validate each controller type by label
+ * 12. Assert each controller is properly linked to parent reference
+ * 13. Execute loadStorage() to validate persistence of changes
+ */
 void test_modified_DCespinner() {
 	std::vector<ControlAssertion> modified_DC_assertions = {
 		{firstESPinnerSelector, ESPINNERTYPE_LABEL, "DC"},
@@ -448,6 +564,22 @@ void test_firstESPinner_removed() {
 	loadStorage(expectedList);
 }
 
+/**
+ * Main test setup function - orchestrates complete DC ESPinner test sequence
+ *
+ * Code Steps:
+ * 1. Initialize serial communication at 115200 baud
+ * 2. Begin Unity test framework
+ * 3. Test initial empty state (no UI elements)
+ * 4. Execute ESPAllOn.setup() to initialize system and create first UI selector
+ * 5. Validate first selector structure and element ordering
+ * 6. Configure first ESPinner as DC type:
+ *    - Get first ESPinner selector reference from elementToParentMap
+ *    - Find ESPinner type control and set value to "DC"
+ *    - Find ESPinner ID control and set value to "TEST_DC"
+ *    - Execute saveElement_callback() to create DC ESPinner UI
+ * 7. Test void DC ESPinner state (default values, no pins assigned)
+ */
 void setup() {
 	Serial.begin(115200);
 	UNITY_BEGIN();
@@ -484,11 +616,11 @@ void setup() {
 	uint16_t DCMode_ref =
 		searchByLabel(firstESPinnerSelector, DC_MODESELECTOR_LABEL);
 
-	// Input Wrong Number
+	// Input Wrong Number - simulate user entering invalid data
 	uint16_t DCA_ref =
 		searchByLabel(firstESPinnerSelector, DC_PINA_SELECTOR_LABEL);
 	typeDC_AController = ESPUI.getControl(DCA_ref);
-	typeDC_AController->value = "asdfg";
+	typeDC_AController->value = "asdfg"; // Invalid non-numeric input
 
 	// Click On save, but not saved because of wrong number in DC PIN
 	DCSelector_callback(typeDC_AController, B_UP);
@@ -500,7 +632,7 @@ void setup() {
 	// Select a correct Number
 	// Click On Save DC
 	// ---------------------------------------------//
-	typeDC_AController->value = "14";
+	typeDC_AController->value = "14"; // Valid GPIO pin for Motor A
 
 	uint16_t DCB_ref =
 		searchByLabel(firstESPinnerSelector, DC_PINB_SELECTOR_LABEL);

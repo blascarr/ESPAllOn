@@ -1,3 +1,23 @@
+/**
+ * Stepper Motor Module Test
+ *
+ * This comprehensive test validates the ESPinner_Stepper module functionality
+ * for stepper motor control.
+ *
+ * Test Steps:
+ * 1. Initialize system and validate empty state
+ * 2. Create first Stepper ESPinner and validate UI structure
+ * 3. Test invalid pin input handling for STEP pin
+ * 4. Configure valid pin assignments for STEP, DIR, and EN pins
+ * 5. Save Stepper configuration and verify pin manager attachments
+ * 6. Modify pin assignments and test pin detachment/reattachment
+ * 7. Validate stepper motor controller creation (direction, run, velocity)
+ * 8. Create second Stepper ESPinner with different pin configuration
+ * 9. Test multiple stepper motors coexistence and pin exclusivity
+ * 10. Remove first Stepper ESPinner and verify complete cleanup
+ * 11. Validate storage persistence and controller cleanup
+ */
+
 #include <Arduino.h>
 #include <config.h>
 #include <set>

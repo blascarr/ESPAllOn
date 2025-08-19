@@ -1,3 +1,10 @@
+/**
+ * Debug Output Utilities for Testing
+ *
+ * This utility provides a comprehensive set of macros for debug output during
+ * testing.
+ */
+
 #ifndef _DUMP_UTILS_H
 #define _DUMP_UTILS_H
 
@@ -6,6 +13,7 @@
 
 #if PRINTDEBUG
 
+/** Serial interface for debug output */
 #define SERIALDEBUG Serial
 #define DUMPS(s)                                                               \
 	{                                                                          \
@@ -57,9 +65,10 @@
 
 #endif
 
-#define DANGER_COLOR "#cc3333"
-#define SUCCESS_COLOR "#33cc66"
-#define PENDING_COLOR "#6633dd"
-#define SELECTED_COLOR "#1165aa"
+/** UI Color definitions for web interface styling */
+#define DANGER_COLOR "#cc3333"	 // Red for error states
+#define SUCCESS_COLOR "#33cc66"	 // Green for success states
+#define PENDING_COLOR "#6633dd"	 // Purple for pending states
+#define SELECTED_COLOR "#1165aa" // Blue for selected states
 
 #endif
