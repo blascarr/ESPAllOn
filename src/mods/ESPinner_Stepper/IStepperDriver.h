@@ -113,6 +113,28 @@ class AccelStepperAdapter : public IStepperDriver {
 	AccelStepperAdapter(uint8_t dirPin, uint8_t stepPin, uint8_t enPin = 0)
 		: stepper(AccelStepper::DRIVER, dirPin, stepPin), en(enPin) {}
 
+	/**
+	 * Initialize the AccelStepper driver
+	 */
+	void begin() override {
+		if (en != 0) {
+			pinMode(en, OUTPUT);
+			digitalWrite(en, LOW); // Enable stepper
+		}
+		stepper.setMaxSpeed(1000);	  // Default max speed
+		stepper.setAcceleration(500); // Default acceleration
+	}
+
+	/**
+	 * Enable or disable the stepper motor
+	 * @param on True to enable, false to disable
+	 */
+	void enable(bool on) override {
+		if (en != 0) {
+			digitalWrite(en, on ? LOW : HIGH); // LOW = enabled for most drivers
+		}
+	}
+
   private:
 	int spr;		// steps per revolution
 	int rpm;		// revolutions per minute
