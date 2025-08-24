@@ -90,7 +90,7 @@ class ESPinner_Stepper : public ESPinner {
 				// stepper = std::make_unique<TMC5160Stepper>(CS, R_SENSE);
 			}
 			if (driver == Stepper_Driver::A4988) {
-				stepper = std::make_unique<A4988Adapter>(DIR, STEP, EN);
+				// stepper = std::make_unique<A4988Adapter>(DIR, STEP, EN);
 				stepper->begin();
 			}
 			if (driver == Stepper_Driver::ACCELSTEPPER) {

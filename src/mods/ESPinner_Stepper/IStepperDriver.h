@@ -1,6 +1,7 @@
 #ifndef _IESPINNER_STEPPER_H
 #define _IESPINNER_STEPPER_H
 
+#include "StepperRunner.h"
 #include <Arduino.h>
 #include <map>
 
@@ -55,12 +56,36 @@ Stepper_Driver findDriverByName(const String &name) {
 struct IStepperDriver {
 	virtual ~IStepperDriver() = default;
 	virtual void begin() = 0;
-	virtual void enable(bool on) = 0;
+	virtual void enable(bool on) { _active = on; }
+	virtual bool isEnabled() const { return _active; }
 	virtual void setMicrosteps(uint16_t ms) {}
 	virtual void setRMSCurrent(uint16_t mA) {}
+
+	/**
+	 * Get AccelStepper instance for registration with StepperRunner
+	 * @return Pointer to AccelStepper instance or nullptr if not available
+	 */
+	virtual AccelStepper *getAccelStepper() { return nullptr; }
+
+	/**
+	 * Register this stepper with the global StepperRunner
+	 * Should be called after begin() to ensure proper initialization
+	 */
+	virtual bool registerRunner(const String &id) { return false; }
+
+	/**
+	 * Unregister this stepper from the global StepperRunner
+	 */
+	virtual bool unregisterRunner(const String &id) {
+		return StepperRunner::getInstance().unregisterRunnable(id);
+	}
+
+  private:
+	bool _active;
 };
 
 // ===================== Adapter A4988 =====================
+/*
 class A4988Adapter : public IStepperDriver {
   public:
 	A4988Adapter(uint8_t dirPin, uint8_t stepPin, uint8_t enPin)
@@ -92,7 +117,7 @@ class A4988Adapter : public IStepperDriver {
 		stepper.setMicrostep(ms);
 	}
 
-	void setRMSCurrent(uint16_t /*mA*/) override {
+	void setRMSCurrent(uint16_t mA) override {
 		// A4988 does not support RMS current by software, it is manual
 	}
 
@@ -106,9 +131,9 @@ class A4988Adapter : public IStepperDriver {
 	uint8_t en;		// enable pin
 	A4988 stepper;
 };
-
+*/
 // ===================== Adapter AccelStepper =====================
-class AccelStepperAdapter : public IStepperDriver {
+class AccelStepperAdapter : public IStepperDriver, IRunnable {
   public:
 	AccelStepperAdapter(uint8_t dirPin, uint8_t stepPin, uint8_t enPin = 0)
 		: stepper(AccelStepper::DRIVER, dirPin, stepPin), en(enPin) {}
@@ -125,17 +150,55 @@ class AccelStepperAdapter : public IStepperDriver {
 		stepper.setAcceleration(500); // Default acceleration
 	}
 
+	void run() override {
+		if (isEnabled()) {
+			stepper.run();
+		}
+	}
+
+	bool isActive() const override { return IStepperDriver::isEnabled(); }
+
+	/**
+	 * Get the ID of the stepper
+	 * @return ID of the stepper
+	 */
+	String getID() const override { return _id; }
+
 	/**
 	 * Enable or disable the stepper motor
 	 * @param on True to enable, false to disable
 	 */
 	void enable(bool on) override {
+		IStepperDriver::enable(on); // Actualiza _active en la clase base
 		if (en != 0) {
 			digitalWrite(en, on ? LOW : HIGH); // LOW = enabled for most drivers
 		}
 	}
 
+	/**
+	 * Get AccelStepper instance for direct access
+	 */
+	AccelStepper *getAccelStepper() override { return &stepper; }
+
+	/**
+	 * Register this stepper with the global StepperRunner
+	 */
+	bool registerRunner(const String &id) override {
+		_id = id;
+
+		// Create shared_ptr without taking ownership of the object
+		// (no-op deleter)
+		std::shared_ptr<IRunnable> runnable(static_cast<IRunnable *>(this),
+											[](IRunnable *) {});
+		return StepperRunner::getInstance().registerRunnable(runnable);
+	}
+
+	bool unregisterRunner(const String &id) override {
+		return StepperRunner::getInstance().unregisterRunnable(id);
+	}
+
   private:
+	String _id;		// ID of the stepper
 	int spr;		// steps per revolution
 	int rpm;		// revolutions per minute
 	int microsteps; // microsteps per step
@@ -145,6 +208,8 @@ class AccelStepperAdapter : public IStepperDriver {
 };
 
 // ===================== Adapter TMC2130 =====================
+/*
+
 class TMC2130Adapter : public IStepperDriver {
   public:
 	TMC2130Adapter(uint8_t csPin, uint8_t enPin, float rSense,
@@ -175,4 +240,5 @@ class TMC2130Adapter : public IStepperDriver {
 	uint16_t microsteps = 16;
 	TMC2130Stepper drv;
 };
+*/
 #endif
