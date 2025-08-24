@@ -136,7 +136,9 @@ class A4988Adapter : public IStepperDriver {
 class AccelStepperAdapter : public IStepperDriver, IRunnable {
   public:
 	AccelStepperAdapter(uint8_t dirPin, uint8_t stepPin, uint8_t enPin = 0)
-		: stepper(AccelStepper::DRIVER, dirPin, stepPin), en(enPin) {}
+		: stepper(AccelStepper::DRIVER, dirPin, stepPin), en(enPin) {
+		this->begin();
+	}
 
 	/**
 	 * Initialize the AccelStepper driver

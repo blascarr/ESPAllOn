@@ -95,7 +95,15 @@ class ESPinner_Stepper : public ESPinner {
 			}
 			if (driver == Stepper_Driver::ACCELSTEPPER) {
 				stepper = std::make_unique<AccelStepperAdapter>(DIR, STEP);
-				stepper->begin();
+				if (stepper) {
+					bool registered = stepper->registerRunner(this->getID());
+					if (registered) {
+						DUMPLN("✅ Stepper registrado con ID: ", this->getID());
+					} else {
+						DUMPLN("❌ Error registrando stepper con ID: ",
+							   this->getID());
+					}
+				}
 			}
 		} else {
 			// std::cerr << "Driver not found: " << name << std::endl;

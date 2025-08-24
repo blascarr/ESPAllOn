@@ -8,7 +8,7 @@
 
 #include "controllers/UI/ESPAllOnGUI.h"
 #include "manager/ESPAllOn.h"
-
+#include "mods/ESPinner_Stepper/StepperRunner.h"
 #include <TickerFree.h>
 
 #if MEMORYDEBUG
@@ -85,6 +85,9 @@ void loop() {
 
 	UI_UpdateTicker.update();
 	wifi.update();
+
+	// Execute all steppers in the StepperRunner (non-blocking)
+	StepperRunner::getInstance().runAll();
 	if (Serial.available()) {
 		switch (Serial.read()) {
 		case 'w': // Print IP details

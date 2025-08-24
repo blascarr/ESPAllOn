@@ -89,7 +89,11 @@ uint16_t Stepper_driverSelector(uint16_t PIN_ptr) {
 	uint16_t driverSelect = ESPUI.addControl(
 		ControlType::Select, STEPPER_MODESELECTOR_LABEL, currentDriver,
 		ControlColor::Wetasphalt, PIN_ptr, debugCallback);
-
+	ESPUI.addControl(ControlType::Option, "AccelStepper",
+					 getDriverName(Stepper_Driver::ACCELSTEPPER), None,
+					 driverSelect);
+	ESPUI.addControl(ControlType::Option, "A4988",
+					 getDriverName(Stepper_Driver::A4988), None, driverSelect);
 	ESPUI.addControl(ControlType::Option, "TMC2130",
 					 getDriverName(Stepper_Driver::TMC2130), None,
 					 driverSelect);
@@ -111,8 +115,7 @@ uint16_t Stepper_driverSelector(uint16_t PIN_ptr) {
 	ESPUI.addControl(ControlType::Option, "TMC5160",
 					 getDriverName(Stepper_Driver::TMC5160), None,
 					 driverSelect);
-	ESPUI.addControl(ControlType::Option, "A4988",
-					 getDriverName(Stepper_Driver::A4988), None, driverSelect);
+
 	ESPUI.addControl(ControlType::Option, "UNKNOWN",
 					 getDriverName(Stepper_Driver::UNKNOWN), None,
 					 driverSelect);
@@ -230,20 +233,7 @@ void updateStepperMotorState(uint16_t parentRef) {
 			PINDIRSelectorRef);
 
 	DUMPSLN("Movement Begin: ");
-	const int PIN_DIR = 12;
-	const int PIN_STEP = 13;
-	const int PIN_EN = 15;
 
-	pinMode(PIN_EN, OUTPUT);
-	digitalWrite(PIN_EN, HIGH);
-	A4988 stepper(200, PIN_DIR, PIN_STEP);
-	// AccelStepper stepper(AccelStepper::DRIVER, PIN_STEP, PIN_DIR);
-	digitalWrite(PIN_EN, LOW);
-	// stepper.setMaxSpeed(1000);
-	// stepper.setAcceleration(500);
-
-	// stepper.setCurrentPosition(0);
-	// stepper.moveTo(2000);
 	DUMPSLN("EndMovement: ");
 }
 

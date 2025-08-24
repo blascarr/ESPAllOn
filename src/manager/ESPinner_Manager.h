@@ -206,6 +206,18 @@ void ESPINNER_ID_Callback(Control *sender, int type) {
 	}
 }
 
+AccelStepperAdapter *findStepperAdapterById(const String &id) {
+	ESPinner *espinner = ESPinner_Manager::getInstance().findESPinnerById(id);
+	if (espinner && espinner->getType() == ESPinner_Mod::Stepper) {
+
+		ESPinner_Stepper *stepperESPinner =
+			static_cast<ESPinner_Stepper *>(espinner);
+		return static_cast<AccelStepperAdapter *>(
+			stepperESPinner->stepper.get());
+	}
+	return nullptr;
+}
+
 #include "../mods/ESPinner_DC/ESPinner_DC_Controls.h"
 #include "../mods/ESPinner_Encoder/ESPinner_Encoder_Controls.h"
 #include "../mods/ESPinner_GPIO/ESPinner_GPIO_Controls.h"
