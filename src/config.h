@@ -68,6 +68,7 @@ String ESPinner_Path = "espinners";
 #define ESPINNER_STEPPER_ISSPI_CONFIG "ISSPI"
 #define ESPINNER_STEPPER_ISDIAG_CONFIG "ISDIAG"
 #define ESPINNER_STEPPER_DRIVER_CONFIG "DRIVER"
+#define ESPINNER_STEPPER_STEPSREV_CONFIG "STEPS_PER_REV"
 
 // -------- Persistance DC CONFIG --------//
 #define ESPINNER_DC_JSONCONFIG "ESPINNER_DC"
@@ -188,6 +189,8 @@ String ESPinner_Path = "espinners";
 #define STEPPER_SWITCH_RUN_VALUE "0"
 #define STEPPER_SLIDER_VEL_LABEL "STEPPER_VEL_SWITCH"
 #define STEPPER_SLIDER_VEL_VALUE "50"
+#define STEPPER_STEPSREV_LABEL "steps/rev"
+#define STEPPER_STEPSREV_VALUE "200"
 // --------------- DC MOD Definition ----------------//
 #define DC_LABEL "DC"
 #define DC_ESPINNERINPUT_LABEL "INPUT"

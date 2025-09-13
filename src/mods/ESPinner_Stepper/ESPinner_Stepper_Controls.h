@@ -49,6 +49,13 @@ void Stepper_action(uint16_t parentRef) {
 			espinnerStepper->setDriver(espinner_value);
 		}
 
+		if (espinner_label == STEPPER_STEPSREV_LABEL) {
+			uint16_t stepsValue = espinner_value.toInt();
+			if (stepsValue > 0) {
+				espinnerStepper->setStepsPerRevolution(stepsValue);
+			}
+		}
+
 		if (espinner_label == STEPPER_CS_SELECTOR_LABEL) {
 
 			espinnerStepper->setCS(espinner_value.toInt());
@@ -140,6 +147,10 @@ void Stepper_Selector(uint16_t PIN_ptr) {
 
 	GUI_GPIOSelector(PIN_ptr, STEPPER_EN_SELECTOR_LABEL,
 					 STEPPER_EN_SELECTOR_VALUE, StepperSelector_callback);
+
+	// Steps per revolution field
+	GUI_TextField(PIN_ptr, STEPPER_STEPSREV_LABEL, STEPPER_STEPSREV_VALUE,
+				  StepperSelector_callback);
 
 	if (false) {
 		GUI_GPIOSetLabel(PIN_ptr, STEPPER_CS_SELECT_LABEL,
@@ -256,6 +267,20 @@ void StepperSelector_callback(Control *sender, int type) {
 			(String(sender->label) == STEPPER_DIAG0_SELECTOR_LABEL);
 		bool isPinDIAG1 =
 			(String(sender->label) == STEPPER_DIAG1_SELECTOR_LABEL);
+		bool isStepsRev = (String(sender->label) == STEPPER_STEPSREV_LABEL);
+		if (isStepsRev) {
+			// Validate steps per revolution input
+			uint16_t stepsValue = sender->value.toInt();
+			if (stepsValue > 0 && stepsValue <= 10000) {
+				// Valid range for steps per revolution
+				char *backgroundStyle = getBackground(SUCCESS_COLOR);
+				ESPUI.setElementStyle(sender->id, backgroundStyle);
+			} else {
+				// Invalid value
+				char *backgroundStyle = getBackground(DANGER_COLOR);
+				ESPUI.setElementStyle(sender->id, backgroundStyle);
+			}
+		}
 
 		if (isPinDIR) {
 			uint16_t selectLabelRefDIR =
@@ -464,19 +489,31 @@ void ESPinner_Stepper::implement() {
 	ESPUI.updateSelect(driverSelector, ESPinner_Stepper::get_driverName());
 
 	String gpioDIR = String(ESPinner_Stepper::getDIR());
+	GUI_GPIOSetLabel(Stepper_PIN_selector, STEPPER_DIR_SELECT_LABEL,
+					 STEPPER_DIR_SELECT_VALUE, SELECTED_COLOR);
 	uint16_t gpioDIR_ref =
 		GUI_GPIOSelector(Stepper_PIN_selector, STEPPER_DIR_SELECTOR_LABEL,
 						 gpioDIR.c_str(), StepperSelector_callback);
 
+	GUI_GPIOSetLabel(Stepper_PIN_selector, STEPPER_STEP_SELECT_LABEL,
+					 STEPPER_STEP_SELECT_VALUE, SELECTED_COLOR);
 	String gpioSTEP = String(ESPinner_Stepper::getSTEP());
 	uint16_t gpioSTEP_ref =
 		GUI_GPIOSelector(Stepper_PIN_selector, STEPPER_STEP_SELECTOR_LABEL,
 						 gpioSTEP.c_str(), StepperSelector_callback);
 
+	GUI_GPIOSetLabel(Stepper_PIN_selector, STEPPER_EN_SELECT_LABEL,
+					 STEPPER_EN_SELECT_VALUE, SELECTED_COLOR);
 	String gpioEN = String(ESPinner_Stepper::getEN());
 	uint16_t gpioEN_ref =
 		GUI_GPIOSelector(Stepper_PIN_selector, STEPPER_EN_SELECTOR_LABEL,
 						 gpioEN.c_str(), StepperSelector_callback);
+
+	// Steps per revolution field with current value
+	String stepsRevValue = String(ESPinner_Stepper::getStepsPerRevolution());
+	uint16_t stepsRevText =
+		GUI_TextField(Stepper_PIN_selector, STEPPER_STEPSREV_LABEL,
+					  stepsRevValue.c_str(), StepperSelector_callback);
 
 	ESPAllOnPinManager::getInstance().setPinControlRelation(
 		ESPinner_Stepper::getDIR(), gpioDIR_ref);

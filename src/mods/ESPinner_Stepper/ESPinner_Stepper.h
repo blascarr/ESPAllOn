@@ -13,6 +13,7 @@ class ESPinner_Stepper : public ESPinner {
 	uint8_t DIR, STEP, EN;
 	uint8_t CS, DIAG0, DIAG1;
 	uint8_t R_SENSE = 0.11f;
+	uint16_t stepsPerRevolution = 200;
 
 	bool isSPI = false;
 	bool isDIAG = false;
@@ -98,9 +99,9 @@ class ESPinner_Stepper : public ESPinner {
 				if (stepper) {
 					bool registered = stepper->registerRunner(this->getID());
 					if (registered) {
-						DUMPLN("✅ Stepper registrado con ID: ", this->getID());
+						DUMPLN("Stepper registered with ID: ", this->getID());
 					} else {
-						DUMPLN("❌ Error registrando stepper con ID: ",
+						DUMPLN("Error registering stepper with ID: ",
 							   this->getID());
 					}
 				}
@@ -132,6 +133,9 @@ class ESPinner_Stepper : public ESPinner {
 	void setISDIAG(bool isdiag) { isDIAG = isdiag; }
 	uint8_t getISDIAG() { return isDIAG; }
 
+	void setStepsPerRevolution(uint16_t steps) { stepsPerRevolution = steps; }
+	uint16_t getStepsPerRevolution() { return stepsPerRevolution; }
+
 	ESP_PinMode getPinModeConf(StepperPin pinType) {
 		ESP_PinMode pinMode = {getGPIO(pinType), OutputPin(true),
 							   PinType::BusPWM};
@@ -146,6 +150,7 @@ class ESPinner_Stepper : public ESPinner {
 		doc[ESPINNER_STEPPER_DIR_CONFIG] = getDIR();
 		doc[ESPINNER_STEPPER_EN_CONFIG] = getEN();
 		doc[ESPINNER_STEPPER_DRIVER_CONFIG] = get_driverName();
+		doc[ESPINNER_STEPPER_STEPSREV_CONFIG] = getStepsPerRevolution();
 		if (getSPI()) {
 			doc[ESPINNER_STEPPER_ISSPI_CONFIG] = getSPI();
 			doc[ESPINNER_STEPPER_CS_CONFIG] = getCS();
@@ -173,6 +178,12 @@ class ESPinner_Stepper : public ESPinner {
 		setDIR(_DIR);
 		uint8_t _EN = doc[ESPINNER_STEPPER_EN_CONFIG].as<uint8_t>();
 		setEN(_EN);
+
+		uint16_t _stepsPerRev =
+			doc[ESPINNER_STEPPER_STEPSREV_CONFIG].as<uint16_t>();
+		if (_stepsPerRev > 0) {
+			setStepsPerRevolution(_stepsPerRev);
+		}
 
 		bool isspi = doc[ESPINNER_STEPPER_ISSPI_CONFIG].as<bool>();
 		if (isspi) {
