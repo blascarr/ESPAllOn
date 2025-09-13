@@ -340,11 +340,11 @@ void GUIButtons_Elements(uint16_t parentRef, const char *saveLabel,
 }
 
 void GUI_GPIOSetLabel(uint16_t parentRef, const char *GPIOLabel,
-					  const char *GPIOValue) {
+					  const char *GPIOValue, const char *color = DANGER_COLOR) {
 	uint16_t GPIOLabel_selector =
 		ESPUI.addControl(ControlType::Label, GPIOLabel, GPIOValue,
 						 ControlColor::Carrot, parentRef);
-	char *backgroundStyle = getBackground(DANGER_COLOR);
+	char *backgroundStyle = getBackground(color);
 	ESPUI.setElementStyle(GPIOLabel_selector, backgroundStyle);
 	addElementWithParent(elementToParentMap, GPIOLabel_selector,
 						 parentRef); // Add GPIO Label to parent

@@ -19,4 +19,17 @@ uint16_t GUI_GPIOSelector(uint16_t parentRef, const char *GPIOLabel,
 						 parentRef); // Add GPIO Selector to parent
 	return GPIOPIN_selector;
 }
+
+uint16_t GUI_TextField(uint16_t parentRef, const char *label, const char *value,
+					   UICallback SelectorCallback) {
+
+	uint16_t textfield =
+		ESPUI.addControl(ControlType::Text, label, value,
+						 ControlColor::Wetasphalt, parentRef, SelectorCallback);
+
+	addElementWithParent(elementToParentMap, textfield,
+						 parentRef); // Add Textfield to parent
+	return textfield;
+}
+
 #endif
