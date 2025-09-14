@@ -191,6 +191,8 @@ String ESPinner_Path = "espinners";
 #define STEPPER_SLIDER_VEL_VALUE "50"
 #define STEPPER_STEPSREV_LABEL "steps/rev"
 #define STEPPER_STEPSREV_VALUE "200"
+
+#define STEPPER_STEPSREV_MAX_VALUE 10000
 // --------------- DC MOD Definition ----------------//
 #define DC_LABEL "DC"
 #define DC_ESPINNERINPUT_LABEL "INPUT"

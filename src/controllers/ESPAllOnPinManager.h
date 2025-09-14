@@ -174,7 +174,7 @@ void DUMP_PINOUT() {
  */
 bool isNumericAndInRange(const String value, uint16_t ref) {
 	int val = value.toInt();
-	ESPAllOnPinManager::getInstance().debugCurrentStatus();
+	// ESPAllOnPinManager::getInstance().debugCurrentStatus();
 	uint16_t pinRef = ESPAllOnPinManager::getInstance().pinCurrentStatus[val];
 	if (val == 0 || pinRef == 10000) {
 		return false;

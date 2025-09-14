@@ -285,6 +285,25 @@ bool isNumericString(String str) {
 	return (str.toInt() != 0 && str.toInt() < PINSIZE);
 }
 
+/**
+ * @brief Validates if a string contains only numeric characters
+ * @param value The string to validate
+ * @return true if the string contains only digits, false otherwise
+ */
+bool isValidNumericString(const String &value) {
+	if (value.length() == 0) {
+		return false;
+	}
+
+	for (size_t i = 0; i < value.length(); i++) {
+		if (!isdigit(value.charAt(i))) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 //-------------- UI --------------------//
 
 /**

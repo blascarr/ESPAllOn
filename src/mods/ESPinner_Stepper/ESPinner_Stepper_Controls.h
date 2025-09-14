@@ -257,7 +257,23 @@ void Stepper_UI(uint16_t Stepper_ptr) {
 
 void StepperSelector_callback(Control *sender, int type) {
 	uint16_t parentRef = getParentId(elementToParentMap, sender->id);
-	if (isNumericAndInRange(sender->value, sender->id)) {
+
+	bool isStepsRev = (String(sender->label) == STEPPER_STEPSREV_LABEL);
+	if (isStepsRev) {
+		// Validate steps per revolution input
+		uint16_t stepsValue = sender->value.toInt();
+		if (isValidNumericString(sender->value) > 0 &&
+			stepsValue <= STEPPER_STEPSREV_MAX_VALUE) {
+
+			// Valid range for steps per revolution
+			char *backgroundStyle = getBackground(SUCCESS_COLOR);
+			ESPUI.setElementStyle(sender->id, backgroundStyle);
+		} else {
+			// Invalid value
+			char *backgroundStyle = getBackground(DANGER_COLOR);
+			ESPUI.setElementStyle(sender->id, backgroundStyle);
+		}
+	} else if (isNumericAndInRange(sender->value, sender->id)) {
 
 		bool isPinDIR = (String(sender->label) == STEPPER_DIR_SELECTOR_LABEL);
 		bool isPinSTEP = (String(sender->label) == STEPPER_STEP_SELECTOR_LABEL);
@@ -267,20 +283,6 @@ void StepperSelector_callback(Control *sender, int type) {
 			(String(sender->label) == STEPPER_DIAG0_SELECTOR_LABEL);
 		bool isPinDIAG1 =
 			(String(sender->label) == STEPPER_DIAG1_SELECTOR_LABEL);
-		bool isStepsRev = (String(sender->label) == STEPPER_STEPSREV_LABEL);
-		if (isStepsRev) {
-			// Validate steps per revolution input
-			uint16_t stepsValue = sender->value.toInt();
-			if (stepsValue > 0 && stepsValue <= 10000) {
-				// Valid range for steps per revolution
-				char *backgroundStyle = getBackground(SUCCESS_COLOR);
-				ESPUI.setElementStyle(sender->id, backgroundStyle);
-			} else {
-				// Invalid value
-				char *backgroundStyle = getBackground(DANGER_COLOR);
-				ESPUI.setElementStyle(sender->id, backgroundStyle);
-			}
-		}
 
 		if (isPinDIR) {
 			uint16_t selectLabelRefDIR =
