@@ -81,7 +81,7 @@ struct IStepperDriver {
 	}
 
   private:
-	bool _active;
+	bool _active = false;
 };
 
 // ===================== Adapter A4988 =====================
@@ -133,10 +133,13 @@ class A4988Adapter : public IStepperDriver {
 };
 */
 // ===================== Adapter AccelStepper =====================
+
+/* Stepper ESPinner class only used for hardware instantiation */
 class AccelStepperAdapter : public IStepperDriver, IRunnable {
   public:
-	AccelStepperAdapter(uint8_t dirPin, uint8_t stepPin, uint8_t enPin = 0)
-		: stepper(AccelStepper::DRIVER, dirPin, stepPin), en(enPin) {
+	AccelStepperAdapter(uint8_t stepPin, uint8_t dirPin, uint8_t enPin = 0)
+		: stepper(AccelStepper::DRIVER, stepPin, dirPin), step(stepPin),
+		  dir(dirPin), en(enPin) {
 		this->begin();
 	}
 
@@ -148,8 +151,17 @@ class AccelStepperAdapter : public IStepperDriver, IRunnable {
 			pinMode(en, OUTPUT);
 			digitalWrite(en, LOW); // Enable stepper
 		}
+
+		if (dir != 0) {
+			pinMode(dir, OUTPUT);
+			digitalWrite(dir, LOW);
+		}
+
 		stepper.setMaxSpeed(1000);	  // Default max speed
 		stepper.setAcceleration(500); // Default acceleration
+
+		// Enable the stepper after initialization
+		enable(true);
 	}
 
 	void run() override {
@@ -167,11 +179,17 @@ class AccelStepperAdapter : public IStepperDriver, IRunnable {
 	String getID() const override { return _id; }
 
 	/**
+	 * Get the driver name of the stepper
+	 * @return Driver name of the stepper
+	 */
+	String getDriverName() const override { return "ACCELSTEPPER"; }
+
+	/**
 	 * Enable or disable the stepper motor
 	 * @param on True to enable, false to disable
 	 */
 	void enable(bool on) override {
-		IStepperDriver::enable(on); // Actualiza _active en la clase base
+		IStepperDriver::enable(on); // Update _active in base class
 		if (en != 0) {
 			digitalWrite(en, on ? LOW : HIGH); // LOW = enabled for most drivers
 		}
@@ -199,6 +217,19 @@ class AccelStepperAdapter : public IStepperDriver, IRunnable {
 		return StepperRunner::getInstance().unregisterRunnable(id);
 	}
 
+	void setEnablePin(uint8_t en) { this->en = en; }
+	void setStepPin(uint8_t step) { this->step = step; }
+	void setDirPin(uint8_t dir) { this->dir = dir; }
+	void setStepsPerRevolution(int steps) { spr = steps; }
+	void setMicrosteps(int microsteps) { this->microsteps = microsteps; }
+
+	// void setSleepPin(int sleep) { this->sleep = sleep; }
+	uint8_t getEnablePin() { return en; }
+	uint8_t getStepPin() { return step; }
+	uint8_t getDirPin() { return dir; }
+
+	uint8_t getStepsPerRevolution() { return spr; }
+
   private:
 	String _id;		// ID of the stepper
 	int spr;		// steps per revolution
@@ -206,6 +237,8 @@ class AccelStepperAdapter : public IStepperDriver, IRunnable {
 	int microsteps; // microsteps per step
 	uint8_t sleep;	// sleep pin
 	uint8_t en;		// enable pin
+	uint8_t step;	// step pin
+	uint8_t dir;	// direction pin
 	AccelStepper stepper;
 };
 

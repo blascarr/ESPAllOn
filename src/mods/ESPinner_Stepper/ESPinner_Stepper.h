@@ -8,6 +8,7 @@
 #include "./IStepperDriver.h"
 #include "./MotionController.h"
 
+/* Stepper ESPinner class only used for software instantiation */
 class ESPinner_Stepper : public ESPinner {
   public:
 	uint8_t DIR, STEP, EN;
@@ -19,7 +20,6 @@ class ESPinner_Stepper : public ESPinner {
 	bool isDIAG = false;
 	Stepper_Driver driver = Stepper_Driver::UNKNOWN;
 	std::unique_ptr<IStepperDriver> stepper;
-	std::unique_ptr<AccelStepper> motion;
 	std::unique_ptr<MotionController> controller;
 
 	ESPinner_Stepper(ESPinner_Mod espinner_mod) : ESPinner(espinner_mod) {}
@@ -95,11 +95,19 @@ class ESPinner_Stepper : public ESPinner {
 				stepper->begin();
 			}
 			if (driver == Stepper_Driver::ACCELSTEPPER) {
-				stepper = std::make_unique<AccelStepperAdapter>(DIR, STEP);
+				stepper = std::make_unique<AccelStepperAdapter>(
+					getDIR(), getSTEP(), getEN());
 				if (stepper) {
 					bool registered = stepper->registerRunner(this->getID());
+
 					if (registered) {
 						DUMPLN("Stepper registered with ID: ", this->getID());
+
+						// Cast to AccelStepperAdapter
+						AccelStepperAdapter *adapter =
+							static_cast<AccelStepperAdapter *>(stepper.get());
+						adapter->begin();
+						adapter->setStepsPerRevolution(getStepsPerRevolution());
 					} else {
 						DUMPLN("Error registering stepper with ID: ",
 							   this->getID());

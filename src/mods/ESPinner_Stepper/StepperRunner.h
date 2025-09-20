@@ -15,6 +15,7 @@ class IRunnable {
 	virtual void run() = 0;
 	virtual bool isActive() const = 0;
 	virtual String getID() const = 0;
+	virtual String getDriverName() const = 0;
 };
 
 /**

@@ -134,16 +134,14 @@ void Stepper_Selector(uint16_t PIN_ptr) {
 
 	Stepper_driverSelector(PIN_ptr);
 
-	GUI_GPIOSetLabel(PIN_ptr, STEPPER_STEP_SELECT_LABEL,
-					 STEPPER_STEP_SELECT_VALUE);
+	GUI_setLabel(PIN_ptr, STEPPER_STEP_SELECT_LABEL, STEPPER_STEP_SELECT_VALUE);
 	GUI_GPIOSelector(PIN_ptr, STEPPER_STEP_SELECTOR_LABEL,
 					 STEPPER_STEP_SELECTOR_VALUE, StepperSelector_callback);
-	GUI_GPIOSetLabel(PIN_ptr, STEPPER_DIR_SELECT_LABEL,
-					 STEPPER_DIR_SELECT_VALUE);
+	GUI_setLabel(PIN_ptr, STEPPER_DIR_SELECT_LABEL, STEPPER_DIR_SELECT_VALUE);
 	GUI_GPIOSelector(PIN_ptr, STEPPER_DIR_SELECTOR_LABEL,
 					 STEPPER_DIR_SELECTOR_VALUE, StepperSelector_callback);
 
-	GUI_GPIOSetLabel(PIN_ptr, STEPPER_EN_SELECT_LABEL, STEPPER_EN_SELECT_VALUE);
+	GUI_setLabel(PIN_ptr, STEPPER_EN_SELECT_LABEL, STEPPER_EN_SELECT_VALUE);
 
 	GUI_GPIOSelector(PIN_ptr, STEPPER_EN_SELECTOR_LABEL,
 					 STEPPER_EN_SELECTOR_VALUE, StepperSelector_callback);
@@ -153,19 +151,18 @@ void Stepper_Selector(uint16_t PIN_ptr) {
 				  StepperSelector_callback);
 
 	if (false) {
-		GUI_GPIOSetLabel(PIN_ptr, STEPPER_CS_SELECT_LABEL,
-						 STEPPER_CS_SELECT_VALUE);
+		GUI_setLabel(PIN_ptr, STEPPER_CS_SELECT_LABEL, STEPPER_CS_SELECT_VALUE);
 		GUI_GPIOSelector(PIN_ptr, STEPPER_CS_SELECTOR_LABEL,
 						 STEPPER_CS_SELECTOR_VALUE, StepperSelector_callback);
 	}
 	if (false) {
-		GUI_GPIOSetLabel(PIN_ptr, STEPPER_DIAG0_SELECT_LABEL,
-						 STEPPER_DIAG0_SELECT_VALUE);
+		GUI_setLabel(PIN_ptr, STEPPER_DIAG0_SELECT_LABEL,
+					 STEPPER_DIAG0_SELECT_VALUE);
 		GUI_GPIOSelector(PIN_ptr, STEPPER_DIAG0_SELECTOR_LABEL,
 						 STEPPER_DIAG0_SELECTOR_VALUE,
 						 StepperSelector_callback);
-		GUI_GPIOSetLabel(PIN_ptr, STEPPER_DIAG1_SELECT_LABEL,
-						 STEPPER_DIAG1_SELECT_VALUE);
+		GUI_setLabel(PIN_ptr, STEPPER_DIAG1_SELECT_LABEL,
+					 STEPPER_DIAG1_SELECT_VALUE);
 		GUI_GPIOSelector(PIN_ptr, STEPPER_DIAG1_SELECTOR_LABEL,
 						 STEPPER_DIAG1_SELECTOR_VALUE,
 						 StepperSelector_callback);
@@ -231,21 +228,56 @@ void removeStepper_callback(Control *sender, int type) {
 }
 
 void updateStepperMotorState(uint16_t parentRef) {
-	uint16_t PINSTEPSelectorRef =
-		searchByLabel(parentRef, STEPPER_SWITCH_RUN_LABEL);
-	uint16_t PINDIRSelectorRef =
-		searchByLabel(parentRef, STEPPER_SWITCH_DIR_LABEL);
+	if (parentRef == 0)
+		return;
 
-	uint8_t associatedPinSTEP =
-		ESPAllOnPinManager::getInstance().getCurrentReference(
-			PINSTEPSelectorRef);
-	uint8_t associatedPinDIR =
-		ESPAllOnPinManager::getInstance().getCurrentReference(
-			PINDIRSelectorRef);
+	uint16_t enableRef =
+		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
+						   parentRef, STEPPER_SWITCH_EN_LABEL);
 
-	DUMPSLN("Movement Begin: ");
+	uint16_t dirRef =
+		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
+						   parentRef, STEPPER_SWITCH_DIR_LABEL);
+	uint16_t targetRef =
+		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
+						   parentRef, STEPPER_SLIDER_TARGET_LABEL);
+	uint16_t velRef =
+		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
+						   parentRef, STEPPER_SLIDER_VEL_LABEL);
 
-	DUMPSLN("EndMovement: ");
+	// Get stepper motor instance
+	ESPinner *espinner = ESPinner_Manager::getInstance().findESPinnerById(
+		ESPUI.getControl(parentRef)->value);
+	AccelStepperAdapter *stepperAdapter = nullptr;
+	AccelStepper *stepper = nullptr;
+
+	if (espinner && espinner->getType() == ESPinner_Mod::Stepper) {
+		ESPinner_Stepper *stepperESPinner =
+			static_cast<ESPinner_Stepper *>(espinner);
+		stepperAdapter =
+			static_cast<AccelStepperAdapter *>(stepperESPinner->stepper.get());
+
+		if (stepperAdapter) {
+			stepper = stepperAdapter->getAccelStepper();
+			if (velRef != 0) {
+				stepper->setSpeed(ESPUI.getControl(velRef)->value.toInt());
+			}
+			if (enableRef != 0) {
+				uint16_t PINENSelectorRef =
+					searchByLabel(parentRef, STEPPER_EN_SELECTOR_LABEL);
+				stepperAdapter->enable(
+					ESPUI.getControl(enableRef)->value.toInt() == 0 ? true
+																	: false);
+			}
+			if (dirRef != 0) {
+
+				uint16_t PINDIRSelectorRef =
+					searchByLabel(parentRef, STEPPER_DIR_SELECTOR_LABEL);
+				stepperAdapter->setDirPin(
+					ESPUI.getControl(dirRef)->value.toInt() == 0 ? LOW : HIGH);
+			}
+		}
+	}
 }
 
 void Stepper_UI(uint16_t Stepper_ptr) {
@@ -320,24 +352,35 @@ void StepperSelector_callback(Control *sender, int type) {
 	}
 }
 
-void Stepper_VEL_Slider_callback(Control *sender, int type) {
+//---------------------------------------------//
+// -------- UPDATE STATE CONTROLLERS ----------//
+//--------------------------------------------//
+void Stepper_upateState_callback(Control *sender, int type) {
 	uint16_t parentRef =
 		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
-	// updateDCMotorState(parentRef);
-}
-
-void Stepper_DIR_Switcher_callback(Control *sender, int type) {
-	uint16_t parentRef =
-		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
+	// Update velocity state
 	updateStepperMotorState(parentRef);
 }
 
-void Stepper_RUN_Switcher_callback(Control *sender, int type) {
+void Stepper_Target_Slider_callback(Control *sender, int type) {
 	uint16_t parentRef =
 		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
+	debugCallback(sender, type);
 	updateStepperMotorState(parentRef);
+
+	// Update target display label
+	uint16_t targetDisplayRef =
+		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
+						   parentRef, STEPPER_LABEL_TARGET_LABEL);
+	if (targetDisplayRef) {
+		String targetValue = "Target: " + sender->value;
+		ESPUI.updateLabel(targetDisplayRef, targetValue);
+	}
 }
 
+//----------------------------------------//
+// -------- MOVEMENT CONTROLLERS -------- //
+//----------------------------------------//
 void Stepper_Pad_callback(Control *sender, int type) {
 	debugCallback(sender, type);
 
@@ -346,43 +389,111 @@ void Stepper_Pad_callback(Control *sender, int type) {
 	if (parentRef == 0)
 		return;
 
-	uint16_t runRef =
+	uint16_t enableRef =
 		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
-						   parentRef, STEPPER_SWITCH_RUN_LABEL);
+						   parentRef, STEPPER_SWITCH_EN_LABEL);
 	uint16_t dirRef =
 		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
 						   parentRef, STEPPER_SWITCH_DIR_LABEL);
+	uint16_t targetRef =
+		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
+						   parentRef, STEPPER_SLIDER_TARGET_LABEL);
 	uint16_t velRef =
 		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
 						   parentRef, STEPPER_SLIDER_VEL_LABEL);
 
+	// Get stepper motor instance
+	ESPinner *espinner = ESPinner_Manager::getInstance().findESPinnerById(
+		ESPUI.getControl(parentRef)->value);
+	AccelStepperAdapter *stepperAdapter = nullptr;
+	AccelStepper *stepper = nullptr;
+
+	if (espinner && espinner->getType() == ESPinner_Mod::Stepper) {
+		ESPinner_Stepper *stepperESPinner =
+			static_cast<ESPinner_Stepper *>(espinner);
+		stepperAdapter =
+			static_cast<AccelStepperAdapter *>(stepperESPinner->stepper.get());
+		if (stepperAdapter) {
+			stepper = stepperAdapter->getAccelStepper();
+		}
+	}
+
 	switch (type) {
-	case P_CENTER_DOWN: // toggle RUN
-		if (runRef) {
-			String v = ESPUI.getControl(runRef)->value;
-			ESPUI.updateSwitcher(runRef, v == "1" ? 0 : 1);
+	case P_CENTER_DOWN: // Execute target movement
+		if (targetRef && enableRef) {
+			int targetSteps = ESPUI.getControl(targetRef)->value.toInt();
+			if (targetSteps != 0) {
+				// Execute movement with target steps
+				// Enable motor and execute movement
+				// ESPUI.updateSwitcher(enableRef, 1);
+				DUMPLN("Executing target movement: ", targetSteps);
+			}
 		}
 		break;
-	case P_LEFT_DOWN: // DIR = 0
-		if (dirRef)
-			ESPUI.updateSwitcher(dirRef, 0);
-		break;
-	case P_RIGHT_DOWN: // DIR = 1
-		if (dirRef)
-			ESPUI.updateSwitcher(dirRef, 1);
-		break;
-	case P_FOR_DOWN: // ++VEL
-		if (velRef) {
-			int val = ESPUI.getControl(velRef)->value.toInt();
-			val = constrain(val + 5, 0, 100);
-			ESPUI.updateSlider(velRef, val);
+	case P_LEFT_DOWN: // Start continuous movement left (enable + direction)
+		if (enableRef && dirRef) {
+			// ESPUI.updateSwitcher(dirRef, 0);	// Set direction to left/CCW
+			//  ESPUI.updateSwitcher(enableRef, 1); // Enable motor
+			DUMPSLN("Starting continuous movement LEFT");
 		}
 		break;
-	case P_BACK_DOWN: // --VEL
-		if (velRef) {
-			int val = ESPUI.getControl(velRef)->value.toInt();
-			val = constrain(val - 5, 0, 100);
-			ESPUI.updateSlider(velRef, val);
+	case P_LEFT_UP: // Stop continuous movement
+		if (enableRef) {
+			// ESPUI.updateSwitcher(enableRef, 0); // Disable motor
+			DUMPSLN("Stopping continuous movement");
+		}
+		break;
+	case P_RIGHT_DOWN: // Start continuous movement right (enable + direction)
+		if (enableRef && dirRef) {
+			// ESPUI.updateSwitcher(dirRef, 1);	// Set direction to right/CW
+			// ESPUI.updateSwitcher(enableRef, 1); // Enable motor
+			// stepperAdapter->enable(true);
+
+			// Set speed based on velocity slider (convert percentage to
+			// steps/sec)
+			int velocity = ESPUI.getControl(velRef)->value.toInt();
+			float speed = (velocity / 100.0) * 1000; // Max 1000 steps/sec
+			stepper->setSpeed(speed); // Positive for forward direction
+			DUMPSLN("Starting continuous movement RIGHT");
+		}
+		break;
+	case P_RIGHT_UP: // Stop continuous movement
+		if (enableRef) {
+			//	ESPUI.updateSwitcher(enableRef, 0); // Disable motor
+			DUMPSLN("Stopping continuous movement");
+		}
+		break;
+	case P_FOR_DOWN: // Discrete movement - start
+		if (enableRef) {
+			//	ESPUI.updateSwitcher(enableRef, 1);
+			DUMPSLN("Starting discrete movement FORWARD");
+
+			// Execute the movement with runSpeed() for continuous movements
+			// DUMPLN("Stepper Enabled: ", stepper->isEnabled() == 0 ? 'true' :
+			// 'false');
+			DUMPLN("Stepper in Movement Enabled: ",
+				   stepperAdapter->isEnabled() == 0 ? "true" : "false");
+			stepperAdapter->getAccelStepper()->moveTo(10000);
+			// stepperAdapter->moveTo(300);
+			// stepper->runSpeed();
+		}
+		break;
+	case P_FOR_UP: // Discrete movement - stop
+		if (enableRef) {
+			// ESPUI.updateSwitcher(enableRef, 0);
+			DUMPSLN("Stopping discrete movement");
+		}
+		break;
+	case P_BACK_DOWN: // Discrete movement - start
+		if (enableRef) {
+			// ESPUI.updateSwitcher(enableRef, 1);
+			DUMPSLN("Starting discrete movement BACKWARD");
+		}
+		break;
+	case P_BACK_UP: // Discrete movement - stop
+		if (enableRef) {
+			// ESPUI.updateSwitcher(enableRef, 0);
+			DUMPSLN("Stopping discrete movement");
 		}
 		break;
 	default:
@@ -391,41 +502,71 @@ void Stepper_Pad_callback(Control *sender, int type) {
 }
 
 void Stepper_Controller(String ID_LABEL, uint16_t parentRef) {
-
+	DUMPLN("Creating Stepper parent", parentRef);
 	uint16_t controllerTabRef = getTab(TabType::ControllerTab);
-	uint16_t STEPPER_PIN_ID = ESPUI.addControl(
+	uint16_t STEPPER_Controller_ID = ESPUI.addControl(
 		ControlType::Text, STEPPER_ID_LABEL, ID_LABEL.c_str(),
 		ControlColor::Wetasphalt, controllerTabRef, debugCallback);
-	ESPUI.getControl(STEPPER_PIN_ID)->enabled = false;
+	ESPUI.getControl(STEPPER_Controller_ID)->enabled = false;
 
+	// Enable ON/OFF Switch with Label
+	GUI_setLabel(STEPPER_Controller_ID, STEPPER_LABEL_EN_LABEL,
+				 STEPPER_LABEL_EN_VALUE, SELECTED_COLOR);
+
+	uint16_t STEPPER_EN_Switch =
+		ESPUI.addControl(ControlType::Switcher, STEPPER_SWITCH_EN_LABEL,
+						 STEPPER_SWITCH_EN_VALUE, ControlColor::Wetasphalt,
+						 STEPPER_Controller_ID, Stepper_upateState_callback);
+
+	// Direction CW/CCW Switch with Label
+	GUI_setLabel(STEPPER_Controller_ID, STEPPER_LABEL_DIR_LABEL,
+				 STEPPER_LABEL_DIR_VALUE, SELECTED_COLOR);
 	uint16_t STEPPER_DIR_Switch =
 		ESPUI.addControl(ControlType::Switcher, STEPPER_SWITCH_DIR_LABEL,
 						 STEPPER_SWITCH_DIR_VALUE, ControlColor::Wetasphalt,
-						 STEPPER_PIN_ID, Stepper_DIR_Switcher_callback);
+						 STEPPER_Controller_ID, Stepper_upateState_callback);
 
-	uint16_t STEPPER_RUN_Switch =
-		ESPUI.addControl(ControlType::Switcher, STEPPER_SWITCH_RUN_LABEL,
-						 STEPPER_SWITCH_RUN_VALUE, ControlColor::Wetasphalt,
-						 STEPPER_PIN_ID, Stepper_RUN_Switcher_callback);
+	// Velocity Slider
+	GUI_setLabel(STEPPER_Controller_ID, STEPPER_LABEL_VEL_LABEL,
+				 STEPPER_LABEL_VEL_LABEL, SELECTED_COLOR);
+	uint16_t STEPPER_VEL_Slider =
+		ESPUI.addControl(ControlType::Slider, STEPPER_SLIDER_VEL_LABEL,
+						 STEPPER_SLIDER_VEL_VALUE, ControlColor::Wetasphalt,
+						 STEPPER_Controller_ID, Stepper_upateState_callback);
 
-	uint16_t STEPPER_VEL_Slider = ESPUI.addControl(
-		ControlType::Slider, STEPPER_SLIDER_VEL_LABEL, STEPPER_SLIDER_VEL_VALUE,
-		ControlColor::Wetasphalt, STEPPER_PIN_ID, Stepper_VEL_Slider_callback);
+	// Control Pad
+	uint16_t STEPPER_PAD =
+		ESPUI.addControl(ControlType::PadWithCenter, STEPPER_PAD_MOVEMENT_LABEL,
+						 STEPPER_PAD_MOVEMENT_VALUE, ControlColor::Wetasphalt,
+						 STEPPER_Controller_ID, Stepper_Pad_callback);
 
-	uint16_t STEPPER_PAD = ESPUI.addControl(
-		ControlType::PadWithCenter, "Stepper Pad", "0",
-		ControlColor::Wetasphalt, STEPPER_PIN_ID, Stepper_Pad_callback);
+	// Target Display Label
+	GUI_setLabel(STEPPER_Controller_ID, STEPPER_LABEL_TARGET_LABEL,
+				 STEPPER_LABEL_TARGET_VALUE, SELECTED_COLOR);
+	// Target Steps Slider
+	uint16_t STEPPER_TARGET_Slider =
+		ESPUI.addControl(ControlType::Slider, STEPPER_SLIDER_TARGET_LABEL,
+						 STEPPER_SLIDER_TARGET_VALUE, ControlColor::Wetasphalt,
+						 STEPPER_Controller_ID, Stepper_upateState_callback);
 
-	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_DIR_Switch,
+	// Current Position Label
+	GUI_setLabel(STEPPER_Controller_ID, STEPPER_LABEL_POSITION_LABEL,
+				 STEPPER_LABEL_POSITION_VALUE, SELECTED_COLOR);
+
+	// Add controller relations
+	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_EN_Switch,
 														  parentRef);
-	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_RUN_Switch,
+	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_DIR_Switch,
 														  parentRef);
 	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_VEL_Slider,
 														  parentRef);
 	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_PAD,
 														  parentRef);
+	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_TARGET_Slider,
+														  parentRef);
 
-	ESPinner_Manager::getInstance().addUIRelation(parentRef, STEPPER_PIN_ID);
+	ESPinner_Manager::getInstance().addUIRelation(parentRef,
+												  STEPPER_Controller_ID);
 }
 
 void saveStepper_callback(Control *sender, int type) {
@@ -491,21 +632,21 @@ void ESPinner_Stepper::implement() {
 	ESPUI.updateSelect(driverSelector, ESPinner_Stepper::get_driverName());
 
 	String gpioDIR = String(ESPinner_Stepper::getDIR());
-	GUI_GPIOSetLabel(Stepper_PIN_selector, STEPPER_DIR_SELECT_LABEL,
-					 STEPPER_DIR_SELECT_VALUE, SELECTED_COLOR);
+	GUI_setLabel(Stepper_PIN_selector, STEPPER_DIR_SELECT_LABEL,
+				 STEPPER_DIR_SELECT_VALUE, SELECTED_COLOR);
 	uint16_t gpioDIR_ref =
 		GUI_GPIOSelector(Stepper_PIN_selector, STEPPER_DIR_SELECTOR_LABEL,
 						 gpioDIR.c_str(), StepperSelector_callback);
 
-	GUI_GPIOSetLabel(Stepper_PIN_selector, STEPPER_STEP_SELECT_LABEL,
-					 STEPPER_STEP_SELECT_VALUE, SELECTED_COLOR);
+	GUI_setLabel(Stepper_PIN_selector, STEPPER_STEP_SELECT_LABEL,
+				 STEPPER_STEP_SELECT_VALUE, SELECTED_COLOR);
 	String gpioSTEP = String(ESPinner_Stepper::getSTEP());
 	uint16_t gpioSTEP_ref =
 		GUI_GPIOSelector(Stepper_PIN_selector, STEPPER_STEP_SELECTOR_LABEL,
 						 gpioSTEP.c_str(), StepperSelector_callback);
 
-	GUI_GPIOSetLabel(Stepper_PIN_selector, STEPPER_EN_SELECT_LABEL,
-					 STEPPER_EN_SELECT_VALUE, SELECTED_COLOR);
+	GUI_setLabel(Stepper_PIN_selector, STEPPER_EN_SELECT_LABEL,
+				 STEPPER_EN_SELECT_VALUE, SELECTED_COLOR);
 	String gpioEN = String(ESPinner_Stepper::getEN());
 	uint16_t gpioEN_ref =
 		GUI_GPIOSelector(Stepper_PIN_selector, STEPPER_EN_SELECTOR_LABEL,
@@ -513,9 +654,9 @@ void ESPinner_Stepper::implement() {
 
 	// Steps per revolution field with current value
 	String stepsRevValue = String(ESPinner_Stepper::getStepsPerRevolution());
-	uint16_t stepsRevText =
-		GUI_TextField(Stepper_PIN_selector, STEPPER_STEPSREV_LABEL,
-					  stepsRevValue.c_str(), StepperSelector_callback);
+
+	GUI_TextField(Stepper_PIN_selector, STEPPER_STEPSREV_LABEL,
+				  stepsRevValue.c_str(), StepperSelector_callback);
 
 	ESPAllOnPinManager::getInstance().setPinControlRelation(
 		ESPinner_Stepper::getDIR(), gpioDIR_ref);
@@ -579,6 +720,7 @@ void ESPinner_Stepper::implement() {
 
 	// ------- Create Controllers ----------- //
 	Stepper_Controller(ESPinner_Stepper::getID(), Stepper_PIN_selector);
+	// updateStepperMotorState(Stepper_PIN_selector); // Initialize motor state
 }
 
 #endif
