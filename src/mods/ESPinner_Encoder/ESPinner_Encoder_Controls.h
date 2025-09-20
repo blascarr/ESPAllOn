@@ -25,7 +25,7 @@ void saveEncoder_callback(Control *sender, int type) {
 }
 
 void Encoder_Selector(uint16_t PIN_ptr) {
-	GUI_GPIOSetLabel(PIN_ptr, ENCODER_SELECT_LABEL, ENCODER_SELECT_VALUE);
+	GUI_setLabel(PIN_ptr, ENCODER_SELECT_LABEL, ENCODER_SELECT_VALUE);
 	GUI_GPIOSelector(PIN_ptr, ENCODER_PINSELECTOR_LABEL,
 					 ENCODER_PINSELECTOR_VALUE, createEncoder_callback);
 }

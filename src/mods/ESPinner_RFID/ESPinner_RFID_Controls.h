@@ -24,7 +24,7 @@ void saveRFID_callback(Control *sender, int type) {
 }
 
 void RFID_Selector(uint16_t PIN_ptr) {
-	GUI_GPIOSetLabel(PIN_ptr, RFID_SELECT_LABEL, RFID_SELECT_VALUE);
+	GUI_setLabel(PIN_ptr, RFID_SELECT_LABEL, RFID_SELECT_VALUE);
 	GUI_GPIOSelector(PIN_ptr, RFID_PINSELECTOR_LABEL, RFID_PINSELECTOR_VALUE,
 					 createRFID_callback);
 }

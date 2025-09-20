@@ -23,7 +23,7 @@ void saveMPU_callback(Control *sender, int type) {
  */
 
 void MPU_Selector(uint16_t MPU_ptr) {
-	GUI_GPIOSetLabel(MPU_ptr, MPU_SELECT_LABEL, MPU_SELECT_VALUE);
+	GUI_setLabel(MPU_ptr, MPU_SELECT_LABEL, MPU_SELECT_VALUE);
 	GUI_GPIOSelector(MPU_ptr, MPU_PINSELECTOR_LABEL, MPU_PINSELECTOR_VALUE,
 					 createMPU_callback);
 }

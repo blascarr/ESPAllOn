@@ -24,7 +24,7 @@ void saveNP_callback(Control *sender, int type) {
  */
 
 void NP_Selector(uint16_t NP_ptr) {
-	GUI_GPIOSetLabel(NP_ptr, NEOPIXEL_SELECT_LABEL, NEOPIXEL_SELECT_VALUE);
+	GUI_setLabel(NP_ptr, NEOPIXEL_SELECT_LABEL, NEOPIXEL_SELECT_VALUE);
 	GUI_GPIOSelector(NP_ptr, NEOPIXEL_PINSELECTOR_LABEL,
 					 NEOPIXEL_PINSELECTOR_VALUE, createNP_callback);
 }

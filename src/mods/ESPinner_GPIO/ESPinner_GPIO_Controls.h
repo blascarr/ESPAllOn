@@ -163,7 +163,7 @@ void GPIOSelector_callback(Control *sender, int type) {
 }
 
 void GPIO_Selector(uint16_t PIN_ptr) {
-	GUI_GPIOSetLabel(PIN_ptr, GPIO_SELECT_LABEL, GPIO_SELECT_VALUE);
+	GUI_setLabel(PIN_ptr, GPIO_SELECT_LABEL, GPIO_SELECT_VALUE);
 	GUI_GPIOSelector(PIN_ptr, GPIO_PINSELECTOR_LABEL, GPIO_PINSELECTOR_VALUE,
 					 GPIOSelector_callback);
 }

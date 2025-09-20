@@ -358,15 +358,14 @@ void GUIButtons_Elements(uint16_t parentRef, const char *saveLabel,
 	GUI_RemoveButton(parentRef, removeLabel, removeValue, removeCallback);
 }
 
-void GUI_GPIOSetLabel(uint16_t parentRef, const char *GPIOLabel,
-					  const char *GPIOValue, const char *color = DANGER_COLOR) {
-	uint16_t GPIOLabel_selector =
-		ESPUI.addControl(ControlType::Label, GPIOLabel, GPIOValue,
-						 ControlColor::Carrot, parentRef);
+void GUI_setLabel(uint16_t parentRef, const char *label, const char *value,
+				  const char *color = DANGER_COLOR) {
+	uint16_t Label_selector = ESPUI.addControl(ControlType::Label, label, value,
+											   ControlColor::Carrot, parentRef);
 	char *backgroundStyle = getBackground(color);
-	ESPUI.setElementStyle(GPIOLabel_selector, backgroundStyle);
-	addElementWithParent(elementToParentMap, GPIOLabel_selector,
-						 parentRef); // Add GPIO Label to parent
+	ESPUI.setElementStyle(Label_selector, backgroundStyle);
+	addElementWithParent(elementToParentMap, Label_selector,
+						 parentRef); // Add Label to parent
 }
 
 void saveButtonCheck(uint16_t parentRef, const char *SelectorLabel,

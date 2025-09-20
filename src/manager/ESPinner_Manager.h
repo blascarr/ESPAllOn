@@ -102,7 +102,7 @@ class ESPinner_Manager {
 	uint16_t findRefByControllerId(uint16_t controllerId) {
 		return ESPinnerPINController.find(controllerId)->second;
 	}
-
+	// Add Controller Relation to ESPinnerPINController map
 	void addControllerRelation(uint16_t espinnerId, uint16_t controllerId) {
 		addElementWithParent(ESPinnerPINController, espinnerId, controllerId);
 	}
@@ -128,7 +128,7 @@ class ESPinner_Manager {
 	uint16_t findUIRelationRefByID(uint16_t controllerId) {
 		return getParentId(UI_relationID, controllerId);
 	}
-
+	// Add UI Relation to UI_relationID map
 	void addUIRelation(uint16_t parentRefID, uint16_t UI_ID) {
 		addElementWithParent(UI_relationID, parentRefID, UI_ID);
 	}

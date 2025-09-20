@@ -46,11 +46,11 @@ void DC_action(uint16_t parentRef) {
 }
 
 void DC_Selector(uint16_t PIN_ptr) {
-	GUI_GPIOSetLabel(PIN_ptr, DC_PINA_SELECT_LABEL, DC_PINA_SELECT_VALUE);
+	GUI_setLabel(PIN_ptr, DC_PINA_SELECT_LABEL, DC_PINA_SELECT_VALUE);
 	GUI_GPIOSelector(PIN_ptr, DC_PINA_SELECTOR_LABEL, DC_PINA_SELECTOR_VALUE,
 					 DCSelector_callback);
 
-	GUI_GPIOSetLabel(PIN_ptr, DC_PINB_SELECT_LABEL, DC_PINB_SELECT_VALUE);
+	GUI_setLabel(PIN_ptr, DC_PINB_SELECT_LABEL, DC_PINB_SELECT_VALUE);
 	GUI_GPIOSelector(PIN_ptr, DC_PINB_SELECTOR_LABEL, DC_PINB_SELECTOR_VALUE,
 					 DCSelector_callback);
 }
