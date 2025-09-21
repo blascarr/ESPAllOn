@@ -6,7 +6,6 @@
 #include <ESPUI.h>
 
 #include "./IStepperDriver.h"
-#include "./MotionController.h"
 
 /* Stepper ESPinner class only used for software instantiation */
 class ESPinner_Stepper : public ESPinner {
@@ -20,7 +19,6 @@ class ESPinner_Stepper : public ESPinner {
 	bool isDIAG = false;
 	Stepper_Driver driver = Stepper_Driver::UNKNOWN;
 	std::unique_ptr<IStepperDriver> stepper;
-	std::unique_ptr<MotionController> controller;
 
 	ESPinner_Stepper(ESPinner_Mod espinner_mod) : ESPinner(espinner_mod) {}
 	ESPinner_Stepper() : ESPinner(ESPinner_Mod::Stepper) {}
@@ -216,7 +214,6 @@ void createStepper_callback(Control *sender, int type);
 void saveStepper_callback(Control *sender, int type);
 void removeStepper_callback(Control *sender, int type);
 void StepperSelector_callback(Control *sender, int type);
-// void createStepper_callback(Control *sender, int type);
 void Stepper_Selector(uint16_t PIN_ptr);
 void Stepper_UI(uint16_t GPIO_ptr);
 

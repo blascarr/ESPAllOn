@@ -145,7 +145,7 @@ String ESPinner_Path = "espinners";
 #define GPIO_PINSELECTOR_VALUE "0"
 #define GPIO_MODESELECTOR_LABEL "GPIO_ModeSelector"
 
-#define GPIO_SWITCH_ID_LABEL "GPIO_ID_Switcher"
+#define GPIO_ID_LABEL "GPIO_ID_Switcher"
 #define GPIO_SWITCH_LABEL "GPIO_Switcher"
 #define GPIO_SWITCH_VALUE "0"
 
@@ -185,8 +185,6 @@ String ESPinner_Path = "espinners";
 #define STEPPER_ID_LABEL "STEPPER_CONTROLLER"
 #define STEPPER_SWITCH_EN_LABEL "Enable"
 #define STEPPER_SWITCH_EN_VALUE "1"
-#define STEPPER_SWITCH_DIR_LABEL "Direction CW/CCW"
-#define STEPPER_SWITCH_DIR_VALUE "0"
 #define STEPPER_SLIDER_VEL_LABEL "Vel:"
 #define STEPPER_SLIDER_VEL_VALUE "50"
 #define STEPPER_SLIDER_TARGET_LABEL "Length"
@@ -201,8 +199,6 @@ String ESPinner_Path = "espinners";
 
 #define STEPPER_LABEL_EN_LABEL "Enable"
 #define STEPPER_LABEL_EN_VALUE "ON/OFF"
-#define STEPPER_LABEL_DIR_LABEL "Direction"
-#define STEPPER_LABEL_DIR_VALUE "CW/CCW"
 #define STEPPER_LABEL_VEL_LABEL "Vel:"
 #define STEPPER_LABEL_VEL_VALUE "Vel:"
 
@@ -210,6 +206,9 @@ String ESPinner_Path = "espinners";
 #define STEPPER_STEPSREV_VALUE "200"
 
 #define STEPPER_STEPSREV_MAX_VALUE 10000
+
+#define STEPPER_MAX_STEPPERS 8
+#define STEPPER_ACTIONS_INTERVAL_MS 100
 // --------------- DC MOD Definition ----------------//
 #define DC_LABEL "DC"
 #define DC_ESPINNERINPUT_LABEL "INPUT"

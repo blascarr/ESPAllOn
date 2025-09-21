@@ -74,7 +74,7 @@ void GPIO_Controller(String ID_LABEL, uint16_t parentRef) {
 
 	uint16_t controllerTabRef = getTab(TabType::ControllerTab);
 	uint16_t GPIOPIN_ID = ESPUI.addControl(
-		ControlType::Text, GPIO_SWITCH_ID_LABEL, ID_LABEL.c_str(),
+		ControlType::Text, GPIO_ID_LABEL, ID_LABEL.c_str(),
 		ControlColor::Wetasphalt, controllerTabRef, debugCallback);
 	ESPUI.getControl(GPIOPIN_ID)->enabled = false;
 	DUMPLN("GPIOPIN_ID CREATION CONTROLLER : ", GPIOPIN_ID);
@@ -86,6 +86,7 @@ void GPIO_Controller(String ID_LABEL, uint16_t parentRef) {
 														  parentRef);
 
 	ESPinner_Manager::getInstance().addUIRelation(parentRef, GPIOPIN_ID);
+	ESPinner_Manager::getInstance().addUIESPinner_ID(parentRef, ID_LABEL);
 }
 
 void removeController(uint16_t CONTROLLER_LABEL) {

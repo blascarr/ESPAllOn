@@ -219,13 +219,14 @@ AccelStepperAdapter *findStepperAdapterById(const String &id) {
 }
 
 #include "../mods/ESPinner_DC/ESPinner_DC_Controls.h"
-#include "../mods/ESPinner_Encoder/ESPinner_Encoder_Controls.h"
 #include "../mods/ESPinner_GPIO/ESPinner_GPIO_Controls.h"
+#include "../mods/ESPinner_Stepper/ESPinner_Stepper_Controls.h"
+
+#include "../mods/ESPinner_Encoder/ESPinner_Encoder_Controls.h"
 #include "../mods/ESPinner_LCD/ESPinner_LCD_Controls.h"
 #include "../mods/ESPinner_MPU/ESPinner_MPU_Controls.h"
 #include "../mods/ESPinner_NeoPixel/ESPinner_NeoPixel_Controls.h"
 #include "../mods/ESPinner_RFID/ESPinner_RFID_Controls.h"
-#include "../mods/ESPinner_Stepper/ESPinner_Stepper_Controls.h"
 #include "../mods/ESPinner_TFT/ESPinner_TFT_Controls.h"
 
 #endif

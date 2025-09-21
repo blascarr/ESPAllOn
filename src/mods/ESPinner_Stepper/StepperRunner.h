@@ -24,7 +24,8 @@ class IRunnable {
  */
 class StepperRunner {
   private:
-	static constexpr size_t MAX_STEPPERS = 16; // Maximum number of steppers
+	static constexpr size_t MAX_STEPPERS =
+		STEPPER_MAX_STEPPERS; // Maximum number of steppers
 	std::vector<std::shared_ptr<IRunnable>> _runnables;
 	static StepperRunner *_instance;
 

@@ -234,10 +234,6 @@ void updateStepperMotorState(uint16_t parentRef) {
 	uint16_t enableRef =
 		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
 						   parentRef, STEPPER_SWITCH_EN_LABEL);
-
-	uint16_t dirRef =
-		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
-						   parentRef, STEPPER_SWITCH_DIR_LABEL);
 	uint16_t targetRef =
 		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
 						   parentRef, STEPPER_SLIDER_TARGET_LABEL);
@@ -269,12 +265,6 @@ void updateStepperMotorState(uint16_t parentRef) {
 					ESPUI.getControl(enableRef)->value.toInt() == 0 ? true
 																	: false);
 			}
-			if (dirRef != 0) {
-
-				uint16_t PINDIRSelectorRef =
-					searchByLabel(parentRef, STEPPER_DIR_SELECTOR_LABEL);
-				stepperAdapter->setDirPin(
-					ESPUI.getControl(dirRef)->value.toInt() == 0 ? LOW : HIGH);
 			}
 		}
 	}
@@ -392,9 +382,6 @@ void Stepper_Pad_callback(Control *sender, int type) {
 	uint16_t enableRef =
 		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
 						   parentRef, STEPPER_SWITCH_EN_LABEL);
-	uint16_t dirRef =
-		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
-						   parentRef, STEPPER_SWITCH_DIR_LABEL);
 	uint16_t targetRef =
 		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
 						   parentRef, STEPPER_SLIDER_TARGET_LABEL);
@@ -431,7 +418,7 @@ void Stepper_Pad_callback(Control *sender, int type) {
 		}
 		break;
 	case P_LEFT_DOWN: // Start continuous movement left (enable + direction)
-		if (enableRef && dirRef) {
+		if (enableRef) {
 			// ESPUI.updateSwitcher(dirRef, 0);	// Set direction to left/CCW
 			//  ESPUI.updateSwitcher(enableRef, 1); // Enable motor
 			DUMPSLN("Starting continuous movement LEFT");
@@ -444,7 +431,7 @@ void Stepper_Pad_callback(Control *sender, int type) {
 		}
 		break;
 	case P_RIGHT_DOWN: // Start continuous movement right (enable + direction)
-		if (enableRef && dirRef) {
+		if (enableRef) {
 			// ESPUI.updateSwitcher(dirRef, 1);	// Set direction to right/CW
 			// ESPUI.updateSwitcher(enableRef, 1); // Enable motor
 			// stepperAdapter->enable(true);
@@ -465,34 +452,30 @@ void Stepper_Pad_callback(Control *sender, int type) {
 		break;
 	case P_FOR_DOWN: // Discrete movement - start
 		if (enableRef) {
-			//	ESPUI.updateSwitcher(enableRef, 1);
 			DUMPSLN("Starting discrete movement FORWARD");
 
 			// Execute the movement with runSpeed() for continuous movements
-			// DUMPLN("Stepper Enabled: ", stepper->isEnabled() == 0 ? 'true' :
-			// 'false');
+			stepperAdapter->getAccelStepper()->move(10000);
 			DUMPLN("Stepper in Movement Enabled: ",
 				   stepperAdapter->isEnabled() == 0 ? "true" : "false");
-			stepperAdapter->getAccelStepper()->moveTo(10000);
-			// stepperAdapter->moveTo(300);
-			// stepper->runSpeed();
 		}
 		break;
 	case P_FOR_UP: // Discrete movement - stop
 		if (enableRef) {
-			// ESPUI.updateSwitcher(enableRef, 0);
+			stepperAdapter->getAccelStepper()->stop();
 			DUMPSLN("Stopping discrete movement");
 		}
 		break;
 	case P_BACK_DOWN: // Discrete movement - start
 		if (enableRef) {
-			// ESPUI.updateSwitcher(enableRef, 1);
+
+			stepperAdapter->getAccelStepper()->move(-10000);
 			DUMPSLN("Starting discrete movement BACKWARD");
 		}
 		break;
 	case P_BACK_UP: // Discrete movement - stop
 		if (enableRef) {
-			// ESPUI.updateSwitcher(enableRef, 0);
+			stepperAdapter->getAccelStepper()->stop();
 			DUMPSLN("Stopping discrete movement");
 		}
 		break;
@@ -516,14 +499,6 @@ void Stepper_Controller(String ID_LABEL, uint16_t parentRef) {
 	uint16_t STEPPER_EN_Switch =
 		ESPUI.addControl(ControlType::Switcher, STEPPER_SWITCH_EN_LABEL,
 						 STEPPER_SWITCH_EN_VALUE, ControlColor::Wetasphalt,
-						 STEPPER_Controller_ID, Stepper_upateState_callback);
-
-	// Direction CW/CCW Switch with Label
-	GUI_setLabel(STEPPER_Controller_ID, STEPPER_LABEL_DIR_LABEL,
-				 STEPPER_LABEL_DIR_VALUE, SELECTED_COLOR);
-	uint16_t STEPPER_DIR_Switch =
-		ESPUI.addControl(ControlType::Switcher, STEPPER_SWITCH_DIR_LABEL,
-						 STEPPER_SWITCH_DIR_VALUE, ControlColor::Wetasphalt,
 						 STEPPER_Controller_ID, Stepper_upateState_callback);
 
 	// Velocity Slider
@@ -555,8 +530,6 @@ void Stepper_Controller(String ID_LABEL, uint16_t parentRef) {
 
 	// Add controller relations
 	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_EN_Switch,
-														  parentRef);
-	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_DIR_Switch,
 														  parentRef);
 	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_VEL_Slider,
 														  parentRef);
@@ -720,7 +693,6 @@ void ESPinner_Stepper::implement() {
 
 	// ------- Create Controllers ----------- //
 	Stepper_Controller(ESPinner_Stepper::getID(), Stepper_PIN_selector);
-	// updateStepperMotorState(Stepper_PIN_selector); // Initialize motor state
 }
 
 #endif
