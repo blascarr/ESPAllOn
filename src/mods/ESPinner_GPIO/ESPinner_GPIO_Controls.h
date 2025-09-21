@@ -86,7 +86,6 @@ void GPIO_Controller(String ID_LABEL, uint16_t parentRef) {
 														  parentRef);
 
 	ESPinner_Manager::getInstance().addUIRelation(parentRef, GPIOPIN_ID);
-	ESPinner_Manager::getInstance().addUIESPinner_ID(parentRef, ID_LABEL);
 }
 
 void removeController(uint16_t CONTROLLER_LABEL) {

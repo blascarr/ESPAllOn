@@ -265,7 +265,6 @@ void updateStepperMotorState(uint16_t parentRef) {
 					ESPUI.getControl(enableRef)->value.toInt() == 0 ? true
 																	: false);
 			}
-			}
 		}
 	}
 }
