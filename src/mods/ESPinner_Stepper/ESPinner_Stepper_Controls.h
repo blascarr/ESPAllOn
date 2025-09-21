@@ -227,50 +227,6 @@ void removeStepper_callback(Control *sender, int type) {
 	}
 }
 
-void updateStepperMotorState(uint16_t parentRef) {
-
-	uint16_t enableRef =
-		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
-						   parentRef, STEPPER_SWITCH_EN_LABEL);
-	uint16_t targetRef =
-		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
-						   parentRef, STEPPER_SLIDER_TARGET_LABEL);
-	uint16_t velRef =
-		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
-						   parentRef, STEPPER_SLIDER_VEL_LABEL);
-
-	// Get stepper motor instance
-	ESPinner *espinner = ESPinner_Manager::getInstance().findESPinnerById(
-		ESPUI.getControl(parentRef)->value);
-	AccelStepperAdapter *stepperAdapter = nullptr;
-	AccelStepper *stepper = nullptr;
-
-	if (espinner && espinner->getType() == ESPinner_Mod::Stepper) {
-		ESPinner_Stepper *stepperESPinner =
-			static_cast<ESPinner_Stepper *>(espinner);
-		stepperAdapter =
-			static_cast<AccelStepperAdapter *>(stepperESPinner->stepper.get());
-
-		if (stepperAdapter) {
-			stepper = stepperAdapter->getAccelStepper();
-			if (velRef != 0) {
-				// TODO: Review if this is the correct way to set Speed and map
-				// value in greater range
-				float speed =
-					(ESPUI.getControl(velRef)->value.toInt() / 100.0) * 1000.0;
-				DUMPLN("Setting speed: ", speed);
-				stepper->setSpeed(speed);
-			}
-			if (enableRef != 0) {
-				bool enableState =
-					ESPUI.getControl(enableRef)->value.toInt() == 1 ? true
-																	: false;
-				stepperAdapter->enable(enableState);
-			}
-		}
-	}
-}
-
 void Stepper_UI(uint16_t Stepper_ptr) {
 	Stepper_Selector(Stepper_ptr);
 	GUIButtons_Elements(Stepper_ptr, STEPPER_SAVE_LABEL, STEPPER_SAVE_VALUE,
@@ -334,7 +290,7 @@ void StepperSelector_callback(Control *sender, int type) {
 			}
 		}
 
-		char *backgroundStyle = getBackground(SUCCESS_COLOR);
+		char *backgroundStyle = getBackground(SELECTED_COLOR);
 		ESPUI.setElementStyle(sender->id, backgroundStyle);
 
 	} else {
@@ -349,23 +305,53 @@ void StepperSelector_callback(Control *sender, int type) {
 void Stepper_updateState_callback(Control *sender, int type) {
 	uint16_t parentRef =
 		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
-	// Update velocity state
-	updateStepperMotorState(parentRef);
-}
 
-void Stepper_Target_Slider_callback(Control *sender, int type) {
-	uint16_t parentRef =
-		ESPinner_Manager::getInstance().findRefByControllerId(sender->id);
-	debugCallback(sender, type);
-	updateStepperMotorState(parentRef);
+	bool isEN_Ref = (String(sender->label) == STEPPER_SWITCH_EN_LABEL);
+	bool isVel_Ref = (String(sender->label) == STEPPER_SLIDER_VEL_LABEL);
+	bool isTarget_Ref = (String(sender->label) == STEPPER_SLIDER_TARGET_LABEL);
 
-	// Update target display label
-	uint16_t targetDisplayRef =
-		searchInMapByLabel(ESPinner_Manager::getInstance().getControllerMap(),
-						   parentRef, STEPPER_LABEL_TARGET_LABEL);
-	if (targetDisplayRef) {
-		String targetValue = "Target: " + sender->value;
-		ESPUI.updateLabel(targetDisplayRef, targetValue);
+	if (isTarget_Ref) {
+		// Validate steps per revolution input
+		if (isValidNumericString(sender->value) > 0) {
+			// Valid range for steps per revolution
+			char *backgroundStyle = getBackground(SUCCESS_COLOR);
+			ESPUI.setElementStyle(sender->id, backgroundStyle);
+		} else {
+			// Invalid value
+			char *backgroundStyle = getBackground(DANGER_COLOR);
+			ESPUI.setElementStyle(sender->id, backgroundStyle);
+		}
+	}
+
+	// Get stepper motor instance
+	ESPinner *espinner = ESPinner_Manager::getInstance().findESPinnerById(
+		ESPUI.getControl(parentRef)->value);
+	AccelStepperAdapter *stepperAdapter = nullptr;
+	AccelStepper *stepper = nullptr;
+
+	if (espinner && espinner->getType() == ESPinner_Mod::Stepper) {
+		ESPinner_Stepper *stepperESPinner =
+			static_cast<ESPinner_Stepper *>(espinner);
+		stepperAdapter =
+			static_cast<AccelStepperAdapter *>(stepperESPinner->stepper.get());
+
+		if (stepperAdapter) {
+			stepper = stepperAdapter->getAccelStepper();
+			if (isVel_Ref) {
+				float speed = (sender->value.toInt() / 100.0) * 1000.0;
+				DUMPLN("Setting speed: ", speed);
+				stepper->setSpeed(speed);
+			}
+			if (isEN_Ref) {
+				bool enableState = sender->value.toInt() == 1 ? true : false;
+				DUMPLN("Setting enable state: ", enableState);
+				stepperAdapter->enable(enableState);
+			}
+
+			if (isTarget_Ref) {
+				stepperAdapter->setTarget(sender->value.toInt());
+			}
+		}
 	}
 }
 
@@ -403,10 +389,8 @@ void Stepper_Pad_callback(Control *sender, int type) {
 	switch (type) {
 	case P_CENTER_DOWN: // Execute target movement
 		if (targetRef) {
-			int targetSteps = ESPUI.getControl(targetRef)->value.toInt();
-			if (targetSteps != 0) {
-				stepperAdapter->getAccelStepper()->moveTo(-200);
-			}
+			int targetSteps = stepperAdapter->getTarget();
+			stepperAdapter->getAccelStepper()->moveTo(targetSteps);
 		}
 		break;
 	case P_LEFT_DOWN: // Start continuous movement left
@@ -467,11 +451,11 @@ void Stepper_Controller(String ID_LABEL, uint16_t parentRef) {
 	// Target Display Label
 	GUI_setLabel(STEPPER_Controller_ID, STEPPER_LABEL_TARGET_LABEL,
 				 STEPPER_LABEL_TARGET_VALUE, SELECTED_COLOR);
-	// Target Steps Slider
-	uint16_t STEPPER_TARGET_Slider =
-		ESPUI.addControl(ControlType::Slider, STEPPER_SLIDER_TARGET_LABEL,
+	// Target Steps TextBox
+	uint16_t STEPPER_Target =
+		ESPUI.addControl(ControlType::Text, STEPPER_SLIDER_TARGET_LABEL,
 						 STEPPER_SLIDER_TARGET_VALUE, ControlColor::Wetasphalt,
-						 STEPPER_Controller_ID, Stepper_Target_Slider_callback);
+						 STEPPER_Controller_ID, Stepper_updateState_callback);
 
 	// Current Position Label
 	GUI_setLabel(STEPPER_Controller_ID, STEPPER_LABEL_POSITION_LABEL,
@@ -484,7 +468,7 @@ void Stepper_Controller(String ID_LABEL, uint16_t parentRef) {
 														  parentRef);
 	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_PAD,
 														  parentRef);
-	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_TARGET_Slider,
+	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_Target,
 														  parentRef);
 
 	ESPinner_Manager::getInstance().addUIRelation(parentRef,
@@ -530,7 +514,7 @@ void saveStepper_callback(Control *sender, int type) {
 									   parentRef);
 				}
 
-				char *backgroundStyle = getBackground(SELECTED_COLOR);
+				char *backgroundStyle = getBackground(SUCCESS_COLOR);
 				ESPUI.setPanelStyle(parentRef, backgroundStyle);
 			} else {
 				char *backgroundStyle = getBackground(PENDING_COLOR);
@@ -642,6 +626,37 @@ void ESPinner_Stepper::implement() {
 
 	// ------- Create Controllers ----------- //
 	Stepper_Controller(ESPinner_Stepper::getID(), Stepper_PIN_selector);
+}
+
+void AccelStepperAdapter::updateActions() {
+	DUMPSLN("");
+	long currentPos = stepper.currentPosition();
+	DUMPLN("Current Position: ", currentPos);
+	ESPinner *espinner = ESPinner_Manager::getInstance().findESPinnerById(
+		AccelStepperAdapter::getID());
+	/*
+	if (espinner != nullptr) {
+		DUMPLN("Parent Ref: ", espinner->getID());
+		uint16_t parentRef =
+			ESPinner_Manager::getInstance().findUIRelationRefByID(
+				espinner->getID());
+		DUMPLN("UI ESPinner Ref: ", parentRef);
+		uint16_t controllerRef =
+			ESPinner_Manager::getInstance().findUIRelationRefByID(parentRef);
+		DUMPLN("Controller Ref: ", controllerRef);
+
+		if (parentRef != 0) {
+			uint16_t currentPositionRef = searchInMapByLabel(
+				elementToParentMap, parentRef, STEPPER_LABEL_POSITION_LABEL);
+
+			String currentPositionValue =
+				"Current Position: " + String(currentPos);
+			ESPUI.updateLabel(currentPositionRef, currentPositionValue);
+		}
+	} else {
+		DUMPSLN("ESPinner not found");
+	}
+		*/
 }
 
 #endif

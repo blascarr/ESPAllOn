@@ -230,8 +230,7 @@ uint16_t searchInMapByLabel(const std::map<K, V> &relationMap,
 			return childControllerId; // Retornar ID si encuentra coincidencia
 		}
 	}
-
-	DUMPSLN("MEMORY FAIL: LABEL NOT FOUND");
+	DUMPLN("MEMORY FAIL: LABEL NOT FOUND: ", label);
 	return 0;
 }
 
@@ -251,7 +250,7 @@ uint16_t searchInMapByValue(const std::map<K, V> &relationMap,
 	}
 
 	// Mensaje de error si no se encuentra el valor
-	DUMPSLN("MEMORY FAIL: VALUE NOT FOUND");
+	DUMPLN("MEMORY FAIL: VALUE NOT FOUND: ", value);
 	return 0;
 }
 

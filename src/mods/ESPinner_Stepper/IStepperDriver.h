@@ -8,6 +8,7 @@
 #include "A4988.h"
 #include <AccelStepper.h>
 #include <TMCStepper.h>
+#include <TickerFree.h>
 
 enum class Stepper_Driver {
 	TMC2208,
@@ -80,6 +81,8 @@ struct IStepperDriver {
 		return StepperRunner::getInstance().unregisterRunnable(id);
 	}
 
+	virtual void updateActions() {}
+
   private:
 	bool _active = false;
 };
@@ -91,7 +94,9 @@ class AccelStepperAdapter : public IStepperDriver, IRunnable {
   public:
 	AccelStepperAdapter(uint8_t stepPin, uint8_t dirPin, uint8_t enPin = 0)
 		: stepper(AccelStepper::DRIVER, stepPin, dirPin), step(stepPin),
-		  dir(dirPin), en(enPin) {
+		  dir(dirPin), en(enPin),
+		  stepperActions([this]() { this->updateActions(); },
+						 STEPPER_ACTIONS_INTERVAL_MS, 0, MILLIS) {
 		this->begin();
 	}
 
@@ -110,13 +115,18 @@ class AccelStepperAdapter : public IStepperDriver, IRunnable {
 			digitalWrite(dir, LOW);
 		}
 
-		stepper.setMaxSpeed(1000);	  // Default max speed
-		stepper.setAcceleration(500); // Default acceleration
+		stepper.setMaxSpeed(STEPPER_DEFAULT_MAX_SPEED); // Default max speed
+		stepper.setAcceleration(
+			STEPPER_DEFAULT_ACCELERATION); // Default acceleration
+		stepperActions.start();
 	}
 
 	void run() override {
 		if (isEnabled()) {
 			stepper.run();
+			if (stepperActions.state() == status_t::RUNNING) {
+				stepperActions.update();
+			}
 		}
 	}
 
@@ -167,16 +177,23 @@ class AccelStepperAdapter : public IStepperDriver, IRunnable {
 		return StepperRunner::getInstance().unregisterRunnable(id);
 	}
 
+	void setAction(std::function<void()> action) {
+		stepperActions.setCallback(action);
+	}
+
+	void updateActions() override;
+
 	void setEnablePin(uint8_t en) { this->en = en; }
 	void setStepPin(uint8_t step) { this->step = step; }
 	void setDirPin(uint8_t dir) { this->dir = dir; }
 	void setStepsPerRevolution(int steps) { spr = steps; }
 	void setMicrosteps(int microsteps) { this->microsteps = microsteps; }
+	void setTarget(int target) { this->target = target; }
 
-	// void setSleepPin(int sleep) { this->sleep = sleep; }
 	uint8_t getEnablePin() { return en; }
 	uint8_t getStepPin() { return step; }
 	uint8_t getDirPin() { return dir; }
+	int getTarget() { return target; }
 
 	uint8_t getStepsPerRevolution() { return spr; }
 
@@ -190,6 +207,8 @@ class AccelStepperAdapter : public IStepperDriver, IRunnable {
 	uint8_t step;	// step pin
 	uint8_t dir;	// direction pin
 	AccelStepper stepper;
+	int target; // target position
+	TickerFree<> stepperActions;
 };
 
 // ===================== Adapter TMC2130 =====================
