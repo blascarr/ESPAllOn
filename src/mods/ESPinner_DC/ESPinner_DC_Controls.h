@@ -47,12 +47,12 @@ void DC_action(uint16_t parentRef) {
 
 void DC_Selector(uint16_t PIN_ptr) {
 	GUI_setLabel(PIN_ptr, DC_PINA_SELECT_LABEL, DC_PINA_SELECT_VALUE);
-	GUI_GPIOSelector(PIN_ptr, DC_PINA_SELECTOR_LABEL, DC_PINA_SELECTOR_VALUE,
-					 DCSelector_callback);
+	GUI_TextField(PIN_ptr, DC_PINA_SELECTOR_LABEL, DC_PINA_SELECTOR_VALUE,
+				  DCSelector_callback);
 
 	GUI_setLabel(PIN_ptr, DC_PINB_SELECT_LABEL, DC_PINB_SELECT_VALUE);
-	GUI_GPIOSelector(PIN_ptr, DC_PINB_SELECTOR_LABEL, DC_PINB_SELECTOR_VALUE,
-					 DCSelector_callback);
+	GUI_TextField(PIN_ptr, DC_PINB_SELECTOR_LABEL, DC_PINB_SELECTOR_VALUE,
+				  DCSelector_callback);
 }
 
 void removeDC_callback(Control *sender, int type) {
@@ -260,14 +260,12 @@ void ESPinner_DC::implement() {
 	addElementWithParent(elementToParentMap, DCPIN_selector, DCPIN_selector);
 
 	String gpioA = String(ESPinner_DC::getGPIOA());
-	uint16_t gpioA_ref =
-		GUI_GPIOSelector(DCPIN_selector, DC_PINA_SELECTOR_LABEL, gpioA.c_str(),
-						 DCSelector_callback);
+	uint16_t gpioA_ref = GUI_TextField(DCPIN_selector, DC_PINA_SELECTOR_LABEL,
+									   gpioA.c_str(), DCSelector_callback);
 
 	String gpioB = String(ESPinner_DC::getGPIOB());
-	uint16_t gpioB_ref =
-		GUI_GPIOSelector(DCPIN_selector, DC_PINB_SELECTOR_LABEL, gpioB.c_str(),
-						 DCSelector_callback);
+	uint16_t gpioB_ref = GUI_TextField(DCPIN_selector, DC_PINB_SELECTOR_LABEL,
+									   gpioB.c_str(), DCSelector_callback);
 
 	GUIButtons_Elements(DCPIN_selector, DC_SAVE_LABEL, DC_SAVE_VALUE,
 						REMOVEESPINNER_LABEL, REMOVEESPINNER_VALUE,

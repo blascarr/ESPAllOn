@@ -24,8 +24,8 @@ void saveTFT_callback(Control *sender, int type) {
 
 void TFT_Selector(uint16_t TFT_ptr) {
 	GUI_setLabel(TFT_ptr, TFT_SELECT_LABEL, TFT_SELECT_VALUE);
-	GUI_GPIOSelector(TFT_ptr, TFT_PINSELECTOR_LABEL, TFT_PINSELECTOR_VALUE,
-					 createTFT_callback);
+	GUI_TextField(TFT_ptr, TFT_PINSELECTOR_LABEL, TFT_PINSELECTOR_VALUE,
+				  createTFT_callback);
 }
 
 void TFT_UI(uint16_t TFT_ptr) {

@@ -192,6 +192,11 @@ String ESPinner_Path = "espinners";
 #define STEPPER_PAD_MOVEMENT_LABEL "Stepper Pad"
 #define STEPPER_PAD_MOVEMENT_VALUE "0"
 
+#define STEPPER_BUTTON_HOME_LABEL "Home"
+#define STEPPER_BUTTON_HOME_VALUE "Go Home"
+#define STEPPER_BUTTON_ZERO_LABEL "Set Zero"
+#define STEPPER_BUTTON_ZERO_VALUE "Zero"
+
 #define STEPPER_LABEL_TARGET_LABEL "Target:"
 #define STEPPER_LABEL_TARGET_VALUE "Target:"
 #define STEPPER_LABEL_POSITION_LABEL "Current Position:"

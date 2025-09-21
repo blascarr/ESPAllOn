@@ -65,6 +65,7 @@
 #define SUCCESS_COLOR "#33cc66"
 #define PENDING_COLOR "#6633dd"
 #define SELECTED_COLOR "#1165aa"
+#define INFO_COLOR "#22ccb3"
 
 /** Type alias for UI callback functions */
 using UICallback = void (*)(Control *sender, int type);
@@ -87,8 +88,10 @@ void saveElement_callback(Control *sender, int type);
  * @param SelectorCallback Callback function for the selector
  * @return Control ID of the created GPIO selector
  */
-uint16_t GUI_GPIOSelector(uint16_t parentRef, const char *GPIOLabel,
-						  const char *GPIOValue, UICallback SelectorCallback);
+template <typename MapType>
+uint16_t GUI_TextField(uint16_t parentRef, const char *GPIOLabel,
+					   const char *GPIOValue, UICallback SelectorCallback,
+					   MapType &targetMap);
 
 /**
  * Detaches a removed PIN from the system
@@ -355,16 +358,6 @@ void GUIButtons_Elements(uint16_t parentRef, const char *saveLabel,
 						 UICallback removeCallback) {
 	GUI_SaveButton(parentRef, saveLabel, saveValue, saveCallback);
 	GUI_RemoveButton(parentRef, removeLabel, removeValue, removeCallback);
-}
-
-void GUI_setLabel(uint16_t parentRef, const char *label, const char *value,
-				  const char *color = DANGER_COLOR) {
-	uint16_t Label_selector = ESPUI.addControl(ControlType::Label, label, value,
-											   ControlColor::Carrot, parentRef);
-	char *backgroundStyle = getBackground(color);
-	ESPUI.setElementStyle(Label_selector, backgroundStyle);
-	addElementWithParent(elementToParentMap, Label_selector,
-						 parentRef); // Add Label to parent
 }
 
 void saveButtonCheck(uint16_t parentRef, const char *SelectorLabel,

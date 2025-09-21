@@ -164,8 +164,8 @@ void GPIOSelector_callback(Control *sender, int type) {
 
 void GPIO_Selector(uint16_t PIN_ptr) {
 	GUI_setLabel(PIN_ptr, GPIO_SELECT_LABEL, GPIO_SELECT_VALUE);
-	GUI_GPIOSelector(PIN_ptr, GPIO_PINSELECTOR_LABEL, GPIO_PINSELECTOR_VALUE,
-					 GPIOSelector_callback);
+	GUI_TextField(PIN_ptr, GPIO_PINSELECTOR_LABEL, GPIO_PINSELECTOR_VALUE,
+				  GPIOSelector_callback);
 }
 
 void removeGPIO_callback(Control *sender, int type) {
@@ -232,9 +232,8 @@ void ESPinner_GPIO::implement() {
 	ESPUI.getControl(gpioMode_ref)->value = ESPinner_GPIO::getGPIOMode_JSON();
 
 	String gpio = String(ESPinner_GPIO::getGPIO());
-	uint16_t gpio_ref =
-		GUI_GPIOSelector(GPIOPIN_selector, GPIO_PINSELECTOR_LABEL, gpio.c_str(),
-						 GPIOSelector_callback);
+	uint16_t gpio_ref = GUI_TextField(GPIOPIN_selector, GPIO_PINSELECTOR_LABEL,
+									  gpio.c_str(), GPIOSelector_callback);
 
 	GUIButtons_Elements(GPIOPIN_selector, GPIO_SAVE_LABEL, GPIO_SAVE_VALUE,
 						REMOVEESPINNER_LABEL, REMOVEESPINNER_VALUE,

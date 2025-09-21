@@ -24,8 +24,8 @@ void saveLCD_callback(Control *sender, int type) {
 
 void LCD_Selector(uint16_t LCD_ptr) {
 	GUI_setLabel(LCD_ptr, "Select_LCD_GPIO", "Select LCD");
-	GUI_GPIOSelector(LCD_ptr, LCD_PINSELECTOR_LABEL, LCD_PINSELECTOR_VALUE,
-					 createLCD_callback);
+	GUI_TextField(LCD_ptr, LCD_PINSELECTOR_LABEL, LCD_PINSELECTOR_VALUE,
+				  createLCD_callback);
 }
 
 void LCD_UI(uint16_t LCD_ptr) {

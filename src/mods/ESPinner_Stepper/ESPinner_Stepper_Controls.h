@@ -135,16 +135,16 @@ void Stepper_Selector(uint16_t PIN_ptr) {
 	Stepper_driverSelector(PIN_ptr);
 
 	GUI_setLabel(PIN_ptr, STEPPER_STEP_SELECT_LABEL, STEPPER_STEP_SELECT_VALUE);
-	GUI_GPIOSelector(PIN_ptr, STEPPER_STEP_SELECTOR_LABEL,
-					 STEPPER_STEP_SELECTOR_VALUE, StepperSelector_callback);
+	GUI_TextField(PIN_ptr, STEPPER_STEP_SELECTOR_LABEL,
+				  STEPPER_STEP_SELECTOR_VALUE, StepperSelector_callback);
 	GUI_setLabel(PIN_ptr, STEPPER_DIR_SELECT_LABEL, STEPPER_DIR_SELECT_VALUE);
-	GUI_GPIOSelector(PIN_ptr, STEPPER_DIR_SELECTOR_LABEL,
-					 STEPPER_DIR_SELECTOR_VALUE, StepperSelector_callback);
+	GUI_TextField(PIN_ptr, STEPPER_DIR_SELECTOR_LABEL,
+				  STEPPER_DIR_SELECTOR_VALUE, StepperSelector_callback);
 
 	GUI_setLabel(PIN_ptr, STEPPER_EN_SELECT_LABEL, STEPPER_EN_SELECT_VALUE);
 
-	GUI_GPIOSelector(PIN_ptr, STEPPER_EN_SELECTOR_LABEL,
-					 STEPPER_EN_SELECTOR_VALUE, StepperSelector_callback);
+	GUI_TextField(PIN_ptr, STEPPER_EN_SELECTOR_LABEL, STEPPER_EN_SELECTOR_VALUE,
+				  StepperSelector_callback);
 
 	// Steps per revolution field
 	GUI_TextField(PIN_ptr, STEPPER_STEPSREV_LABEL, STEPPER_STEPSREV_VALUE,
@@ -152,20 +152,18 @@ void Stepper_Selector(uint16_t PIN_ptr) {
 
 	if (false) {
 		GUI_setLabel(PIN_ptr, STEPPER_CS_SELECT_LABEL, STEPPER_CS_SELECT_VALUE);
-		GUI_GPIOSelector(PIN_ptr, STEPPER_CS_SELECTOR_LABEL,
-						 STEPPER_CS_SELECTOR_VALUE, StepperSelector_callback);
+		GUI_TextField(PIN_ptr, STEPPER_CS_SELECTOR_LABEL,
+					  STEPPER_CS_SELECTOR_VALUE, StepperSelector_callback);
 	}
 	if (false) {
 		GUI_setLabel(PIN_ptr, STEPPER_DIAG0_SELECT_LABEL,
 					 STEPPER_DIAG0_SELECT_VALUE);
-		GUI_GPIOSelector(PIN_ptr, STEPPER_DIAG0_SELECTOR_LABEL,
-						 STEPPER_DIAG0_SELECTOR_VALUE,
-						 StepperSelector_callback);
+		GUI_TextField(PIN_ptr, STEPPER_DIAG0_SELECTOR_LABEL,
+					  STEPPER_DIAG0_SELECTOR_VALUE, StepperSelector_callback);
 		GUI_setLabel(PIN_ptr, STEPPER_DIAG1_SELECT_LABEL,
 					 STEPPER_DIAG1_SELECT_VALUE);
-		GUI_GPIOSelector(PIN_ptr, STEPPER_DIAG1_SELECTOR_LABEL,
-						 STEPPER_DIAG1_SELECTOR_VALUE,
-						 StepperSelector_callback);
+		GUI_TextField(PIN_ptr, STEPPER_DIAG1_SELECTOR_LABEL,
+					  STEPPER_DIAG1_SELECTOR_VALUE, StepperSelector_callback);
 	}
 }
 
@@ -309,6 +307,8 @@ void Stepper_updateState_callback(Control *sender, int type) {
 	bool isEN_Ref = (String(sender->label) == STEPPER_SWITCH_EN_LABEL);
 	bool isVel_Ref = (String(sender->label) == STEPPER_SLIDER_VEL_LABEL);
 	bool isTarget_Ref = (String(sender->label) == STEPPER_SLIDER_TARGET_LABEL);
+	bool isHome_Ref = (String(sender->label) == STEPPER_BUTTON_HOME_LABEL);
+	bool isZero_Ref = (String(sender->label) == STEPPER_BUTTON_ZERO_LABEL);
 
 	if (isTarget_Ref) {
 		// Validate steps per revolution input
@@ -350,6 +350,12 @@ void Stepper_updateState_callback(Control *sender, int type) {
 
 			if (isTarget_Ref) {
 				stepperAdapter->setTarget(sender->value.toInt());
+			}
+			if (isHome_Ref) {
+				stepperAdapter->getAccelStepper()->moveTo(0);
+			}
+			if (isZero_Ref) {
+				stepperAdapter->getAccelStepper()->setCurrentPosition(0);
 			}
 		}
 	}
@@ -420,56 +426,53 @@ void Stepper_Pad_callback(Control *sender, int type) {
 
 void Stepper_Controller(String ID_LABEL, uint16_t parentRef) {
 	uint16_t controllerTabRef = getTab(TabType::ControllerTab);
+
 	uint16_t STEPPER_Controller_ID = ESPUI.addControl(
 		ControlType::Text, STEPPER_ID_LABEL, ID_LABEL.c_str(),
 		ControlColor::Wetasphalt, controllerTabRef, debugCallback);
 	ESPUI.getControl(STEPPER_Controller_ID)->enabled = false;
 
+	std::map<uint16_t, uint16_t> &controllerMap =
+		ESPinner_Manager::getInstance().getControllerMap();
 	// Enable ON/OFF Switch with Label
-	GUI_setLabel(STEPPER_Controller_ID, STEPPER_LABEL_EN_LABEL,
-				 STEPPER_LABEL_EN_VALUE, SELECTED_COLOR);
+	GUI_Label(STEPPER_Controller_ID, STEPPER_LABEL_EN_LABEL,
+			  STEPPER_LABEL_EN_VALUE, controllerMap, SELECTED_COLOR);
 
-	uint16_t STEPPER_EN_Switch =
-		ESPUI.addControl(ControlType::Switcher, STEPPER_SWITCH_EN_LABEL,
-						 STEPPER_SWITCH_EN_VALUE, ControlColor::Wetasphalt,
-						 STEPPER_Controller_ID, Stepper_updateState_callback);
-
+	GUI_Switcher(STEPPER_Controller_ID, STEPPER_SWITCH_EN_LABEL,
+				 STEPPER_SWITCH_EN_VALUE, Stepper_updateState_callback,
+				 controllerMap);
 	// Velocity Slider
-	GUI_setLabel(STEPPER_Controller_ID, STEPPER_LABEL_VEL_LABEL,
-				 STEPPER_LABEL_VEL_LABEL, SELECTED_COLOR);
-	uint16_t STEPPER_VEL_Slider =
-		ESPUI.addControl(ControlType::Slider, STEPPER_SLIDER_VEL_LABEL,
-						 STEPPER_SLIDER_VEL_VALUE, ControlColor::Wetasphalt,
-						 STEPPER_Controller_ID, Stepper_updateState_callback);
+	GUI_Label(STEPPER_Controller_ID, STEPPER_LABEL_VEL_LABEL,
+			  STEPPER_LABEL_VEL_LABEL, controllerMap, SELECTED_COLOR);
+
+	GUI_Slider(STEPPER_Controller_ID, STEPPER_SLIDER_VEL_LABEL,
+			   STEPPER_SLIDER_VEL_VALUE, Stepper_updateState_callback,
+			   controllerMap);
 
 	// Control Pad
-	uint16_t STEPPER_PAD =
-		ESPUI.addControl(ControlType::PadWithCenter, STEPPER_PAD_MOVEMENT_LABEL,
-						 STEPPER_PAD_MOVEMENT_VALUE, ControlColor::Wetasphalt,
-						 STEPPER_Controller_ID, Stepper_Pad_callback);
+	GUI_PadWithCenter(STEPPER_Controller_ID, STEPPER_PAD_MOVEMENT_LABEL,
+					  STEPPER_PAD_MOVEMENT_VALUE, Stepper_Pad_callback,
+					  controllerMap);
 
 	// Target Display Label
-	GUI_setLabel(STEPPER_Controller_ID, STEPPER_LABEL_TARGET_LABEL,
-				 STEPPER_LABEL_TARGET_VALUE, SELECTED_COLOR);
+	GUI_Label(STEPPER_Controller_ID, STEPPER_LABEL_TARGET_LABEL,
+			  STEPPER_LABEL_TARGET_VALUE, controllerMap, SELECTED_COLOR);
+
 	// Target Steps TextBox
-	uint16_t STEPPER_Target =
-		ESPUI.addControl(ControlType::Text, STEPPER_SLIDER_TARGET_LABEL,
-						 STEPPER_SLIDER_TARGET_VALUE, ControlColor::Wetasphalt,
-						 STEPPER_Controller_ID, Stepper_updateState_callback);
+	GUI_Text(STEPPER_Controller_ID, STEPPER_SLIDER_TARGET_LABEL,
+			 STEPPER_SLIDER_TARGET_VALUE, Stepper_updateState_callback,
+			 controllerMap);
 
 	// Current Position Label
-	GUI_setLabel(STEPPER_Controller_ID, STEPPER_LABEL_POSITION_LABEL,
-				 STEPPER_LABEL_POSITION_VALUE, SELECTED_COLOR);
+	GUI_Label(STEPPER_Controller_ID, STEPPER_LABEL_POSITION_LABEL,
+			  STEPPER_LABEL_POSITION_VALUE, controllerMap, SELECTED_COLOR);
 
-	// Add controller relations
-	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_EN_Switch,
-														  parentRef);
-	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_VEL_Slider,
-														  parentRef);
-	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_PAD,
-														  parentRef);
-	ESPinner_Manager::getInstance().addControllerRelation(STEPPER_Target,
-														  parentRef);
+	GUI_Button(STEPPER_Controller_ID, STEPPER_BUTTON_HOME_LABEL,
+			   STEPPER_BUTTON_HOME_VALUE, Stepper_updateState_callback,
+			   controllerMap, INFO_COLOR);
+	GUI_Button(STEPPER_Controller_ID, STEPPER_BUTTON_ZERO_LABEL,
+			   STEPPER_BUTTON_ZERO_VALUE, Stepper_updateState_callback,
+			   controllerMap, INFO_COLOR);
 
 	ESPinner_Manager::getInstance().addUIRelation(parentRef,
 												  STEPPER_Controller_ID);
@@ -541,22 +544,22 @@ void ESPinner_Stepper::implement() {
 	GUI_setLabel(Stepper_PIN_selector, STEPPER_DIR_SELECT_LABEL,
 				 STEPPER_DIR_SELECT_VALUE, SELECTED_COLOR);
 	uint16_t gpioDIR_ref =
-		GUI_GPIOSelector(Stepper_PIN_selector, STEPPER_DIR_SELECTOR_LABEL,
-						 gpioDIR.c_str(), StepperSelector_callback);
+		GUI_TextField(Stepper_PIN_selector, STEPPER_DIR_SELECTOR_LABEL,
+					  gpioDIR.c_str(), StepperSelector_callback);
 
 	GUI_setLabel(Stepper_PIN_selector, STEPPER_STEP_SELECT_LABEL,
 				 STEPPER_STEP_SELECT_VALUE, SELECTED_COLOR);
 	String gpioSTEP = String(ESPinner_Stepper::getSTEP());
 	uint16_t gpioSTEP_ref =
-		GUI_GPIOSelector(Stepper_PIN_selector, STEPPER_STEP_SELECTOR_LABEL,
-						 gpioSTEP.c_str(), StepperSelector_callback);
+		GUI_TextField(Stepper_PIN_selector, STEPPER_STEP_SELECTOR_LABEL,
+					  gpioSTEP.c_str(), StepperSelector_callback);
 
 	GUI_setLabel(Stepper_PIN_selector, STEPPER_EN_SELECT_LABEL,
 				 STEPPER_EN_SELECT_VALUE, SELECTED_COLOR);
 	String gpioEN = String(ESPinner_Stepper::getEN());
 	uint16_t gpioEN_ref =
-		GUI_GPIOSelector(Stepper_PIN_selector, STEPPER_EN_SELECTOR_LABEL,
-						 gpioEN.c_str(), StepperSelector_callback);
+		GUI_TextField(Stepper_PIN_selector, STEPPER_EN_SELECTOR_LABEL,
+					  gpioEN.c_str(), StepperSelector_callback);
 
 	// Steps per revolution field with current value
 	String stepsRevValue = String(ESPinner_Stepper::getStepsPerRevolution());
@@ -586,8 +589,8 @@ void ESPinner_Stepper::implement() {
 	if (ESPinner_Stepper::getSPI()) {
 		String gpioCS = String(ESPinner_Stepper::getCS());
 		uint16_t gpioCS_ref =
-			GUI_GPIOSelector(Stepper_PIN_selector, STEPPER_CS_SELECTOR_LABEL,
-							 gpioCS.c_str(), StepperSelector_callback);
+			GUI_TextField(Stepper_PIN_selector, STEPPER_CS_SELECTOR_LABEL,
+						  gpioCS.c_str(), StepperSelector_callback);
 
 		ESPAllOnPinManager::getInstance().setPinControlRelation(
 			ESPinner_Stepper::getCS(), gpioCS_ref);
@@ -599,12 +602,12 @@ void ESPinner_Stepper::implement() {
 	if (ESPinner_Stepper::getISDIAG()) {
 		String gpioDIAG0 = String(ESPinner_Stepper::getDIAG0());
 		uint16_t gpioDIAG0_ref =
-			GUI_GPIOSelector(Stepper_PIN_selector, STEPPER_DIAG0_SELECTOR_LABEL,
-							 gpioDIAG0.c_str(), StepperSelector_callback);
+			GUI_TextField(Stepper_PIN_selector, STEPPER_DIAG0_SELECTOR_LABEL,
+						  gpioDIAG0.c_str(), StepperSelector_callback);
 		String gpioDIAG1 = String(ESPinner_Stepper::getDIAG1());
 		uint16_t gpioDIAG1_ref =
-			GUI_GPIOSelector(Stepper_PIN_selector, STEPPER_DIAG1_SELECTOR_LABEL,
-							 gpioDIAG1.c_str(), StepperSelector_callback);
+			GUI_TextField(Stepper_PIN_selector, STEPPER_DIAG1_SELECTOR_LABEL,
+						  gpioDIAG1.c_str(), StepperSelector_callback);
 
 		ESPAllOnPinManager::getInstance().setPinControlRelation(
 			ESPinner_Stepper::getDIAG0(), gpioDIAG0_ref);
