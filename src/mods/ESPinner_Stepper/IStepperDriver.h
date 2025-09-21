@@ -84,54 +84,6 @@ struct IStepperDriver {
 	bool _active = false;
 };
 
-// ===================== Adapter A4988 =====================
-/*
-class A4988Adapter : public IStepperDriver {
-  public:
-	A4988Adapter(uint8_t dirPin, uint8_t stepPin, uint8_t enPin)
-		: stepper(200, dirPin, stepPin, enPin), en(enPin) {}
-
-	A4988Adapter(uint8_t dirPin, uint8_t stepPin, uint8_t enPin,
-				 int stepsPerRev)
-		: stepper(stepsPerRev, dirPin, stepPin, enPin), en(enPin) {}
-
-	A4988Adapter(int stepsPerRev, uint8_t dirPin, uint8_t stepPin,
-				 uint8_t sleepPin, int rpm, int microsteps)
-		: spr(stepsPerRev), rpm(rpm), microsteps(microsteps),
-		  stepper(stepsPerRev, dirPin, stepPin), sleep(sleepPin) {}
-
-	A4988Adapter(int stepsPerRev, uint8_t dirPin, uint8_t stepPin,
-				 uint8_t ms1Pin, uint8_t ms2Pin, uint8_t ms3Pin,
-				 uint8_t sleepPin, int rpm, int microsteps)
-		: spr(stepsPerRev), rpm(rpm), microsteps(microsteps),
-		  stepper(stepsPerRev, dirPin, stepPin, ms1Pin, ms2Pin, ms3Pin),
-		  sleep(sleepPin) {}
-	void begin() override {
-		pinMode(en, OUTPUT);
-		digitalWrite(en, LOW);
-	}
-	void enable(bool on) override { digitalWrite(sleep, on ? HIGH : LOW); }
-
-	void setMicrosteps(uint16_t ms) override {
-		microsteps = ms;
-		stepper.setMicrostep(ms);
-	}
-
-	void setRMSCurrent(uint16_t mA) override {
-		// A4988 does not support RMS current by software, it is manual
-	}
-
-	void rotate(int revs) { stepper.rotate(revs); }
-
-  private:
-	int spr;		// steps per revolution
-	int rpm;		// revolutions per minute
-	int microsteps; // microsteps per step
-	uint8_t sleep;	// sleep pin
-	uint8_t en;		// enable pin
-	A4988 stepper;
-};
-*/
 // ===================== Adapter AccelStepper =====================
 
 /* Stepper ESPinner class only used for hardware instantiation */
@@ -149,7 +101,8 @@ class AccelStepperAdapter : public IStepperDriver, IRunnable {
 	void begin() override {
 		if (en != 0) {
 			pinMode(en, OUTPUT);
-			digitalWrite(en, LOW); // Enable stepper
+			// Enable the stepper after initialization
+			enable(true);
 		}
 
 		if (dir != 0) {
@@ -159,9 +112,6 @@ class AccelStepperAdapter : public IStepperDriver, IRunnable {
 
 		stepper.setMaxSpeed(1000);	  // Default max speed
 		stepper.setAcceleration(500); // Default acceleration
-
-		// Enable the stepper after initialization
-		enable(true);
 	}
 
 	void run() override {
