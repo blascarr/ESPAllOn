@@ -209,11 +209,15 @@ void removeStepper_callback(Control *sender, int type) {
 				detachRemovedPIN(STEPPER_DIAG1_SELECTOR_LABEL, espinner_label,
 								 espinner_value);
 			}
-			if (espinner_label == STEPPER_MODESELECTOR_LABEL) {
-				// TODO: Review if this is the correct way to reset the stepper
+			if (espinner_label == ESPINNERID_LABEL) {
+				// Clean up the direct mapping when stepper is removed
+				ESPinner_Manager::getInstance().removeESPinnerControllerMapping(
+					espinner_value);
+
+				// Reset the stepper instance
 				ESPinner *espinner =
 					ESPinner_Manager::getInstance().findESPinnerById(
-						espinner_label);
+						espinner_value);
 				if (espinner) {
 					ESPinner_Stepper *espinnerStepper =
 						static_cast<ESPinner_Stepper *>(espinner);
@@ -476,6 +480,10 @@ void Stepper_Controller(String ID_LABEL, uint16_t parentRef) {
 
 	ESPinner_Manager::getInstance().addUIRelation(parentRef,
 												  STEPPER_Controller_ID);
+
+	// Add direct mapping for O(1) controller lookup
+	ESPinner_Manager::getInstance().addESPinnerControllerMapping(
+		ID_LABEL, STEPPER_Controller_ID);
 }
 
 void saveStepper_callback(Control *sender, int type) {
@@ -632,34 +640,25 @@ void ESPinner_Stepper::implement() {
 }
 
 void AccelStepperAdapter::updateActions() {
-	DUMPSLN("");
 	long currentPos = stepper.currentPosition();
-	DUMPLN("Current Position: ", currentPos);
-	ESPinner *espinner = ESPinner_Manager::getInstance().findESPinnerById(
-		AccelStepperAdapter::getID());
-	/*
-	if (espinner != nullptr) {
-		DUMPLN("Parent Ref: ", espinner->getID());
-		uint16_t parentRef =
-			ESPinner_Manager::getInstance().findUIRelationRefByID(
-				espinner->getID());
-		DUMPLN("UI ESPinner Ref: ", parentRef);
-		uint16_t controllerRef =
-			ESPinner_Manager::getInstance().findUIRelationRefByID(parentRef);
-		DUMPLN("Controller Ref: ", controllerRef);
 
-		if (parentRef != 0) {
-			uint16_t currentPositionRef = searchInMapByLabel(
-				elementToParentMap, parentRef, STEPPER_LABEL_POSITION_LABEL);
+	// Direct O(1) lookup to get controller reference
+	uint16_t controllerRef =
+		ESPinner_Manager::getInstance().getControllerRefByESPinnerID(
+			AccelStepperAdapter::getID());
 
+	if (controllerRef != 0) {
+		// Direct search for position label in controller's children
+		uint16_t positionLabelRef = searchInMapByLabel(
+			ESPinner_Manager::getInstance().getControllerMap(), controllerRef,
+			STEPPER_LABEL_POSITION_LABEL);
+
+		if (positionLabelRef != 0) {
 			String currentPositionValue =
 				"Current Position: " + String(currentPos);
-			ESPUI.updateLabel(currentPositionRef, currentPositionValue);
+			ESPUI.updateLabel(positionLabelRef, currentPositionValue);
 		}
-	} else {
-		DUMPSLN("ESPinner not found");
 	}
-		*/
 }
 
 #endif

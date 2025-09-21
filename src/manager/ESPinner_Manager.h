@@ -24,6 +24,10 @@ class ESPinner_Manager {
 	// External Ref - Parent Ref
 	std::map<uint16_t, uint16_t> UI_relationID;
 
+	// Direct mapping: ESPinner ID String -> Controller UI Reference
+	// This provides O(1) lookup for controller access
+	std::map<String, uint16_t> ESPinnerID_to_ControllerRef;
+
   public:
 	ESPinner_Manager() : ESPinnerManager(nullptr, &storage) {
 		storage.setRoot(ESPinner_File);
@@ -34,7 +38,10 @@ class ESPinner_Manager {
 		return instance;
 	}
 	size_t espinnerSize() const { return ESPinners.size(); }
-	void clearESPinners() { ESPinners.clear(); }
+	void clearESPinners() {
+		ESPinners.clear();
+		clearESPinnerControllerMappings();
+	}
 
 	std::map<uint16_t, uint16_t> &getControllerMap() {
 		return ESPinnerPINController;
@@ -142,6 +149,58 @@ class ESPinner_Manager {
 	}
 
 	void debugUIRelation() { debugMap(UI_relationID); }
+
+	// ------------------------------------- //
+	// ------- ESPinner ID TO CONTROLLER --- //
+	// ------------------------------------- //
+
+	/**
+	 * Add direct mapping from ESPinner ID to its controller reference
+	 * This enables O(1) lookup for controller access
+	 * @param espinnerID String ID of the ESPinner
+	 * @param controllerRef UI reference of the controller
+	 */
+	void addESPinnerControllerMapping(const String &espinnerID,
+									  uint16_t controllerRef) {
+		ESPinnerID_to_ControllerRef[espinnerID] = controllerRef;
+	}
+
+	/**
+	 * Get controller reference by ESPinner ID
+	 * @param espinnerID String ID of the ESPinner
+	 * @return Controller reference or 0 if not found
+	 */
+	uint16_t getControllerRefByESPinnerID(const String &espinnerID) {
+		auto it = ESPinnerID_to_ControllerRef.find(espinnerID);
+		if (it != ESPinnerID_to_ControllerRef.end()) {
+			return it->second;
+		}
+		return 0;
+	}
+
+	/**
+	 * Remove ESPinner controller mapping
+	 * @param espinnerID String ID of the ESPinner to remove
+	 */
+	void removeESPinnerControllerMapping(const String &espinnerID) {
+		ESPinnerID_to_ControllerRef.erase(espinnerID);
+	}
+
+	/**
+	 * Clear all ESPinner controller mappings
+	 */
+	void clearESPinnerControllerMappings() {
+		ESPinnerID_to_ControllerRef.clear();
+	}
+
+	void debugESPinnerControllerMap() {
+		DUMPLN("ESPinner ID to Controller mappings: ",
+			   ESPinnerID_to_ControllerRef.size());
+		for (const auto &pair : ESPinnerID_to_ControllerRef) {
+			DUMP("ID: ", pair.first);
+			DUMPLN(" -> Controller: ", pair.second);
+		}
+	}
 
 	// ------------------------------------- //
 	// ---------- ESPINNER METHODS --------- //

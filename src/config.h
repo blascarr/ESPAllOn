@@ -213,7 +213,7 @@ String ESPinner_Path = "espinners";
 #define STEPPER_STEPSREV_MAX_VALUE 10000
 
 #define STEPPER_MAX_STEPPERS 8
-#define STEPPER_ACTIONS_INTERVAL_MS 1000
+#define STEPPER_ACTIONS_INTERVAL_MS 200
 #define STEPPER_DEFAULT_MAX_SPEED 1000
 #define STEPPER_DEFAULT_ACCELERATION 500
 // --------------- DC MOD Definition ----------------//
