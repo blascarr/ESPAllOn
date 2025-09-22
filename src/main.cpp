@@ -67,7 +67,6 @@ void setup() {
 	ESPAllOn::getInstance().begin();
 
 	ESPinner_Manager::getInstance().loadFromStorage();
-	UI_UpdateTicker.start();
 	wifi.start();
 	wifi.connectWifi();
 
@@ -82,8 +81,6 @@ void setup() {
  * serial commands for debugging and configuration purposes.
  */
 void loop() {
-
-	UI_UpdateTicker.update();
 	wifi.update();
 
 	// Execute all steppers in the StepperRunner (non-blocking)

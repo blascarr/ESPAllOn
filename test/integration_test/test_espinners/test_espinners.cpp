@@ -10,6 +10,7 @@
 
 #include "../../utils/testTicker.h"
 
+/*
 void executeDelayedCommand() {
 	// Espera 10 segundos
 	std::this_thread::sleep_for(std::chrono::seconds(10));
@@ -27,6 +28,7 @@ int main() {
 	std::cout << "El hilo de ejecución ha completado." << std::endl;
 	return 0;
 }
+*/
 
 std::vector<std::string> expectedLabels = {"ESPinnerType", "ESPinnerID",
 										   "ESPinner_Save"};

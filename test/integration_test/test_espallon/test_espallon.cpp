@@ -32,27 +32,6 @@
 
 #include "../../utils/testTicker.h"
 
-/**
- * Browser automation execution with system initialization delay
- * Uses ticker-based delay instead of threads for ESP compatibility
- */
-void executeDelayedCommand() {
-	std::this_thread::sleep_for(std::chrono::seconds(10));
-	// Execute Puppeteer browser automation test
-	int returnCode = system("node ../node_test/src_test/puppeteer_test.js");
-	std::cout << "Browser test return code: " << returnCode << std::endl;
-}
-
-int main() {
-	std::cout << "El hilo principal continúa ejecutándose..." << std::endl;
-	// Lanza el hilo que maneja la espera y la ejecución del comando
-	std::thread worker(executeDelayedCommand);
-	// Hace que el hilo principal espere a que el trabajador termine
-	worker.join();
-	std::cout << "El hilo de ejecución ha completado." << std::endl;
-	return 0;
-}
-
 std::vector<std::string> expectedLabels = {"ESPinnerType", "ESPinnerID",
 										   "ESPinner_Save"};
 
@@ -137,11 +116,6 @@ void setup() {
 	testFunctions.push_back(addRFIDESPinner);
 	testFunctions.push_back(addStepperESPinner);
 	testFunctions.push_back(addGPIOESPinner);
-
-	ESPinner_Manager::getInstance().loadFromStorage();
-	UI_UpdateTicker.start();
-	wifi.start();
-	wifi.connectWifi();
 
 	test_runTicker.start();
 }

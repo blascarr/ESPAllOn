@@ -30,18 +30,6 @@ void textCallback(Control *sender, int type) {}
 void ESPinnerSelector();
 
 /**
- * UI update function called periodically by ticker
- *
- * This function is called periodically to update UI elements.
- * Currently contains placeholder code for slider value updates.
- */
-void uiUpdate() {
-	static uint16_t sliderVal = 10;
-
-	// ESPUI.updateLabel(mainLabel, String(sliderVal));
-}
-
-/**
  * Callback function to remove all pin configurations
  *
  * This function clears all stored pin configurations when the
@@ -57,9 +45,6 @@ void removeConfig(Control *sender, int type) {
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
-
-/** @brief Ticker for periodic UI updates (every 500ms) */
-TickerFree<> UI_UpdateTicker(uiUpdate, 500, 0, MILLIS);
 
 /**
  * Main application manager class for ESPAllOn system

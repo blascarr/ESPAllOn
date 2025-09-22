@@ -28,6 +28,7 @@
  * Delayed command execution function
  * Waits 10 seconds then executes Puppeteer browser automation test
  */
+/*
 void executeDelayedCommand() {
 	// Wait 10 seconds for system initialization
 	std::this_thread::sleep_for(std::chrono::seconds(10));
@@ -35,20 +36,22 @@ void executeDelayedCommand() {
 	int returnCode = system("node ../node_test/src_test/puppeteer_test.js");
 	std::cout << "Return code: " << returnCode << std::endl;
 }
-
+*/
 /**
  * Main function for browser automation testing
  * Manages thread execution for delayed browser testing
  */
+/*
 int main() {
-	std::cout << "Main thread continues executing..." << std::endl;
-	// Launch thread that handles wait and command execution
-	std::thread worker(executeDelayedCommand);
-	// Make main thread wait for worker to complete
-	worker.join();
-	std::cout << "Execution thread has completed." << std::endl;
-	return 0;
+   std::cout << "Main thread continues executing..." << std::endl;
+   // Launch thread that handles wait and command execution
+   std::thread worker(executeDelayedCommand);
+   // Make main thread wait for worker to complete
+   worker.join();
+   std::cout << "Execution thread has completed." << std::endl;
+   return 0;
 }
+*/
 
 void setup() {
 	UNITY_BEGIN();

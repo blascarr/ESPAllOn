@@ -44,6 +44,12 @@ void setup() {
 	Serial.begin(115200);
 	UNITY_BEGIN();
 
+	wifi.connectWifi();
+#if defined(ESP32)
+	WiFi.setSleep(false); // For the ESP32: turn off sleeping to increase UI
+						  // responsivness (at the cost of power use)
+#endif
+	// RUN_TEST(test_no_elementsInParentMap);
 	ESPAllOn::getInstance().setup();
 	ESPAllOn::getInstance().begin();
 
