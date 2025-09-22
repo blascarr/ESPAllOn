@@ -449,8 +449,8 @@ void test_second_DCespinner() {
 	std::vector<ControlAssertion> void_DC_assertions = {
 		{secondESPinnerSelector, ESPINNERTYPE_LABEL, "DC"},
 		{secondESPinnerSelector, ESPINNERID_LABEL, "TEST_DC_2"},
-		{secondESPinnerSelector, DC_PINA_SELECTOR_LABEL, "20"},
-		{secondESPinnerSelector, DC_PINB_SELECTOR_LABEL, "22"},
+		{secondESPinnerSelector, DC_PINA_SELECTOR_LABEL, "14"},
+		{secondESPinnerSelector, DC_PINB_SELECTOR_LABEL, "15"},
 		{secondESPinnerSelector, DC_SAVE_LABEL, DC_SAVE_VALUE},
 		{secondESPinnerSelector, DC_REMOVE_LABEL, DC_REMOVE_VALUE}};
 
@@ -471,8 +471,8 @@ void test_second_DCespinner() {
 	first_espinner.setID("TEST_DC");
 
 	ESPinner_DC expected_espinner = ESPinner_DC();
-	expected_espinner.setGPIOA(20);
-	expected_espinner.setGPIOB(22);
+	expected_espinner.setGPIOA(14);
+	expected_espinner.setGPIOB(15);
 	expected_espinner.setID("TEST_DC_2");
 
 	ESPinner_DC expectedList[] = {first_espinner, expected_espinner};
@@ -538,8 +538,8 @@ void test_firstESPinner_removed() {
 	TEST_ASSERT_EQUAL_INT16(2, controlReferences.size());
 
 	ESPinner_DC expected_espinner = ESPinner_DC();
-	expected_espinner.setGPIOA(20);
-	expected_espinner.setGPIOB(22);
+	expected_espinner.setGPIOA(14);
+	expected_espinner.setGPIOB(15);
 	expected_espinner.setID("TEST_DC_2");
 	checkESPinnerState(expected_espinner.getID(), expected_espinner.getGPIOA(),
 					   expected_espinner.getGPIOB(),
@@ -691,12 +691,12 @@ void setup() {
 	uint16_t second_DC_ref =
 		searchByLabel(secondESPinnerSelector, DC_PINA_SELECTOR_LABEL);
 	typeDC_AController = ESPUI.getControl(second_DC_ref);
-	typeDC_AController->value = "20";
+	typeDC_AController->value = "14";
 
 	uint16_t second_DCB_ref =
 		searchByLabel(secondESPinnerSelector, DC_PINB_SELECTOR_LABEL);
 	typeDC_BController = ESPUI.getControl(second_DCB_ref);
-	typeDC_BController->value = "22";
+	typeDC_BController->value = "15";
 
 	DCSelector_callback(typeDC_AController, B_UP);
 	DCSelector_callback(typeDC_BController, B_UP);
