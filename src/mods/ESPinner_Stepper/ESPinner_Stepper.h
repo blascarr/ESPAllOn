@@ -93,8 +93,8 @@ class ESPinner_Stepper : public ESPinner {
 				stepper->begin();
 			}
 			if (driver == Stepper_Driver::ACCELSTEPPER) {
-				stepper = std::make_unique<AccelStepperAdapter>(
-					getDIR(), getSTEP(), getEN());
+				stepper = std::unique_ptr<IStepperDriver>(
+					new AccelStepperAdapter(getDIR(), getSTEP(), getEN()));
 				if (stepper) {
 					bool registered = stepper->registerRunner(this->getID());
 
