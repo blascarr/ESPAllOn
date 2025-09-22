@@ -25,9 +25,9 @@ class ESPALLON_Controller : public TickerFree<> {
 
 	/**
 	 * Constructor initializes the ticker with default interval
-	 * Sets up a 10ms ticker interval and binds the tick() method
+	 * Sets up a 100ms ticker interval and binds the tick() method
 	 */
-	ESPALLON_Controller() : TickerFree<>([this]() { this->tick(); }, 10) {}
+	ESPALLON_Controller() : TickerFree<>([this]() { this->tick(); }, 100) {}
 
 	/**
 	 * Virtual function for connection tick handling

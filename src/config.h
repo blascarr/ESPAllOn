@@ -28,6 +28,7 @@
 
 // Settings
 #define SLOW_BOOT 0
+// For ESP8266, if credentials are not found, it creates an access point
 #define HOSTNAME "ESPAllOn"
 #define FORCE_USE_HOTSPOT 0
 #define DEBUG false

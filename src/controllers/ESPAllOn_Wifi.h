@@ -25,6 +25,7 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
   public:
 	uint16_t wifi_ssid_text, wifi_pass_text;
 	bool wifiStatus = false;
+	bool shouldReconnect = false; // Flag for deferred reconnection
 
 	/**
 	 * Constructor sets up the connection tick callback
@@ -49,8 +50,10 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 	 */
 	void begin() override {
 		wifiConfig();
+		ESPALLON_Controller::interval(500);
 		ESPALLON_Controller::start();
 		wifiScan();
+		connectWifi();
 	}
 
 	/**
@@ -99,6 +102,7 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 					std::bind(&ESPALLON_Wifi::checkWifiConnection, this));
 			};
 		}
+		handleDeferredReconnection();
 	}
 
 	/**
@@ -115,6 +119,19 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 
 	/** Get current status - placeholder function */
 	void getCurrentStatus() {}
+
+	/**
+	 * Handle deferred reconnection requests
+	 * Should be called in main loop to safely reconnect
+	 */
+	void handleDeferredReconnection() {
+		if (shouldReconnect) {
+			shouldReconnect = false;
+			DUMPSLN("Performing deferred WiFi reconnection...");
+			delay(2000); // Give time for web response to be sent
+			connectWifi();
+		}
+	}
 
 	/**
 	 * Check if connected and print network information
@@ -233,6 +250,10 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 			WiFi.mode(WIFI_AP);
 			WiFi.softAPConfig(LOCAL_IP, GATEWAY, SUBNET);
 			WiFi.softAP(HOSTNAME);
+			DUMPLN("AP created with SSID: ", HOSTNAME);
+
+			// Start DNS server for captive portal
+			setupCaptivePortal();
 
 			connect_timeout = 20;
 			do {
@@ -241,6 +262,19 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 				connect_timeout--;
 			} while (connect_timeout);
 		}
+	}
+
+	/**
+	 * Setup captive portal for WiFi configuration
+	 * Configures DNS server to redirect all requests to the ESP
+	 */
+	void setupCaptivePortal() {
+		// Include DNS server from Wifi_Controller
+		extern DNSServer dnsServer;
+
+		// Start DNS server to redirect all requests to our IP
+		dnsServer.start(DNS_PORT, "*", LOCAL_IP);
+		DUMPSLN("Captive portal DNS server started");
 	}
 };
 

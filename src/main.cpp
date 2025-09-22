@@ -67,8 +67,7 @@ void setup() {
 	ESPAllOn::getInstance().begin();
 
 	ESPinner_Manager::getInstance().loadFromStorage();
-	wifi.start();
-	wifi.connectWifi();
+	wifi.begin();
 
 #if MEMORYDEBUG
 	Memory_Ticker.start();
