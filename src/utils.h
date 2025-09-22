@@ -120,6 +120,9 @@ std::vector<uint16_t> controlReferences;
  */
 std::map<uint16_t, uint16_t> elementToParentMap;
 
+/** Map to store WiFi UI control references by label */
+std::map<String, uint16_t> WIFI_UI_ref;
+
 /**
  * Gets all child IDs for a given parent ID from the map
  * @param map Map containing child-parent relationships

@@ -110,14 +110,14 @@ class ESPAllOn {
 		ESPUI.addControl(ControlType::Max, VOID_VALUE, "64", None,
 						 ESPALLON_Wifi::getInstance().wifi_pass_text);
 
-		// Register controls in the WiFi UI map for easy access
-		extern std::map<String, uint16_t> WIFI_UI_ref;
+		// Create Save button and register it
+		uint16_t saveButtonId = ESPUI.addControl(
+			ControlType::Button, WIFI_SAVE_LABEL, WIFI_SAVE_VALUE,
+			ControlColor::Peterriver, wifitab, enterWifiDetailsCallback);
+
 		WIFI_UI_ref[SSID_LABEL] = ESPALLON_Wifi::getInstance().wifi_ssid_text;
 		WIFI_UI_ref[PASS_LABEL] = ESPALLON_Wifi::getInstance().wifi_pass_text;
-
-		ESPUI.addControl(ControlType::Button, SAVE_LABEL, SAVE_VALUE,
-						 ControlColor::Peterriver, wifitab,
-						 enterWifiDetailsCallback);
+		WIFI_UI_ref[WIFI_SAVE_LABEL] = saveButtonId;
 
 		ESPUI.addControl(ControlType::Button, REMOVE_PINCONFIG_LABEL,
 						 REMOVE_PINCONFIG_VALUE, ControlColor::Peterriver,

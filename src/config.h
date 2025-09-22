@@ -119,9 +119,9 @@ String ESPinner_Path = "espinners";
 #define REMOVEESPINNER_VALUE "Remove"
 #define SSID_LABEL "SSID"
 #define PASS_LABEL "Password"
-#define SAVE_LABEL "Save"
+#define WIFI_SAVE_LABEL "Save"
 #define VOID_LABEL "VOID"
-#define SAVE_VALUE "Save"
+#define WIFI_SAVE_VALUE "Save"
 #define VOID_VALUE ""
 
 #define REMOVE_PINCONFIG_LABEL "REMOVE_PIN_CONFIGURATION"

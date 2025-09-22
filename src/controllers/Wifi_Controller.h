@@ -9,9 +9,6 @@
 /** DNS server instance for captive portal functionality */
 DNSServer dnsServer;
 
-/** Map to store WiFi UI control references by label */
-std::map<String, uint16_t> WIFI_UI_ref;
-
 /**
  * Helper function to get UI control reference by label
  * @param label The label to search for (SSID_LABEL or PASS_LABEL)
@@ -79,15 +76,24 @@ struct WiFiCredentials {
 	 * @return true if credentials are valid, false otherwise
 	 */
 	bool isValid() const {
+		uint16_t save_button_ref = getWiFiControlByLabel(WIFI_SAVE_LABEL);
+		char *dangerBackgroundStyle = getBackground(DANGER_COLOR);
+
 		if (ssid.length() == 0 || ssid.length() > SSID_MAX_LENGTH) {
 			DUMPSLN("ERROR: SSID is empty or too long!");
+			ESPUI.setElementStyle(save_button_ref, dangerBackgroundStyle);
 			return false;
 		}
 
 		if (password.length() == 0 || password.length() > PASS_MAX_LENGTH) {
 			DUMPLN("ERROR: Password is empty or too long: ", password.length());
+			ESPUI.setElementStyle(save_button_ref, dangerBackgroundStyle);
 			return false;
 		}
+
+		char *successBackgroundStyle = getBackground(SUCCESS_COLOR);
+		ESPUI.setElementStyle(save_button_ref, successBackgroundStyle);
+
 		return true;
 	}
 
@@ -133,12 +139,13 @@ struct WiFiCredentials {
  */
 void enterWifiDetailsCallback(Control *sender, int type) {
 	if (type == B_UP) {
-
 		// Get control references using the map
 		uint16_t ssid_control_ref = getWiFiControlByLabel(SSID_LABEL);
 		uint16_t pass_control_ref = getWiFiControlByLabel(PASS_LABEL);
+		uint16_t save_button_ref = getWiFiControlByLabel(WIFI_SAVE_LABEL);
 
-		if (ssid_control_ref == 0 || pass_control_ref == 0) {
+		if (ssid_control_ref == 0 || pass_control_ref == 0 ||
+			save_button_ref == 0) {
 			DUMPSLN("ERROR: WiFi controls not found in map!");
 			return;
 		}
@@ -148,14 +155,15 @@ void enterWifiDetailsCallback(Control *sender, int type) {
 		credentials.ssid = ESPUI.getControl(ssid_control_ref)->value;
 		credentials.password = ESPUI.getControl(pass_control_ref)->value;
 
-		// Validate and save credentials
-		if (credentials.saveToEEPROM()) {
-			DUMPSLN("Credentials saved! Scheduling reconnection...");
-			// Set flag for deferred reconnection instead of calling
-			// connectWifi() directly
-			ESPALLON_Wifi::getInstance().shouldReconnect = true;
-		} else {
-			DUMPSLN("Failed to save WiFi credentials!");
+		// Check if credentials are valid and update button color
+		if (credentials.isValid()) {
+			// Valid credentials - try to save
+			if (credentials.saveToEEPROM()) {
+				DUMPSLN("Credentials saved! Scheduling reconnection...");
+				ESPALLON_Wifi::getInstance().shouldReconnect = true;
+			} else {
+				DUMPSLN("Failed to save WiFi credentials!");
+			}
 		}
 	}
 }
