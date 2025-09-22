@@ -107,48 +107,49 @@ class ESPinner_Manager {
 	// ------------------------------------- //
 
 	uint16_t findRefByControllerId(uint16_t controllerId) {
-		return ESPinnerPINController.find(controllerId)->second;
+		return findByKey(ESPinnerPINController, controllerId,
+						 static_cast<uint16_t>(0));
 	}
-	// Add Controller Relation to ESPinnerPINController map
+
 	void addControllerRelation(uint16_t espinnerId, uint16_t controllerId) {
-		addElementWithParent(ESPinnerPINController, espinnerId, controllerId);
+		addRelation(ESPinnerPINController, espinnerId, controllerId);
 	}
 
 	void removeController(uint16_t controller) {
-		removeValueFromMap(ESPinnerPINController, controller);
+		removeByKey(ESPinnerPINController, controller);
 	}
 
 	void removeAllControllersBySelector(uint16_t selector) {
-		removeKeyFromMap(ESPinnerPINController, selector);
+		removeByKey(ESPinnerPINController, selector);
 	}
 
 	void removeAllControllersByParent(uint16_t parentRef) {
-		removeChildrenFromMap(ESPinnerPINController, parentRef);
+		removeByValue(ESPinnerPINController, parentRef);
 	}
 
-	void debugController() { debugMap(ESPinnerPINController); }
+	void debugController() {
+		debugGenericMap(ESPinnerPINController, "ESPinnerPINController");
+	}
 
 	// ------------------------------------- //
 	// ---------- UI RELATION MAP ---------- //
 	// ------------------------------------- //
 
 	uint16_t findUIRelationRefByID(uint16_t controllerId) {
-		return getParentId(UI_relationID, controllerId);
-	}
-	// Add UI Relation to UI_relationID map
-	void addUIRelation(uint16_t parentRefID, uint16_t UI_ID) {
-		addElementWithParent(UI_relationID, parentRefID, UI_ID);
+		return findByKey(UI_relationID, controllerId, static_cast<uint16_t>(0));
 	}
 
-	void removeUIRelation(uint16_t UI_ID) {
-		removeValueFromMap(UI_relationID, UI_ID);
+	void addUIRelation(uint16_t parentRefID, uint16_t UI_ID) {
+		addRelation(UI_relationID, parentRefID, UI_ID);
 	}
+
+	void removeUIRelation(uint16_t UI_ID) { removeByKey(UI_relationID, UI_ID); }
 
 	void removeAllUIRelationBySelector(uint16_t selector) {
-		removeKeyFromMap(UI_relationID, selector);
+		removeByKey(UI_relationID, selector);
 	}
 
-	void debugUIRelation() { debugMap(UI_relationID); }
+	void debugUIRelation() { debugGenericMap(UI_relationID, "UI_relationID"); }
 
 	// ------------------------------------- //
 	// ------- ESPinner ID TO CONTROLLER --- //
@@ -162,7 +163,7 @@ class ESPinner_Manager {
 	 */
 	void addESPinnerControllerMapping(const String &espinnerID,
 									  uint16_t controllerRef) {
-		ESPinnerID_to_ControllerRef[espinnerID] = controllerRef;
+		addRelation(ESPinnerID_to_ControllerRef, espinnerID, controllerRef);
 	}
 
 	/**
@@ -171,11 +172,8 @@ class ESPinner_Manager {
 	 * @return Controller reference or 0 if not found
 	 */
 	uint16_t getControllerRefByESPinnerID(const String &espinnerID) {
-		auto it = ESPinnerID_to_ControllerRef.find(espinnerID);
-		if (it != ESPinnerID_to_ControllerRef.end()) {
-			return it->second;
-		}
-		return 0;
+		return findByKey(ESPinnerID_to_ControllerRef, espinnerID,
+						 static_cast<uint16_t>(0));
 	}
 
 	/**
@@ -183,7 +181,7 @@ class ESPinner_Manager {
 	 * @param espinnerID String ID of the ESPinner to remove
 	 */
 	void removeESPinnerControllerMapping(const String &espinnerID) {
-		ESPinnerID_to_ControllerRef.erase(espinnerID);
+		removeByKey(ESPinnerID_to_ControllerRef, espinnerID);
 	}
 
 	/**
@@ -194,12 +192,8 @@ class ESPinner_Manager {
 	}
 
 	void debugESPinnerControllerMap() {
-		DUMPLN("ESPinner ID to Controller mappings: ",
-			   ESPinnerID_to_ControllerRef.size());
-		for (const auto &pair : ESPinnerID_to_ControllerRef) {
-			DUMP("ID: ", pair.first);
-			DUMPLN(" -> Controller: ", pair.second);
-		}
+		debugGenericMap(ESPinnerID_to_ControllerRef,
+						"ESPinnerID_to_ControllerRef");
 	}
 
 	// ------------------------------------- //

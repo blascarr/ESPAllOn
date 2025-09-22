@@ -137,42 +137,107 @@ std::vector<uint16_t> getChildrenIds(const std::map<uint16_t, uint16_t> &map,
 	return childrenIds;
 }
 
+// ------------------------------------- //
+// --------- GENERIC MAP UTILITIES ----- //
+// ------------------------------------- //
+
 /**
- * Adds an element with its parent to a map
+ * Generic method to add element-parent relationship to any map
+ * @param map Reference to the map to modify
+ * @param elementId Element ID to add
+ * @param parentId Parent ID to associate with element
  */
 template <typename K, typename V>
-void addElementWithParent(std::map<K, V> &map, K elementId, V parentId) {
+void addRelation(std::map<K, V> &map, K elementId, V parentId) {
 	map[elementId] = parentId;
 }
 
 /**
- * Debug function to print map contents
- * @param map Map to debug
+ * Generic method to remove element by key from any map
+ * @param map Reference to the map to modify
+ * @param key Key to remove
  */
-template <typename K, typename V> void debugMap(const std::map<K, V> &map) {
-	DUMPLN("SIZE MAP: ", map.size());
-	for (const auto &it : map) {
-		DUMP(" Key: ", it.first);
-		DUMP(" Value: ", it.second);
+template <typename K, typename V> void removeByKey(std::map<K, V> &map, K key) {
+	map.erase(key);
+}
+
+/**
+ * Generic method to remove all elements with specific value from map
+ * @param map Reference to the map to modify
+ * @param value Value to match for removal
+ */
+template <typename K, typename V>
+void removeByValue(std::map<K, V> &map, V value) {
+	std::vector<K> keysToRemove;
+	for (const auto &pair : map) {
+		if (pair.second == value) {
+			keysToRemove.push_back(pair.first);
+		}
+	}
+	for (K key : keysToRemove) {
+		map.erase(key);
 	}
 }
 
 /**
- * Gets parent ID from a generic map where K is the key and V is the
- * value
+ * Generic method to find value by key in map
+ * @param map Reference to the map to search
+ * @param key Key to search for
+ * @param defaultValue Default value if key not found
+ * @return Value if found, defaultValue otherwise
+ */
+template <typename K, typename V>
+V findByKey(const std::map<K, V> &map, K key, V defaultValue = V{}) {
+	auto it = map.find(key);
+	return (it != map.end()) ? it->second : defaultValue;
+}
+
+/**
+ * Generic method to debug any map
+ * @param map Reference to the map to debug
+ * @param mapName Name of the map for debugging output
+ */
+template <typename K, typename V>
+void debugGenericMap(const std::map<K, V> &map, const String &mapName) {
+	DUMP("Map Name: ", mapName);
+	DUMPLN(" size: ", map.size());
+	for (const auto &pair : map) {
+		DUMP("  Key: ", pair.first);
+		DUMPLN(" -> Value: ", pair.second);
+	}
+}
+
+/**
+ * Adds an element with its parent to a map (legacy function - use addRelation
+ * instead)
+ */
+template <typename K, typename V>
+void addElementWithParent(std::map<K, V> &map, K elementId, V parentId) {
+	addRelation(map, elementId, parentId);
+}
+
+/**
+ * Debug function to print map contents (legacy function - use debugGenericMap
+ * instead)
+ * @param map Map to debug
+ */
+template <typename K, typename V> void debugMap(const std::map<K, V> &map) {
+	debugGenericMap(map, "Map");
+}
+
+/**
+ * Gets parent ID from a generic map (legacy function - use findByKey instead)
  * @param map Map to search in
  * @param elementId Element ID to find parent for
  * @return Parent ID if found, 0 otherwise
  */
 template <typename K, typename V>
 V getParentId(const std::map<K, V> &map, K elementId) {
-	auto it = map.find(elementId); // "it" refers to the element found
-	if (it != map.end()) {
-		return it->second;
-	} else {
+	V result = findByKey(map, elementId, V{});
+	if (result == V{}) {
 		DUMPLN("THERE IS NO PARENT FROM HERE: ", elementId);
-		return 0;
 	}
+	return result;
 }
 
 /**
@@ -185,39 +250,23 @@ void removeControlId(std::vector<uint16_t> &controlRef, uint16_t id) {
 	controlRef.erase(newEnd, controlRef.end());
 }
 
-// Remove Key from generic Map template <K, V> where K is the key and V is the
-// value. ElementId is the key and remove the key from the map.
+// Remove Key from generic Map (legacy function - use removeByKey instead)
 template <typename K, typename V>
 void removeValueFromMap(std::map<K, V> &elementToParentMap, K key) {
-	int numErased = elementToParentMap.erase(key);
-	// if (numErased == 0) {
-	// 	DUMPLN("No Element in map : ", numErased);
-	// } else {
-	// 	DUMPLN("REMOVED ID : ", numErased);
-	// }
+	removeByKey(elementToParentMap, key);
 }
 
-// Remove Children from generic Map template <K, V> .
-// ElementId is the key and remove the children from the map.
+// Remove Children from generic Map (legacy function - use removeByValue
+// instead)
 template <typename K, typename V>
 void removeChildrenFromMap(std::map<K, V> &elementToParentMap, V value) {
-	std::vector<K> keysToRemove;
-	for (const auto &pair : elementToParentMap) {
-		if (pair.second == value) {
-			keysToRemove.push_back(pair.first);
-		}
-	}
-
-	for (K key : keysToRemove) {
-		elementToParentMap.erase(key);
-	}
+	removeByValue(elementToParentMap, value);
 }
 
-// Remove Key from generic Map template <K, V>.
-// ElementId is the key and remove the key from the map.
+// Remove Key from generic Map (legacy function - use removeByKey instead)
 template <typename K, typename V>
 void removeKeyFromMap(std::map<K, V> &elementToParentMap, K key) {
-	elementToParentMap.erase(key);
+	removeByKey(elementToParentMap, key);
 }
 
 template <typename K, typename V>
