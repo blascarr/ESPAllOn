@@ -283,6 +283,8 @@ void test_saved_DCespinner() {
 		{firstESPinnerSelector, DC_REMOVE_LABEL, DC_REMOVE_VALUE}};
 
 	assertControlValues(saved_DC_assertions);
+
+	// Should return MEMORY FAIL: LABEL NOT FOUND because it has been removed
 	removedControl(firstESPinnerSelector, DC_PINA_SELECT_LABEL);
 	removedControl(firstESPinnerSelector, DC_PINB_SELECT_LABEL);
 	// -------------------------------------------- //
@@ -349,6 +351,8 @@ void test_modified_DCespinner() {
 		{firstESPinnerSelector, DC_REMOVE_LABEL, DC_REMOVE_VALUE}};
 
 	assertControlValues(modified_DC_assertions);
+
+	// Should return MEMORY FAIL: LABEL NOT FOUND because it has been removed
 	removedControl(firstESPinnerSelector, DC_PINA_SELECT_LABEL);
 	removedControl(firstESPinnerSelector, DC_PINB_SELECT_LABEL);
 	// -------------------------------------------- //
@@ -613,8 +617,6 @@ void setup() {
 	// DC_MODESELECTOR_LABEL
 	// REVIEW DC STRUCTURE
 	// ---------------------------------------------//
-	uint16_t DCMode_ref =
-		searchByLabel(firstESPinnerSelector, DC_MODESELECTOR_LABEL);
 
 	// Input Wrong Number - simulate user entering invalid data
 	uint16_t DCA_ref =
@@ -625,7 +627,7 @@ void setup() {
 	// Click On save, but not saved because of wrong number in DC PIN
 	DCSelector_callback(typeDC_AController, B_UP);
 	saveButtonGPIOCheck(firstESPinnerSelector, DC_PINA_SELECTOR_LABEL,
-						DC_action);
+						DC_action, DC_SAVE_LABEL);
 	RUN_TEST(test_wrong_DCespinner);
 
 	// ---------------------------------------------//
@@ -642,9 +644,9 @@ void setup() {
 	DCSelector_callback(typeDC_AController, B_UP);
 	DCSelector_callback(typeDC_BController, B_UP);
 	saveButtonGPIOCheck(firstESPinnerSelector, DC_PINA_SELECTOR_LABEL,
-						DC_action);
+						DC_action, DC_SAVE_LABEL);
 	saveButtonGPIOCheck(firstESPinnerSelector, DC_PINB_SELECTOR_LABEL,
-						DC_action);
+						DC_action, DC_SAVE_LABEL);
 	RUN_TEST(test_saved_DCespinner);
 
 	// ---------------------------------------------//
@@ -699,9 +701,9 @@ void setup() {
 	DCSelector_callback(typeDC_AController, B_UP);
 	DCSelector_callback(typeDC_BController, B_UP);
 	saveButtonGPIOCheck(secondESPinnerSelector, DC_PINA_SELECTOR_LABEL,
-						DC_action);
+						DC_action, DC_SAVE_LABEL);
 	saveButtonGPIOCheck(secondESPinnerSelector, DC_PINB_SELECTOR_LABEL,
-						DC_action);
+						DC_action, DC_SAVE_LABEL);
 	saveDC_callback(second_typeController, B_UP);
 	RUN_TEST(test_second_DCespinner);
 

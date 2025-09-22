@@ -110,7 +110,7 @@ void saveGPIO_callback(Control *sender, int type) {
 
 				// modify ESPinnerSelectors and Save
 				saveButtonGPIOCheck(parentRef, GPIO_PINSELECTOR_LABEL,
-									gpio_action);
+									gpio_action, GPIO_SAVE_LABEL);
 
 				// ----- Create Controllers ------ //
 				GPIO_Controller(ESPUI.getControl(GPIOIDRef)->value, parentRef);
@@ -142,7 +142,8 @@ void GPIOSelector_callback(Control *sender, int type) {
 		if (selectLabelRef != 0) {
 			ESPUI.removeControl(selectLabelRef);
 			removeValueFromMap(elementToParentMap, selectLabelRef);
-			saveButtonGPIOCheck(parentRef, GPIO_PINSELECTOR_LABEL, gpio_action);
+			saveButtonGPIOCheck(parentRef, GPIO_PINSELECTOR_LABEL, gpio_action,
+								GPIO_SAVE_LABEL);
 		}
 
 		// Change Selector Control with Text Input for numbers

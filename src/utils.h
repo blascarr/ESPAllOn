@@ -430,8 +430,9 @@ void saveButtonCheck(uint16_t parentRef, const char *SelectorLabel,
 	}
 }
 
-void saveButtonGPIOCheck(uint16_t parentRef, const char *label,
-						 void (*GPIO_Actions)(uint16_t)) {
+bool saveButtonGPIOCheck(uint16_t parentRef, const char *label,
+						 void (*GPIO_Actions)(uint16_t),
+						 const char *saveLabel) {
 
 	uint16_t GPIOSelectorRef = searchByLabel(parentRef, label);
 
@@ -442,7 +443,7 @@ void saveButtonGPIOCheck(uint16_t parentRef, const char *label,
 		// related with Container exists. Create new One
 	}
 
-	uint16_t SaveButtonRef = searchByLabel(parentRef, GPIO_SAVE_LABEL);
+	uint16_t SaveButtonRef = searchByLabel(parentRef, saveLabel);
 
 	if (isNumericString(GPIOSelector_value)) {
 		char *backgroundStyle = getBackground(SUCCESS_COLOR);
@@ -454,6 +455,7 @@ void saveButtonGPIOCheck(uint16_t parentRef, const char *label,
 		char *backgroundStyle = getBackground(DANGER_COLOR);
 		ESPUI.setElementStyle(SaveButtonRef, backgroundStyle);
 	}
+	return true;
 }
 
 #endif

@@ -535,7 +535,7 @@ void setup() {
 	// Click On save, but not saved because of wrong number in STEP PIN
 	StepperSelector_callback(typeSTEP_Controller, B_UP);
 	saveButtonGPIOCheck(firstESPinnerSelector, STEPPER_STEP_SELECTOR_LABEL,
-						Stepper_action);
+						Stepper_action, STEPPER_SAVE_LABEL);
 	RUN_TEST(test_wrong_StepperEspinner);
 
 	// ---------------------------------------------//
@@ -559,11 +559,11 @@ void setup() {
 	StepperSelector_callback(typeEN_Controller, B_UP);
 
 	saveButtonGPIOCheck(firstESPinnerSelector, STEPPER_STEP_SELECTOR_LABEL,
-						Stepper_action);
+						Stepper_action, STEPPER_SAVE_LABEL);
 	saveButtonGPIOCheck(firstESPinnerSelector, STEPPER_DIR_SELECTOR_LABEL,
-						Stepper_action);
+						Stepper_action, STEPPER_SAVE_LABEL);
 	saveButtonGPIOCheck(firstESPinnerSelector, STEPPER_EN_SELECTOR_LABEL,
-						Stepper_action);
+						Stepper_action, STEPPER_SAVE_LABEL);
 
 	RUN_TEST(test_saved_StepperEspinner);
 
@@ -626,11 +626,11 @@ void setup() {
 	StepperSelector_callback(typeEN_Controller, B_UP);
 
 	saveButtonGPIOCheck(secondESPinnerSelector, STEPPER_STEP_SELECTOR_LABEL,
-						Stepper_action);
+						Stepper_action, STEPPER_SAVE_LABEL);
 	saveButtonGPIOCheck(secondESPinnerSelector, STEPPER_DIR_SELECTOR_LABEL,
-						Stepper_action);
+						Stepper_action, STEPPER_SAVE_LABEL);
 	saveButtonGPIOCheck(secondESPinnerSelector, STEPPER_EN_SELECTOR_LABEL,
-						Stepper_action);
+						Stepper_action, STEPPER_SAVE_LABEL);
 
 	saveStepper_callback(second_typeSTEPPERController, B_UP);
 	RUN_TEST(test_second_StepperEspinner);

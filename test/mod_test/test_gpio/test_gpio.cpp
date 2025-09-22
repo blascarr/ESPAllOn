@@ -217,6 +217,8 @@ void test_saved_GPIOespinner() {
 		{firstESPinnerSelector, REMOVEESPINNER_LABEL, REMOVEESPINNER_VALUE}};
 
 	assertControlValues(saved_GPIO_assertions);
+
+	// Should return MEMORY FAIL: LABEL NOT FOUND because it has been removed
 	removedControl(firstESPinnerSelector, GPIO_SELECT_LABEL);
 
 	// -------------------------------------------- //
@@ -268,6 +270,8 @@ void test_modified_GPIOespinner() {
 		{firstESPinnerSelector, REMOVEESPINNER_LABEL, REMOVEESPINNER_VALUE}};
 
 	assertControlValues(modified_GPIO_assertions);
+
+	// Should return MEMORY FAIL: LABEL NOT FOUND because it has been removed
 	removedControl(firstESPinnerSelector, GPIO_SELECT_LABEL);
 
 	// -------------------------------------------- //
@@ -507,7 +511,7 @@ void setup() {
 	// Click On save, but not saved because of wrong number in GPIO PIN
 	GPIOSelector_callback(typeGPIOController, B_UP);
 	saveButtonGPIOCheck(firstESPinnerSelector, GPIO_PINSELECTOR_LABEL,
-						gpio_action);
+						gpio_action, GPIO_SAVE_LABEL);
 	RUN_TEST(test_wrong_GPIOespinner);
 
 	// ---------------------------------------------//
@@ -517,7 +521,7 @@ void setup() {
 	typeGPIOController->value = "12";
 	GPIOSelector_callback(typeGPIOController, B_UP);
 	saveButtonGPIOCheck(firstESPinnerSelector, GPIO_PINSELECTOR_LABEL,
-						gpio_action);
+						gpio_action, GPIO_SAVE_LABEL);
 	debugMap(elementToParentMap);
 	RUN_TEST(test_saved_GPIOespinner);
 
@@ -567,7 +571,7 @@ void setup() {
 
 	// Click On save for GPIO PIN
 	saveButtonGPIOCheck(secondESPinnerSelector, GPIO_PINSELECTOR_LABEL,
-						gpio_action);
+						gpio_action, GPIO_SAVE_LABEL);
 	saveGPIO_callback(second_typeController, B_UP);
 	// saveElement_callback(second_typeController, B_UP);
 	// RUN_TEST([&]() { test_controlReferenceExists(controlReferences, testRef);
