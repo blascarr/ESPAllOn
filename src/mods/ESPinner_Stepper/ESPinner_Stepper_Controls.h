@@ -548,19 +548,19 @@ void ESPinner_Stepper::implement() {
 	uint16_t driverSelector = Stepper_driverSelector(Stepper_PIN_selector);
 	ESPUI.updateSelect(driverSelector, ESPinner_Stepper::get_driverName());
 
-	String gpioDIR = String(ESPinner_Stepper::getDIR());
-	GUI_setLabel(Stepper_PIN_selector, STEPPER_DIR_SELECT_LABEL,
-				 STEPPER_DIR_SELECT_VALUE, SELECTED_COLOR);
-	uint16_t gpioDIR_ref =
-		GUI_TextField(Stepper_PIN_selector, STEPPER_DIR_SELECTOR_LABEL,
-					  gpioDIR.c_str(), StepperSelector_callback);
-
 	GUI_setLabel(Stepper_PIN_selector, STEPPER_STEP_SELECT_LABEL,
 				 STEPPER_STEP_SELECT_VALUE, SELECTED_COLOR);
 	String gpioSTEP = String(ESPinner_Stepper::getSTEP());
 	uint16_t gpioSTEP_ref =
 		GUI_TextField(Stepper_PIN_selector, STEPPER_STEP_SELECTOR_LABEL,
 					  gpioSTEP.c_str(), StepperSelector_callback);
+
+	String gpioDIR = String(ESPinner_Stepper::getDIR());
+	GUI_setLabel(Stepper_PIN_selector, STEPPER_DIR_SELECT_LABEL,
+				 STEPPER_DIR_SELECT_VALUE, SELECTED_COLOR);
+	uint16_t gpioDIR_ref =
+		GUI_TextField(Stepper_PIN_selector, STEPPER_DIR_SELECTOR_LABEL,
+					  gpioDIR.c_str(), StepperSelector_callback);
 
 	GUI_setLabel(Stepper_PIN_selector, STEPPER_EN_SELECT_LABEL,
 				 STEPPER_EN_SELECT_VALUE, SELECTED_COLOR);
