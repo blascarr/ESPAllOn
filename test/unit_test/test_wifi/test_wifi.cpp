@@ -65,8 +65,8 @@ void isWifiConnected() { RUN_TEST(test_wifi); }
 
 void setup() {
 	UNITY_BEGIN();
-	ESPALLON_Wifi::getInstance().begin();
 	RUN_TEST(test_nowifi);
+	ESPALLON_Wifi::getInstance().begin();
 	ESPALLON_Wifi::getInstance().connectTick();
 	testFunctions.push_back(isWifiConnected);
 	ESPALLON_Wifi::getInstance().start();
