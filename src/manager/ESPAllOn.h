@@ -9,7 +9,7 @@
 #include "../utils.h"
 
 #include "../controllers/ESPAction.h"
-#include "../controllers/ESPAllOnPinStatus.h"
+#include "../controllers/UI/ESPAllOnPinStatus.h"
 
 #include <TickerFree.h>
 
@@ -164,7 +164,7 @@ class ESPAllOn {
 		linkItemsTab();
 
 		wifiTab();
-		ESPUI.begin(HOSTNAME);
+		ESPUI.beginLITTLEFS(HOSTNAME);
 
 		// Register the pin status endpoint after ESPUI initialization
 		ESPAllOnPinStatus::registerPinStatusEndpoint();

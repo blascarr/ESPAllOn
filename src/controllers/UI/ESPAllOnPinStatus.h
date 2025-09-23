@@ -1,8 +1,8 @@
 #ifndef _ESPALLON_PIN_STATUS_H
 #define _ESPALLON_PIN_STATUS_H
 
-#include "../utils.h"
-#include "ESPAllOnPinManager.h"
+#include "../../utils.h"
+#include "../ESPAllOnPinManager.h"
 #include <ESPAsyncWebServer.h>
 #include <ESPUI.h>
 
@@ -20,7 +20,6 @@ class ESPAllOnPinStatus {
 	 */
 	static void registerPinStatusEndpoint() {
 		ESPUI.server->on("/pin-status", HTTP_GET, handlePinStatusRequest);
-		ESPUI.server->on("/pin-status.css", HTTP_GET, handleCSSRequest);
 		DUMPLN("Pin Status endpoint registered at: ", "/pin-status");
 	}
 
@@ -178,7 +177,14 @@ class ESPAllOnPinStatus {
 		res->print(F(
 			"<div class='legend'>"
 			"<h3>Legend</h3>"
-			/* … items … */
+			"<div class='legend-item'><span class='legend-color' "
+			"style='background: #28a745;'></span>IN USE / USED</div>"
+			"<div class='legend-item'><span class='legend-color' "
+			"style='background: #17a2b8;'></span>AVAILABLE</div>"
+			"<div class='legend-item'><span class='legend-color' "
+			"style='background: #dc3545;'></span>BROKEN</div>"
+			"<div class='legend-item'><span class='legend-color' "
+			"style='background: #87ceeb;'></span>NOT CONFIGURED</div>"
 			"</div>"
 			"<div class='actions'><button "
 			"onclick='location.reload()'>Refresh</button>"
@@ -186,233 +192,6 @@ class ESPAllOnPinStatus {
 			"</div></body></html>"));
 
 		request->send(res);
-	}
-
-	/**
-	 * HTTP request handler for the CSS file
-	 * @param request AsyncWebServerRequest object
-	 */
-	static void handleCSSRequest(AsyncWebServerRequest *request) {
-		static const char CSS[] PROGMEM = R"rawliteral(
-/* ========== Pin Status Styles ========== */
-:root {
-	--bg: #f5f5f5;
-	--card: #ffffff;
-	--text: #333333;
-	--muted: #6c757d;
-	--border: #dddddd;
-	--primary: #007bff;
-	--primary-dark: #0056b3;
-	--success: #28a745;
-	--info: #17a2b8;
-	--danger: #dc3545;
-	--warning: #ffc107;
-	--even: #f8f9fa;
-	--hover: #e9ecef;
-}
-
-* {
-	box-sizing: border-box;
-}
-
-html,
-body {
-	margin: 0;
-	padding: 0;
-	font-family: Arial, Helvetica, sans-serif;
-	background: var(--bg);
-	color: var(--text);
-}
-
-.container {
-	max-width: 1200px;
-	margin: 0 auto;
-	background: var(--card);
-	padding: 20px;
-	border-radius: 8px;
-	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-	text-align: center;
-	margin: 0 0 20px;
-	color: var(--text);
-}
-
-.info-section {
-	background: #e9ecef;
-	padding: 15px;
-	border-radius: 5px;
-	margin-bottom: 20px;
-}
-.info-section p {
-	margin: 5px 0;
-}
-
-table {
-	width: 100%;
-	border-collapse: collapse;
-	margin: 20px 0;
-	font-size: 14px;
-}
-th,
-td {
-	padding: 8px 12px;
-	text-align: left;
-	border: 1px solid var(--border);
-}
-th {
-	background: var(--muted);
-	color: #fff;
-	font-weight: bold;
-}
-tr:nth-child(even) {
-	background: var(--even);
-}
-tr:hover {
-	background: var(--hover);
-}
-
-.pin-number {
-	font-weight: bold;
-	text-align: center;
-}
-
-.status-used {
-	background: var(--success);
-	color: #fff;
-	text-align: center;
-	border-radius: 3px;
-}
-.status-available {
-	background: var(--info);
-	color: #fff;
-	text-align: center;
-	border-radius: 3px;
-}
-.status-broken {
-	background: var(--danger);
-	color: #fff;
-	text-align: center;
-	border-radius: 3px;
-}
-.status-not-configured {
-	background: #87ceeb;
-	color: #333;
-	text-align: center;
-	border-radius: 3px;
-}
-
-.mode-input {
-	background: var(--warning);
-	color: #212529;
-	text-align: center;
-	border-radius: 3px;
-}
-.mode-output {
-	background: var(--success);
-	color: #fff;
-	text-align: center;
-	border-radius: 3px;
-}
-.mode-undefined {
-	background: var(--muted);
-	color: #fff;
-	text-align: center;
-	border-radius: 3px;
-}
-
-.flag-yes {
-	color: var(--success);
-	font-weight: bold;
-}
-.flag-no {
-	color: var(--danger);
-}
-.flag-na {
-	color: var(--muted);
-	font-style: italic;
-}
-
-.pin-type {
-	font-family: monospace;
-	font-size: 12px;
-}
-
-.legend {
-	margin: 20px 0;
-	padding: 15px;
-	background: var(--even);
-	border-radius: 5px;
-}
-.legend h3 {
-	margin: 0 0 10px;
-}
-.legend-item {
-	display: inline-block;
-	margin: 5px 10px;
-}
-.legend-color {
-	display: inline-block;
-	width: 20px;
-	height: 20px;
-	margin-right: 5px;
-	vertical-align: middle;
-	border-radius: 3px;
-}
-
-.actions {
-	text-align: center;
-	margin: 20px 0;
-}
-.actions button {
-	padding: 10px 20px;
-	margin: 0 10px;
-	background: var(--primary);
-	color: #fff;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
-	font-size: 16px;
-}
-.actions button:hover {
-	background: var(--primary-dark);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-	.container {
-		padding: 10px;
-	}
-	table {
-		font-size: 12px;
-	}
-	th,
-	td {
-		padding: 4px 6px;
-	}
-}
-
-/* Auto dark mode */
-@media (prefers-color-scheme: dark) {
-	:root {
-		--bg: #0f1115;
-		--card: #151821;
-		--text: #e5e7eb;
-		--muted: #3b4252;
-		--border: #2a2f3a;
-		--even: #1a1f2b;
-		--hover: #202636;
-		--primary: #3b82f6;
-		--primary-dark: #2563eb;
-	}
-	.info-section {
-		background: #1f2432;
-	}
-}
-)rawliteral";
-
-		request->send_P(200, "text/css", CSS);
 	}
 };
 
