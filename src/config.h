@@ -112,6 +112,8 @@ String ESPinner_Path = "espinners";
 
 #define ADVCONFIGTAB_LABEL "Config"
 #define WIFITAB_LABEL "Wifi Credentials"
+#define PINSTATUSTAB_LABEL "Pin Status"
+#define PINSTATUSTAB_LABEL_MONITOR "Pin Status Monitor"
 
 // ----------------------------------------//
 // --------------- Modules ----------------//

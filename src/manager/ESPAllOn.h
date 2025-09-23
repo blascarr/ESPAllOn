@@ -127,6 +127,26 @@ class ESPAllOn {
 						 wifitab, removeConfig);
 	}
 
+#ifdef USE_LITTLEFS_MODE
+
+	/**
+	 * Creates the pin status tab in the UI
+	 */
+	void pinStatusTab() {
+		auto pinStatusTab = getTab(TabType::PinStatusTab);
+		// Add direct navigation link using JavaScript for same-tab redirection
+		String pinStatusUrl =
+			"<a href='javascript:void(0)' "
+			"onclick='window.location.href=\"/pin-status\"' style='color: "
+			"white; text-decoration: none; padding: 10px "
+			"20px; background: #27ae60; border-radius: 5px; display: "
+			"inline-block; margin: 10px 0; cursor: pointer;'>🔗 OPEN PIN "
+			"STATUS PAGE</a>";
+		ESPUI.addControl(ControlType::Label, PINSTATUSTAB_LABEL, pinStatusUrl,
+						 ControlColor::None, pinStatusTab);
+#endif
+	}
+
 	/**
 	 * Creates the action linking tab in the UI
 	 *
@@ -158,8 +178,8 @@ class ESPAllOn {
 	/**
 	 * Begins the ESPUI web server and initializes all tabs
 	 *
-	 * Sets up the link items tab, WiFi configuration tab, and starts
-	 * the ESPUI web server with the configured hostname.
+	 * Sets up the link items tab, WiFi configuration tab, pin status tab,
+	 * and starts the ESPUI web server with the configured hostname.
 	 * Also registers the pin status endpoint for hardware monitoring.
 	 */
 	void begin() {
@@ -171,8 +191,9 @@ class ESPAllOn {
 		ESPUI.beginLITTLEFS(HOSTNAME);
 		// Register the pin status endpoint after ESPUI initialization
 		ESPAllOnPinStatus::registerPinStatusEndpoint();
+		pinStatusTab();
 #else
-		ESPUI.begin(HOSTNAME);
+	ESPUI.begin(HOSTNAME);
 #endif
 	}
 
