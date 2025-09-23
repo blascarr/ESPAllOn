@@ -9,6 +9,7 @@
 #include "../utils.h"
 
 #include "../controllers/ESPAction.h"
+#include "../controllers/ESPAllOnPinStatus.h"
 
 #include <TickerFree.h>
 
@@ -157,12 +158,16 @@ class ESPAllOn {
 	 *
 	 * Sets up the link items tab, WiFi configuration tab, and starts
 	 * the ESPUI web server with the configured hostname.
+	 * Also registers the pin status endpoint for hardware monitoring.
 	 */
 	void begin() {
 		linkItemsTab();
 
 		wifiTab();
 		ESPUI.begin(HOSTNAME);
+
+		// Register the pin status endpoint after ESPUI initialization
+		ESPAllOnPinStatus::registerPinStatusEndpoint();
 	}
 
 	/**
