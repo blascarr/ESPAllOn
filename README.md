@@ -1,72 +1,72 @@
 # ESPAllOn
 
-Sistema de gestión y control para ESP32/ESP8266 con interfaz web basada en ESPUI.
+Management and control system for ESP32/ESP8266 with ESPUI-based web interface.
 
-## Configuración del Sistema de Archivos
+## File System Configuration
 
-El proyecto soporta dos modos de operación que se controlan mediante el define `USE_LITTLEFS_MODE` en `src/config.h`:
+The project supports two operating modes controlled by the `USE_LITTLEFS_MODE` define in `src/config.h`:
 
-### Modo Estándar (por defecto)
-
-```cpp
-// #define USE_LITTLEFS_MODE  // Comentado = modo estándar
-```
-
-**Características:**
-
-- ESPUI sirve archivos CSS/JS desde PROGMEM (memoria interna)
-- Menor uso del sistema de archivos flash
-- Endpoint `/pin-status` **NO disponible**
-- Inicio más rápido
-- Modo recomendado para desarrollo y uso básico
-
-### Modo LittleFS
+### Standard Mode (default)
 
 ```cpp
-#define USE_LITTLEFS_MODE  // Descomentado = modo filesystem
+// #define USE_LITTLEFS_MODE  // Commented = standard mode
 ```
 
-**Características:**
+**Features:**
 
-- ESPUI sirve archivos CSS/JS desde LittleFS (sistema de archivos)
-- Endpoint `/pin-status` **disponible** con monitoreo completo de pines
-- CSS personalizable editando `data/pin-status.css`
-- Requiere subir sistema de archivos al ESP
+- ESPUI serves CSS/JS files from PROGMEM (internal memory)
+- Lower flash filesystem usage
+- `/pin-status` endpoint **NOT available**
+- Faster startup
+- Recommended mode for development and basic usage
 
-**Configuración requerida:**
+### LittleFS Mode
 
-1. Descomenta `#define USE_LITTLEFS_MODE` en `src/config.h`
-2. Sube el sistema de archivos: `pio run --target uploadfs --environment esp8266` (o `esp32`)
-3. Compila y sube firmware: `pio run --target upload --environment esp8266` (o `esp32`)
+```cpp
+#define USE_LITTLEFS_MODE  // Uncommented = filesystem mode
+```
 
-## Endpoints Disponibles
+**Features:**
 
-**Modo Estándar:**
+- ESPUI serves CSS/JS files from LittleFS (file system)
+- `/pin-status` endpoint **available** with comprehensive pin monitoring
+- Customizable CSS by editing `data/pin-status.css`
+- Requires uploading file system to ESP
 
-- `/` - Interfaz principal ESPUI
+**Required configuration:**
 
-**Modo LittleFS:**
+1. Uncomment `#define USE_LITTLEFS_MODE` in `src/config.h`
+2. Upload file system: `pio run --target uploadfs --environment esp8266` (or `esp32`)
+3. Compile and upload firmware: `pio run --target upload --environment esp8266` (or `esp32`)
 
-- `/` - Interfaz principal ESPUI
-- `/pin-status` - Monitor detallado de estado de pines GPIO
-- `/pin-status.css` - Hoja de estilos personalizable
+## Available Endpoints
 
-## Desarrollo
+**Standard Mode:**
 
-Para cambiar entre modos:
+- `/` - Main ESPUI interface
 
-1. Edita `USE_LITTLEFS_MODE` en `src/config.h`
-2. Si activas LittleFS, ejecuta `pio run --target uploadfs --environment [esp8266|esp32]` antes del primer uso
-3. Compila y sube con `pio run --target upload --environment [esp8266|esp32]`
+**LittleFS Mode:**
 
-**Nota:** El archivo `data/pin-status.css` se mantiene para futuras activaciones del modo LittleFS.
+- `/` - Main ESPUI interface
+- `/pin-status` - Detailed GPIO pin status monitor
+- `/pin-status.css` - Customizable stylesheet
 
-## Estructura de Archivos
+## Development
+
+To switch between modes:
+
+1. Edit `USE_LITTLEFS_MODE` in `src/config.h`
+2. If activating LittleFS, run `pio run --target uploadfs --environment [esp8266|esp32]` before first use
+3. Compile and upload with `pio run --target upload --environment [esp8266|esp32]`
+
+**Note:** The `data/pin-status.css` file is maintained for future activations of LittleFS mode.
+
+## File Structure
 
 ```
-data/                    # Archivos del sistema LittleFS
-├── css/                 # Archivos CSS de ESPUI
-├── js/                  # Archivos JavaScript de ESPUI
-├── index.htm            # Página principal de ESPUI
-└── pin-status.css       # Estilos del monitor de pines
+data/                    # LittleFS file system files
+├── css/                 # ESPUI CSS files
+├── js/                  # ESPUI JavaScript files
+├── index.htm            # ESPUI main page
+└── pin-status.css       # Pin monitor styles
 ```

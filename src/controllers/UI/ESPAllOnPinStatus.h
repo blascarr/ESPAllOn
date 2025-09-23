@@ -31,7 +31,7 @@ class ESPAllOnPinStatus {
 	static void handlePinStatusRequest(AsyncWebServerRequest *request) {
 		auto *res = request->beginResponseStream("text/html");
 
-		// 1) Cabecera y CSS desde PROGMEM (no al heap)
+		// 1) Header and CSS from PROGMEM (no to heap)
 		res->print(
 			F("<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'>"
 			  "<meta name='viewport' "
@@ -51,19 +51,16 @@ class ESPAllOnPinStatus {
 
 		res->printf("<p><strong>Total Pins:</strong> %u</p>",
 					(unsigned)ESP_BoardConf::NUM_PINS);
-		// timestamp
-		{
-			unsigned long s = millis() / 1000, m = s / 60, h = m / 60;
-			res->printf(
-				"<p><strong>Timestamp:</strong> Uptime: %luh %lum %lus</p>",
-				h % 24, m % 60, s % 60);
-		}
-		res->print(F("</div>")); // info-section
+		res->print(F(
+			"<div class='actions'><button "
+			"onclick='location.reload()'>Refresh</button>"
+			"<button onclick='location.href=\"/\"'>Back to Main</button></div>"
+			"</div>")); // info-section
 
-		// 2) Tabla por filas (sin String grandes)
+		// 2) Table by rows (no large String)
 		res->print(F("<table><thead><tr>"
 					 "<th>Pin #</th><th>GPIO</th><th>Status</th><th>Mode</th>"
-					 "<th>Pin Type</th><th>Broken</th>"
+					 "<th>Pin Type</th>"
 #if defined(ESP32) || defined(ESP8266)
 					 "<th>Deep Sleep</th><th>WiFi Safe</th><th>Touch GPIO</th>"
 #endif
@@ -71,7 +68,7 @@ class ESPAllOnPinStatus {
 
 		auto &pm = ESPAllOnPinManager::getInstance();
 		for (uint8_t gpio = 0; gpio < ESP_BoardConf::NUM_PINS; ++gpio) {
-			// busca config
+
 			const ESP_PinMode *cfg = nullptr;
 			for (size_t i = 0; i < (size_t)ESP_BoardConf::INITIAL_PINS; ++i) {
 				if (ESP_BoardConf::PINOUT[i].pin == gpio) {
@@ -83,7 +80,7 @@ class ESPAllOnPinStatus {
 			bool attached = pm.isPinAttached(gpio);
 			bool broken = cfg ? cfg->isBroken : false;
 
-			// uiRef (sin operator[] para no insertar claves y ahorrar heap)
+			// uiRef (no operator[] to avoid inserting keys and save heap)
 			uint16_t uiRef = 0;
 			const auto &mapRef = pm.getPINMap();
 			auto it = mapRef.find(gpio);
@@ -136,7 +133,6 @@ class ESPAllOnPinStatus {
 				}
 
 			const char *pinType = cfg ? getPinTypeName(cfg->type) : "None";
-			const char *brokenClass = broken ? "flag-yes" : "flag-no";
 
 			const char *uiRefText =
 				(uiRef == 0) ? "-" : (uiRef == 10000 ? "BLOCKED" : nullptr);
@@ -144,10 +140,9 @@ class ESPAllOnPinStatus {
 			res->printf("<tr><td class='pin-number'>%u</td><td "
 						"class='pin-number'>%u</td>"
 						"<td class='%s'>%s</td><td class='%s'>%s</td>"
-						"<td class='pin-type'>%s</td>"
-						"<td class='%s'>%s</td>",
+						"<td class='pin-type'>%s</td>",
 						gpio, gpio, statusClass, statusText, modeClass,
-						modeText, pinType, brokenClass, broken ? "YES" : "NO");
+						modeText, pinType);
 
 #if defined(ESP32) || defined(ESP8266)
 			if (cfg) {
@@ -161,9 +156,9 @@ class ESPAllOnPinStatus {
 							cfg->isTouchGPIO ? "flag-yes" : "flag-no",
 							cfg->isTouchGPIO ? "YES" : "NO");
 			} else {
-				res->print(
-					F("<td class='flag-na'>N/A</td><td "
-					  "class='flag-na'>N/A</td><td class='flag-na'>N/A</td>"));
+				res->print(F(
+					"<td class='flag-yes'>YES</td><td "
+					"class='flag-yes'>YES</td><td class='flag-yes'>YES</td>"));
 			}
 #endif
 			if (uiRefText)
@@ -173,23 +168,19 @@ class ESPAllOnPinStatus {
 		}
 		res->print(F("</tbody></table>"));
 
-		// 3) Leyenda y acciones (también desde PROGMEM o F())
-		res->print(F(
-			"<div class='legend'>"
-			"<h3>Legend</h3>"
-			"<div class='legend-item'><span class='legend-color' "
-			"style='background: #28a745;'></span>IN USE / USED</div>"
-			"<div class='legend-item'><span class='legend-color' "
-			"style='background: #17a2b8;'></span>AVAILABLE</div>"
-			"<div class='legend-item'><span class='legend-color' "
-			"style='background: #dc3545;'></span>BROKEN</div>"
-			"<div class='legend-item'><span class='legend-color' "
-			"style='background: #87ceeb;'></span>NOT CONFIGURED</div>"
-			"</div>"
-			"<div class='actions'><button "
-			"onclick='location.reload()'>Refresh</button>"
-			"<button onclick='location.href=\"/\"'>Back to Main</button></div>"
-			"</div></body></html>"));
+		// 3) Legend and actions (also from PROGMEM or F())
+		res->print(F("<div class='legend'>"
+					 "<h3>Legend</h3>"
+					 "<div class='legend-item'><span class='legend-color "
+					 "in-use'></span>IN USE / USED</div>"
+					 "<div class='legend-item'><span class='legend-color "
+					 "available'></span>AVAILABLE</div>"
+					 "<div class='legend-item'><span class='legend-color "
+					 "broken'></span>BROKEN</div>"
+					 "<div class='legend-item'><span class='legend-color "
+					 "not-configured'></span>NOT CONFIGURED</div>"
+					 "</div>"
+					 "</div></body></html>"));
 
 		request->send(res);
 	}

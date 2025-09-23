@@ -165,6 +165,20 @@ tr:hover {
 	border-radius: 3px;
 }
 
+/* Legend color classes */
+.legend-color.in-use {
+	background: #28a745;
+}
+.legend-color.available {
+	background: #17a2b8;
+}
+.legend-color.broken {
+	background: #dc3545;
+}
+.legend-color.not-configured {
+	background: #87ceeb;
+}
+
 .actions {
 	text-align: center;
 	margin: 20px 0;

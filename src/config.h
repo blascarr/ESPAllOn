@@ -47,6 +47,16 @@ IPAddress PRIMARYDNS(9, 9, 9, 9);
 IPAddress SECONDARYDNS(208, 67, 222, 222);
 
 // ------------ Persistance CONFIG ------------//
+
+// ========================================
+// FILESYSTEM CONFIGURATION
+// ========================================
+// Enable LittleFS filesystem mode for static files
+// When enabled: CSS/JS served from filesystem, Pin Status endpoint available
+// When disabled: CSS/JS served from PROGMEM, standard ESPUI mode
+// Uncomment the line below to enable LittleFS mode:
+#define USE_LITTLEFS_MODE
+
 String ESPinner_File = "/ESPinner";
 String ESPinner_Path = "espinners";
 #define ESPINNER_MODEL_JSONCONFIG "ESPinner_Mod"
@@ -102,15 +112,6 @@ String ESPinner_Path = "espinners";
 
 #define ADVCONFIGTAB_LABEL "Config"
 #define WIFITAB_LABEL "Wifi Credentials"
-
-// ========================================
-// FILESYSTEM CONFIGURATION
-// ========================================
-// Enable LittleFS filesystem mode for static files
-// When enabled: CSS/JS served from filesystem, Pin Status endpoint available
-// When disabled: CSS/JS served from PROGMEM, standard ESPUI mode
-// Uncomment the line below to enable LittleFS mode:
-// #define USE_LITTLEFS_MODE
 
 // ----------------------------------------//
 // --------------- Modules ----------------//
