@@ -103,6 +103,15 @@ String ESPinner_Path = "espinners";
 #define ADVCONFIGTAB_LABEL "Config"
 #define WIFITAB_LABEL "Wifi Credentials"
 
+// ========================================
+// FILESYSTEM CONFIGURATION
+// ========================================
+// Enable LittleFS filesystem mode for static files
+// When enabled: CSS/JS served from filesystem, Pin Status endpoint available
+// When disabled: CSS/JS served from PROGMEM, standard ESPUI mode
+// Uncomment the line below to enable LittleFS mode:
+// #define USE_LITTLEFS_MODE
+
 // ----------------------------------------//
 // --------------- Modules ----------------//
 // ----------------------------------------//
