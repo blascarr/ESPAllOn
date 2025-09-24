@@ -345,8 +345,8 @@ void test_modified_DCespinner() {
 	std::vector<ControlAssertion> modified_DC_assertions = {
 		{firstESPinnerSelector, ESPINNERTYPE_LABEL, "DC"},
 		{firstESPinnerSelector, ESPINNERID_LABEL, "TEST_DC"},
-		{firstESPinnerSelector, DC_PINA_SELECTOR_LABEL, "16"},
-		{firstESPinnerSelector, DC_PINB_SELECTOR_LABEL, "18"},
+		{firstESPinnerSelector, DC_PINA_SELECTOR_LABEL, "12"},
+		{firstESPinnerSelector, DC_PINB_SELECTOR_LABEL, "13"},
 		{firstESPinnerSelector, DC_SAVE_LABEL, DC_SAVE_VALUE},
 		{firstESPinnerSelector, DC_REMOVE_LABEL, DC_REMOVE_VALUE}};
 
@@ -363,8 +363,8 @@ void test_modified_DCespinner() {
 	TEST_ASSERT_EQUAL_INT16(2, controlReferences.size());
 
 	ESPinner_DC expected_espinner = ESPinner_DC();
-	expected_espinner.setGPIOA(16);
-	expected_espinner.setGPIOB(18);
+	expected_espinner.setGPIOA(12);
+	expected_espinner.setGPIOB(13);
 	expected_espinner.setID("TEST_DC");
 	ESPinner_DC expectedList[] = {expected_espinner};
 
@@ -466,8 +466,8 @@ void test_second_DCespinner() {
 	TEST_ASSERT_EQUAL_INT16(3, controlReferences.size());
 
 	ESPinner_DC first_espinner = ESPinner_DC();
-	first_espinner.setGPIOA(16);
-	first_espinner.setGPIOB(18);
+	first_espinner.setGPIOA(12);
+	first_espinner.setGPIOB(13);
 	first_espinner.setID("TEST_DC");
 
 	ESPinner_DC expected_espinner = ESPinner_DC();
@@ -552,8 +552,8 @@ void test_firstESPinner_removed() {
 		typeDC_AController->value.toInt()));
 	TEST_ASSERT_TRUE(ESPAllOnPinManager::getInstance().isPinAttached(
 		typeDC_BController->value.toInt()));
-	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(16));
-	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(18));
+	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(12));
+	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(13));
 
 	TEST_ASSERT_EQUAL(
 		3, ESPinner_Manager::getInstance().getControllerMap().size());
@@ -653,9 +653,9 @@ void setup() {
 	// CHANGE PIN NUMBER TO OTHER DIFFERENT
 	// Check Attached and detached PINs
 	// ---------------------------------------------//
-	typeDC_AController->value = "16";
+	typeDC_AController->value = "12";
 	saveDC_callback(typeDC_AController, B_UP);
-	typeDC_BController->value = "18";
+	typeDC_BController->value = "13";
 	saveDC_callback(typeDC_AController, B_UP);
 	RUN_TEST(test_modified_DCespinner);
 

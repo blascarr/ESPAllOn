@@ -42,7 +42,7 @@ ESP_PinMode ESP_BoardConf::PINOUT[ESP_BoardConf::NUM_PINS] = {
  * Defines pin layout and capabilities for ESP8266 boards
  */
 struct ESP_BoardConf {
-	static constexpr size_t NUM_PINS = 20; // Total number of pins
+	static constexpr size_t NUM_PINS = 17; // Total number of pins
 	static ESP_PinMode PINOUT[NUM_PINS];   // Pin configuration array
 #if DEBUG
 	static constexpr size_t INITIAL_PINS = 7; // Debug mode initial pins

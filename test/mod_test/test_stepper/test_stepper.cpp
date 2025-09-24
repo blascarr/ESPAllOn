@@ -255,9 +255,9 @@ void test_saved_StepperEspinner() {
 	std::vector<ControlAssertion> saved_Stepper_assertions = {
 		{firstESPinnerSelector, ESPINNERTYPE_LABEL, "Stepper"},
 		{firstESPinnerSelector, ESPINNERID_LABEL, "TEST_STEPPER"},
-		{firstESPinnerSelector, STEPPER_STEP_SELECTOR_LABEL, "17"},
-		{firstESPinnerSelector, STEPPER_DIR_SELECTOR_LABEL, "18"},
-		{firstESPinnerSelector, STEPPER_EN_SELECTOR_LABEL, "19"},
+		{firstESPinnerSelector, STEPPER_STEP_SELECTOR_LABEL, "15"},
+		{firstESPinnerSelector, STEPPER_DIR_SELECTOR_LABEL, "16"},
+		{firstESPinnerSelector, STEPPER_EN_SELECTOR_LABEL, "2"},
 		{firstESPinnerSelector, STEPPER_SAVE_LABEL, STEPPER_SAVE_VALUE},
 		{firstESPinnerSelector, STEPPER_REMOVE_LABEL, STEPPER_REMOVE_VALUE}};
 
@@ -275,9 +275,9 @@ void test_saved_StepperEspinner() {
 	TEST_ASSERT_EQUAL_INT16(2, controlReferences.size());
 
 	ESPinner_Stepper expected_espinner = ESPinner_Stepper();
-	expected_espinner.setSTEP(17);
-	expected_espinner.setDIR(18);
-	expected_espinner.setEN(19);
+	expected_espinner.setSTEP(15);
+	expected_espinner.setDIR(16);
+	expected_espinner.setEN(2);
 	expected_espinner.setID("TEST_STEPPER");
 	checkESPinnerState(expected_espinner.getID(), expected_espinner.getSTEP(),
 					   expected_espinner.getDIR(), expected_espinner.getEN(),
@@ -306,14 +306,14 @@ void test_saved_StepperEspinner() {
  * Code Steps:
  * 1. Create assertion vector with modified pin configuration
  *    - Same ESPinner ID "TEST_STEPPER" but different pins
- *    - STEP changed from 14 to 17, DIR from 15 to 18, EN from 16 to 19
+ *    - STEP changed from 14 to 15, DIR from 15 to 16, EN from 16 to 2
  * 2. Execute assertControlValues() to validate UI updates
  * 3. Verify GPIO selector controls are removed after modification
  * 4. Assert ESPinner manager still contains exactly 1 ESPinner
  * 5. Create expected ESPinner object with new pin values
  * 6. Execute checkESPinnerState() to validate updated ESPinner
  * 7. Debug output current pin assignments
- * 8. Verify pin manager has new pins attached (GPIO 17, 18, and 19)
+ * 8. Verify pin manager has new pins attached (GPIO 15, 16, and 2)
  * 9. Assert previous pins are detached (GPIO 14, 15, and 16)
  * 10. Validate stepper motor controller creation:
  *     - 3 controllers: EN switch, VEL slider, and movement pad
@@ -370,9 +370,9 @@ void test_modified_StepperEspinner() {
 		typeEN_Controller->value.toInt()));
 
 	// Previous PIN are detached
-	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(17));
-	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(18));
-	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(19));
+	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(15));
+	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(16));
+	TEST_ASSERT_FALSE(ESPAllOnPinManager::getInstance().isPinAttached(2));
 
 	// ----- Controllers Review ------ //
 	// Controller is composed by
@@ -581,7 +581,7 @@ void test_second_StepperEspinner() {
  * 4. Execute checkESPinnerState() to validate remaining ESPinner state
  * 5. Verify pin manager still has second stepper pins attached (GPIO 21, 22,
  * 23)
- * 6. Assert first stepper pins are properly detached (GPIO 17, 18, 19)
+ * 6. Assert first stepper pins are properly detached (GPIO 15, 16, 2)
  * 7. Validate controller cleanup:
  *    - Only 3 controllers remain (from second stepper)
  *    - Only 1 UI relation remains (second stepper controller)
@@ -657,7 +657,7 @@ void test_firstESPinner_removed() {
  *    - Execute callbacks and validation for each pin
  * 10. Test saved Stepper ESPinner state and controller creation
  * 11. Test pin modification functionality:
- *     - Change pins to STEP: 17, DIR: 18, EN: 19
+ *     - Change pins to STEP: 15, DIR: 16, EN: 2
  *     - Validate pin detachment/attachment
  * 12. Create and test second Stepper ESPinner:
  *     - ID: "TEST_STEPPER_2"
@@ -719,17 +719,17 @@ void setup() {
 	// Click On Save Stepper
 	// ---------------------------------------------//
 
-	typeSTEP_Controller->value = "17"; // Valid GPIO pin for STEP
+	typeSTEP_Controller->value = "15"; // Valid GPIO pin for STEP
 
 	uint16_t DIR_ref =
 		searchByLabel(firstESPinnerSelector, STEPPER_DIR_SELECTOR_LABEL);
 	typeDIR_Controller = ESPUI.getControl(DIR_ref);
-	typeDIR_Controller->value = "18";
+	typeDIR_Controller->value = "16";
 
 	uint16_t EN_ref =
 		searchByLabel(firstESPinnerSelector, STEPPER_EN_SELECTOR_LABEL);
 	typeEN_Controller = ESPUI.getControl(EN_ref);
-	typeEN_Controller->value = "19";
+	typeEN_Controller->value = "2";
 
 	StepperSelector_callback(typeSTEP_Controller, B_UP);
 	StepperSelector_callback(typeDIR_Controller, B_UP);
