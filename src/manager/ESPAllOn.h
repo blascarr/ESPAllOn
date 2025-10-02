@@ -144,9 +144,8 @@ class ESPAllOn {
 			"STATUS PAGE</a>";
 		ESPUI.addControl(ControlType::Label, PINSTATUSTAB_LABEL, pinStatusUrl,
 						 ControlColor::None, pinStatusTab);
-#endif
 	}
-
+#endif
 	/**
 	 * Creates the action linking tab in the UI
 	 *
