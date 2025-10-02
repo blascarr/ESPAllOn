@@ -36,8 +36,58 @@ class ESPAllOnPinStatus {
 			F("<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'>"
 			  "<meta name='viewport' "
 			  "content='width=device-width,initial-scale=1.0'>"
-			  "<title>ESP Pin Status - ESPAllOn</title>"
-			  "<link rel='stylesheet' href='/pin-status.css'>"));
+			  "<title>ESP Pin Status - ESPAllOn</title>"));
+
+#ifdef USE_LITTLEFS_MODE
+		// Use external CSS file when LittleFS is enabled
+		res->print(F("<link rel='stylesheet' href='/pin-status.css'>"));
+#else
+		// Embed minimal CSS when LittleFS is disabled
+		res->print(F(
+			"<style>"
+			":root{--bg:#f5f5f5;--card:#fff;--text:#333;--muted:#6c757d;--"
+			"border:#ddd;--primary:#007bff;--success:#28a745;--info:#17a2b8;--"
+			"danger:#dc3545;--warning:#ffc107;--even:#f8f9fa;--hover:#e9ecef}*{"
+			"box-sizing:border-box}html,body{margin:0;padding:0;font-family:"
+			"Arial,sans-serif;background:var(--bg);color:var(--text)}."
+			"container{max-width:1200px;margin:0 "
+			"auto;background:var(--card);padding:20px;border-radius:8px;box-"
+			"shadow:0 2px 10px rgba(0,0,0,.1)}h1{text-align:center;margin:0 0 "
+			"20px;color:var(--text)}.info-section{background:var(--hover);"
+			"padding:15px;border-radius:5px;margin-bottom:20px}.info-section "
+			"p{margin:5px "
+			"0}table{width:100%;border-collapse:collapse;margin:20px "
+			"0;font-size:14px}th,td{padding:8px "
+			"12px;text-align:left;border:1px solid "
+			"var(--border)}th{background:var(--muted);color:#fff;font-weight:"
+			"700}tr:nth-child(even){background:var(--even)}tr:hover{background:"
+			"var(--hover)}.pin-number{font-weight:700;text-align:center}."
+			"status-used,.status-available,.status-broken,.status-not-"
+			"configured,.mode-input,.mode-output,.mode-undefined{text-align:"
+			"center;border-radius:3px}.status-used,.mode-output{background:var("
+			"--success);color:#fff}.status-available{background:var(--info);"
+			"color:#fff}.status-broken{background:var(--danger);color:#fff}."
+			"status-not-configured{background:#87ceeb;color:#333}.mode-input{"
+			"background:var(--warning);color:#212529}.mode-undefined{"
+			"background:var(--muted);color:#fff}.flag-yes{color:var(--success);"
+			"font-weight:700}.flag-no{color:var(--danger)}.pin-type{font-"
+			"family:monospace;font-size:12px}.legend{margin:20px "
+			"0;padding:15px;background:var(--even);border-radius:5px}.legend "
+			"h3{margin:0 0 10px}.legend-item{display:inline-block;margin:5px "
+			"10px}.legend-color{display:inline-block;width:20px;height:20px;"
+			"margin-right:5px;vertical-align:middle;border-radius:3px}.legend-"
+			"color.in-use{background:var(--success)}.legend-color.available{"
+			"background:var(--info)}.legend-color.broken{background:var(--"
+			"danger)}.legend-color.not-configured{background:#87ceeb}.actions{"
+			"text-align:center;margin:20px 0}.actions button{padding:10px "
+			"20px;margin:0 "
+			"10px;background:var(--primary);color:#fff;border:0;border-radius:"
+			"5px;cursor:pointer;font-size:16px}.actions "
+			"button:hover{background:#0056b3}@media(max-width:768px){."
+			"container{padding:10px}table{font-size:12px}th,td{padding:4px "
+			"6px}}"
+			"</style>"));
+#endif
 
 		res->print(F("</head><body><div class='container'>"
 					 "<h1>ESP Pin Configuration & Status</h1><div "

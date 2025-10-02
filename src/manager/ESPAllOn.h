@@ -9,9 +9,7 @@
 #include "../utils.h"
 
 #include "../controllers/ESPAction.h"
-#ifdef USE_LITTLEFS_MODE
 #include "../controllers/UI/ESPAllOnPinStatus.h"
-#endif
 
 #include <TickerFree.h>
 
@@ -127,8 +125,6 @@ class ESPAllOn {
 						 wifitab, removeConfig);
 	}
 
-#ifdef USE_LITTLEFS_MODE
-
 	/**
 	 * Creates the pin status tab in the UI
 	 */
@@ -145,7 +141,7 @@ class ESPAllOn {
 		ESPUI.addControl(ControlType::Label, PINSTATUSTAB_LABEL, pinStatusUrl,
 						 ControlColor::None, pinStatusTab);
 	}
-#endif
+
 	/**
 	 * Creates the action linking tab in the UI
 	 *
@@ -188,12 +184,12 @@ class ESPAllOn {
 
 #ifdef USE_LITTLEFS_MODE
 		ESPUI.beginLITTLEFS(HOSTNAME);
+#else
+		ESPUI.begin(HOSTNAME);
+#endif
 		// Register the pin status endpoint after ESPUI initialization
 		ESPAllOnPinStatus::registerPinStatusEndpoint();
 		pinStatusTab();
-#else
-	ESPUI.begin(HOSTNAME);
-#endif
 	}
 
 	/**
