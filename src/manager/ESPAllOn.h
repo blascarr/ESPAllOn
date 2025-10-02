@@ -143,6 +143,24 @@ class ESPAllOn {
 	}
 
 	/**
+	 * Creates the projects tab in the UI
+	 */
+	void projectsTab() {
+		auto projectsTabRef = getTab(TabType::ProjectsTab);
+
+		// Add a simple label for now - will be enhanced later
+		String projectsUrl =
+			"<a href='javascript:void(0)' "
+			"onclick='window.location.href=\"/projects\"' style='color: "
+			"white; text-decoration: none; padding: 10px "
+			"20px; background: #27ae60; border-radius: 5px; display: "
+			"inline-block; margin: 10px 0; cursor: pointer;'>🔗 OPEN Projects "
+			"Page</a>";
+		ESPUI.addControl(ControlType::Label, "Projects", projectsUrl,
+						 ControlColor::Wetasphalt, projectsTabRef);
+	}
+
+	/**
 	 * Creates the action linking tab in the UI
 	 *
 	 * Sets up the interface for linking actions to configured devices.
@@ -181,6 +199,8 @@ class ESPAllOn {
 		linkItemsTab();
 
 		wifiTab();
+
+		projectsTab();
 
 #ifdef USE_LITTLEFS_MODE
 		ESPUI.beginLITTLEFS(HOSTNAME);

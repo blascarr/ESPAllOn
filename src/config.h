@@ -46,6 +46,13 @@ IPAddress SUBNET(255, 255, 255, 0);
 IPAddress PRIMARYDNS(9, 9, 9, 9);
 IPAddress SECONDARYDNS(208, 67, 222, 222);
 
+// ========================================
+// API CONFIGURATION
+// ========================================
+#define API_BASE_URL "https://espallon.blascarr.com"
+#define API_PROJECTS_ENDPOINT "/api/espallones/projects"
+#define API_PROJECT_ENDPOINT "/api/espallones/project/"
+
 // ------------ Persistance CONFIG ------------//
 
 // ========================================
@@ -114,6 +121,17 @@ String ESPinner_Path = "espinners";
 #define WIFITAB_LABEL "Wifi Credentials"
 #define PINSTATUSTAB_LABEL "Pin Status"
 #define PINSTATUSTAB_LABEL_MONITOR "Pin Status Monitor"
+#define PROJECTSTAB_LABEL "Projects"
+
+// --------------- Projects Definition ----------------//
+#define PROJECTS_REFRESH_LABEL "Refresh Projects"
+#define PROJECTS_REFRESH_VALUE "Refresh"
+#define PROJECTS_SELECT_LABEL "Select Project"
+#define PROJECTS_SELECT_VALUE "Select"
+#define PROJECTS_LOAD_LABEL "Load Configuration"
+#define PROJECTS_LOAD_VALUE "Load Config"
+#define PROJECTS_STATUS_LABEL "Status"
+#define PROJECTS_STATUS_VALUE "Ready"
 
 // ----------------------------------------//
 // --------------- Modules ----------------//

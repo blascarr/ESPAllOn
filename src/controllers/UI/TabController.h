@@ -17,7 +17,8 @@ enum class TabType {
 	AdvancedSettingsTab, // Advanced system settings
 	LinkedActions,		 // Action linking interface
 	NetworkTab,			 // WiFi and network configuration
-	PinStatusTab		 // Pin status monitoring interface
+	PinStatusTab,		 // Pin status monitoring interface
+	ProjectsTab			 // Projects management interface
 };
 
 /**
@@ -41,7 +42,8 @@ TabController tabs[] = {{TabType::BasicTab, BASICTAB_LABEL},
 						{TabType::LinkedActions, LINKACTIONSTAB_LABEL},
 						{TabType::AdvancedSettingsTab, ADVCONFIGTAB_LABEL},
 						{TabType::NetworkTab, WIFITAB_LABEL},
-						{TabType::PinStatusTab, PINSTATUSTAB_LABEL}};
+						{TabType::PinStatusTab, PINSTATUSTAB_LABEL},
+						{TabType::ProjectsTab, PROJECTSTAB_LABEL}};
 
 /**
  * Gets or creates a tab by type
