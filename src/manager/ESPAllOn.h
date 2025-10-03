@@ -10,6 +10,7 @@
 
 #include "../controllers/ESPAction.h"
 #include "../controllers/UI/ESPAllOnPinStatus.h"
+#include "../controllers/UI/ESPAllOnProjects.h"
 
 #include <TickerFree.h>
 
@@ -148,7 +149,6 @@ class ESPAllOn {
 	void projectsTab() {
 		auto projectsTabRef = getTab(TabType::ProjectsTab);
 
-		// Add a simple label for now - will be enhanced later
 		String projectsUrl =
 			"<a href='javascript:void(0)' "
 			"onclick='window.location.href=\"/projects\"' style='color: "
@@ -209,6 +209,10 @@ class ESPAllOn {
 #endif
 		// Register the pin status endpoint after ESPUI initialization
 		ESPAllOnPinStatus::registerPinStatusEndpoint();
+
+		// Register the projects endpoints
+		ESPAllOnProjects::registerProjectsEndpoints();
+
 		pinStatusTab();
 	}
 

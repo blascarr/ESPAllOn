@@ -5,6 +5,7 @@
 #include <utils.h>
 
 #include "controllers/ESPAllOnPinManager.h"
+#include "controllers/ProjectsAPIClient.h"
 
 #include "controllers/UI/ESPAllOnGUI.h"
 #include "manager/ESPAllOn.h"
