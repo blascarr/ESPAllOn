@@ -1,10 +1,9 @@
-#ifndef _ESPALLON_PROJECTS_SIMPLE_H
-#define _ESPALLON_PROJECTS_SIMPLE_H
+#ifndef _ESPALLON_PROJECTS_H
+#define _ESPALLON_PROJECTS_H
 
-#include "../../config.h"
+#include "../../utils.h"
 #include "../ProjectsAPIClient.h"
 #include <ESPUI.h>
-
 /**
  * Simple Projects endpoint handler for ESPAllOn system
  * Provides web interface for project management and configuration loading
@@ -23,7 +22,7 @@ class ESPAllOnProjects {
 		ESPUI.server->on("/api/project/*/load", HTTP_POST,
 						 handleLoadProjectRequest);
 
-		Serial.println("Projects endpoints registered");
+		DUMPSLN("Projects endpoints registered");
 	}
 
   private:
@@ -32,7 +31,7 @@ class ESPAllOnProjects {
 	 * @param request AsyncWebServerRequest object
 	 */
 	static void handleProjectsPageRequest(AsyncWebServerRequest *request) {
-		Serial.println("Serving projects page");
+		DUMPSLN("Serving projects page");
 
 		// Serve simple HTML page
 		String html = F("<!DOCTYPE html><html><head><meta charset='UTF-8'>");
@@ -150,10 +149,9 @@ class ESPAllOnProjects {
 	 * @param request AsyncWebServerRequest object
 	 */
 	static void handleProjectsAPIRequest(AsyncWebServerRequest *request) {
-		Serial.println("API request for projects list");
 
 		String jsonResponse = projectsClient.fetchProjectsJSON();
-		Serial.println(jsonResponse);
+		DUMPLN("API request for projects list ", jsonResponse);
 		if (jsonResponse.isEmpty()) {
 			request->send(
 				500, "application/json",
@@ -170,8 +168,7 @@ class ESPAllOnProjects {
 	 */
 	static void handleLoadProjectRequest(AsyncWebServerRequest *request) {
 		String url = request->url();
-		Serial.print("Load project request: ");
-		Serial.println(url);
+		DUMPLN("Load project request: ", url);
 
 		// Extract project ID from URL: /api/project/{id}/load
 		/*
