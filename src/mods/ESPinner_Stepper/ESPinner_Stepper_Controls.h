@@ -404,10 +404,12 @@ void Stepper_Pad_callback(Control *sender, int type) {
 		}
 		break;
 	case P_LEFT_DOWN: // Start continuous movement left
-		stepperAdapter->getAccelStepper()->move(-200);
+		stepperAdapter->getAccelStepper()->move(
+			stepperAdapter->getStepsPerRevolution() * -1);
 		break;
 	case P_RIGHT_DOWN: // Start continuous movement right
-		stepperAdapter->getAccelStepper()->move(200);
+		stepperAdapter->getAccelStepper()->move(
+			stepperAdapter->getStepsPerRevolution());
 		break;
 	case P_FOR_DOWN: // Discrete movement - start
 		stepperAdapter->getAccelStepper()->move(10000);
