@@ -1,7 +1,6 @@
 #ifndef _ESPALLON_TABCONTROLLER_H
 #define _ESPALLON_TABCONTROLLER_H
 #include <ESPUI.h>
-#include <TickerFree.h>
 
 #include "../../utils.h"
 
@@ -211,7 +210,7 @@ void createPINConfigCallback(Control *sender, int type) {
 		uint16_t is_NEOPIXEL_Selector =
 			searchByLabel(parentRef, NEOPIXEL_MODESELECTOR_LABEL);
 		if (is_NEOPIXEL_Selector == 0) {
-			NP_UI(parentRef);
+			Neopixel_UI(parentRef);
 		}
 #endif
 	}
@@ -334,7 +333,7 @@ void saveElement_callback(Control *sender, int type) {
 
 		if (sender->value == NEOPIXEL_LABEL) {
 #ifdef _ESPINNER_NEOPIXEL_H
-			NP_UI(parentRef);
+			Neopixel_UI(parentRef);
 #endif
 		}
 		if (sender->value == LCD_LABEL) {

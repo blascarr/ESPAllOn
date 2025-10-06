@@ -49,7 +49,7 @@ std::unique_ptr<ESPinner> ESPinner::create(const String &type) {
 			static_cast<ESPinner *>(ptr.release()));
 	}
 	if (type == "ESPINNER_NEOPIXEL") {
-		auto ptr = std::make_unique<ESPinner_NEOPIXEL>();
+		auto ptr = std::make_unique<ESPinner_Neopixel>();
 		return std::unique_ptr<ESPinner>(
 			static_cast<ESPinner *>(ptr.release()));
 	}

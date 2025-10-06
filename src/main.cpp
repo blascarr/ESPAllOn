@@ -9,6 +9,7 @@
 
 #include "controllers/UI/ESPAllOnGUI.h"
 #include "manager/ESPAllOn.h"
+#include "mods/ESPinner_NeoPixel/NeopixelRunner.h"
 #include "mods/ESPinner_Stepper/StepperRunner.h"
 #include <TickerFree.h>
 
@@ -85,6 +86,8 @@ void loop() {
 
 	// Execute all steppers in the StepperRunner (non-blocking)
 	StepperRunner::getInstance().runAll();
+	NeopixelRunner::getInstance().runAll();
+
 	if (Serial.available()) {
 		switch (Serial.read()) {
 		case 'w': // Print IP details

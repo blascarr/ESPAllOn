@@ -93,13 +93,15 @@ String ESPinner_Path = "espinners";
 #define ESPINNER_DCA_JSONCONFIG "ESPINNER_DCA"
 #define ESPINNER_DCB_JSONCONFIG "ESPINNER_DCB"
 
-// -------- Persistance DC CONFIG --------//
+// -------- Persistance NEOPIXEL CONFIG --------//
 #define ESPINNER_NEOPIXEL_JSONCONFIG "ESPINNER_NEOPIXEL"
+#define ESPINNER_NEOPIXEL_NUMPIXELS_CONFIG "NP_NUMPIXELS"
+#define ESPINNER_NEOPIXEL_GPIO_CONFIG "NP_GPIO"
 
-// -------- Persistance DC CONFIG --------//
+// -------- Persistance MPU CONFIG --------//
 #define ESPINNER_MPU_JSONCONFIG "ESPINNER_MPU"
 
-// -------- Persistance DC CONFIG --------//
+// -------- Persistance ENCODER CONFIG --------//
 #define ESPINNER_ENCODER_JSONCONFIG "ESPINNER_ENCODER"
 
 // -------- Persistance RFID CONFIG --------//
@@ -247,6 +249,7 @@ String ESPinner_Path = "espinners";
 #define STEPPER_ACTIONS_INTERVAL_MS 200
 #define STEPPER_DEFAULT_MAX_SPEED 1000
 #define STEPPER_DEFAULT_ACCELERATION 500
+
 // --------------- DC MOD Definition ----------------//
 #define DC_LABEL "DC"
 #define DC_ESPINNERINPUT_LABEL "INPUT"
@@ -277,19 +280,37 @@ String ESPinner_Path = "espinners";
 
 // ------------- NeoPixel MOD Definition --------------//
 #define NEOPIXEL_LABEL "Neopixel"
-#define NEOPIXEL_ESPINNERINPUT_LABEL "INPUT"
-#define NEOPIXEL_ESPINNEROUTPUT_LABEL "OUTPUT"
 #define NEOPIXEL_SAVE_LABEL "Neopixel_Save"
 #define NEOPIXEL_SAVE_VALUE "Save Neopixel"
 #define NEOPIXEL_REMOVE_LABEL "Neopixel_Remove"
 #define NEOPIXEL_REMOVE_VALUE "Remove"
-#define NEOPIXEL_SELECT_LABEL "Select_Neopixel"
-#define NEOPIXEL_SELECT_VALUE "Select Neopixel"
-#define NEOPIXEL_PININPUT_LABEL "Neopixel_PinInput"
-#define NEOPIXEL_PININPUT_VALUE "Select_Neopixel"
-#define NEOPIXEL_PINSELECTOR_LABEL "Neopixel_PinSelector"
+#define NEOPIXEL_PINSELECTOR_LABEL "PinSelector"
 #define NEOPIXEL_PINSELECTOR_VALUE "0"
+
 #define NEOPIXEL_MODESELECTOR_LABEL "Neopixel_ModeSelector"
+
+#define NEOPIXEL_ID_LABEL "Neopixel_ID"
+
+#define NEOPIXEL_NUMPIXELS_LABEL "NumPixels"
+#define NEOPIXEL_NUMPIXELS_VALUE "8"
+
+// NeoPixel control definitions
+#define NEOPIXEL_EN_LABEL "Neopixel_Enable"
+#define NEOPIXEL_EN_VALUE "0"
+#define NEOPIXEL_SWITCH_EN_LABEL "Neopixel_Enable"
+#define NEOPIXEL_SWITCH_EN_VALUE "0"
+#define NEOPIXEL_COLOR_LABEL "Neopixel_Color"
+#define NEOPIXEL_COLOR_VALUE "#FF0000"
+
+#define NEOPIXEL_RAINBOW_LABEL "Neopixel_Rainbow"
+#define NEOPIXEL_RAINBOW_VALUE "0"
+#define NEOPIXEL_SWITCH_RAINBOW_LABEL "Neopixel Enable Rainbow"
+#define NEOPIXEL_SWITCH_RAINBOW_VALUE "0"
+#define NEOPIXEL_SPEED_LABEL "Neopixel_RainbowSpeed"
+#define NEOPIXEL_SPEED_VALUE "50"
+
+#define NEOPIXEL_DEFAULT_BRIGHTNESS 50
+#define NEOPIXEL_INTERVAL_MS 200
 
 // --------------- LCD MOD Definition -----------------//
 #define LCD_LABEL "LCD"
