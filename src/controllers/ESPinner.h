@@ -11,10 +11,10 @@
 enum class ESPinner_Mod {
 	GPIO,	  // Basic GPIO input/output
 	Stepper,  // Stepper motor control
-	RFID,	  // RFID reader module
 	NeoPixel, // Addressable LED strips
 	VOID,	  // Empty/undefined module
 	DC,		  // DC motor control
+	RFID,	  // RFID reader module
 	MPU,	  // Motion processing unit (accelerometer/gyroscope)
 	Encoder,  // Rotary encoder input
 	TFT,	  // TFT display module
@@ -28,9 +28,9 @@ struct ESPinner_Module {
 const ESPinner_Module mods[] = {{ESPinner_Mod::VOID, VOID_LABEL},
 								{ESPinner_Mod::GPIO, GPIO_LABEL},
 								{ESPinner_Mod::Stepper, STEPPER_LABEL},
-								{ESPinner_Mod::RFID, RFID_LABEL},
 								{ESPinner_Mod::NeoPixel, NEOPIXEL_LABEL},
 								{ESPinner_Mod::DC, DC_LABEL},
+								{ESPinner_Mod::RFID, RFID_LABEL},
 								{ESPinner_Mod::MPU, MPU_LABEL},
 								{ESPinner_Mod::Encoder, ENCODER_LABEL},
 								{ESPinner_Mod::TFT, TFT_LABEL},

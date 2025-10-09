@@ -27,7 +27,7 @@ uint16_t GUI_Text(uint16_t parentRef, const char *label, const char *value,
 
 template <typename MapType>
 uint16_t GUI_Label(uint16_t parentRef, const char *label, const char *value,
-				   MapType &targetMap, const char *color = DANGER_COLOR,
+				   MapType &targetMap, const char *color = SELECTED_COLOR,
 				   UICallback labelCallback = nullptr) {
 	uint16_t label_selector =
 		GUI_Factory(ControlType::Label, parentRef, label, value, labelCallback,
@@ -84,7 +84,7 @@ uint16_t GUI_TextField(uint16_t parentRef, const char *label, const char *value,
 }
 
 void GUI_setLabel(uint16_t parentRef, const char *label, const char *value,
-				  const char *color = DANGER_COLOR) {
+				  const char *color = SELECTED_COLOR) {
 	GUI_Label(parentRef, label, value, elementToParentMap, color);
 }
 

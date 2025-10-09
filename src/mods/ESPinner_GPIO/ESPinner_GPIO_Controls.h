@@ -99,8 +99,6 @@ void saveGPIO_callback(Control *sender, int type) {
 	if (type == B_UP) {
 		uint16_t GPIOSelectorRef =
 			searchByLabel(parentRef, GPIO_PINSELECTOR_LABEL);
-		uint16_t GPIOModeRef =
-			searchByLabel(parentRef, GPIO_MODESELECTOR_LABEL);
 		uint16_t GPIOIDRef = searchByLabel(parentRef, ESPINNERID_LABEL);
 		if (GPIOSelectorRef != 0) {
 			String GPIOSelector_value =
@@ -203,8 +201,9 @@ uint16_t GPIO_ModeSelector(uint16_t GPIO_ptr) {
 		ESPUI.addControl(ControlType::Option, GPIO_mods[i].name.c_str(),
 						 GPIO_mods[i].name, None, GPIOMode_selector);
 	}
-	addElementWithParent(elementToParentMap, GPIOMode_selector,
-						 GPIO_ptr); // Add INPUT/OUTPUT Selector to parent
+	// addElementWithParent(elementToParentMap, GPIOMode_selector,
+	// 					 GPIO_ptr); // Add INPUT/OUTPUT Selector to parent
+
 	return GPIOMode_selector;
 }
 

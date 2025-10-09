@@ -256,42 +256,6 @@ void StepperSelector_callback(Control *sender, int type) {
 		}
 	} else if (isNumericAndInRange(sender->value, sender->id)) {
 
-		bool isPinDIR = (String(sender->label) == STEPPER_DIR_SELECTOR_LABEL);
-		bool isPinSTEP = (String(sender->label) == STEPPER_STEP_SELECTOR_LABEL);
-		bool isPinEN = (String(sender->label) == STEPPER_EN_SELECTOR_LABEL);
-		bool isPinCS = (String(sender->label) == STEPPER_CS_SELECTOR_LABEL);
-		bool isPinDIAG0 =
-			(String(sender->label) == STEPPER_DIAG0_SELECTOR_LABEL);
-		bool isPinDIAG1 =
-			(String(sender->label) == STEPPER_DIAG1_SELECTOR_LABEL);
-
-		if (isPinDIR) {
-			uint16_t selectLabelRefDIR =
-				searchByLabel(parentRef, STEPPER_DIR_SELECT_LABEL);
-			if (selectLabelRefDIR != 0) {
-				ESPUI.removeControl(selectLabelRefDIR);
-				removeValueFromMap(elementToParentMap, selectLabelRefDIR);
-			}
-		}
-
-		if (isPinSTEP) {
-			uint16_t selectLabelRefSTEP =
-				searchByLabel(parentRef, STEPPER_STEP_SELECT_LABEL);
-			if (selectLabelRefSTEP != 0) {
-				ESPUI.removeControl(selectLabelRefSTEP);
-				removeValueFromMap(elementToParentMap, selectLabelRefSTEP);
-			}
-		}
-
-		if (isPinEN) {
-			uint16_t selectLabelRefEN =
-				searchByLabel(parentRef, STEPPER_EN_SELECT_LABEL);
-			if (selectLabelRefEN != 0) {
-				ESPUI.removeControl(selectLabelRefEN);
-				removeValueFromMap(elementToParentMap, selectLabelRefEN);
-			}
-		}
-
 		char *backgroundStyle = getBackground(SELECTED_COLOR);
 		ESPUI.setElementStyle(sender->id, backgroundStyle);
 

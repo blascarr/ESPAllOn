@@ -133,6 +133,6 @@ class ProjectsAPIClient {
 };
 
 // Global instance reference
-extern ProjectsAPIClient &projectsClient;
+// extern ProjectsAPIClient &projectsClient;
 
 #endif

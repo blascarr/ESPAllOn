@@ -124,11 +124,6 @@ void assertControlValues(const std::vector<ControlAssertion> &assertions) {
 	}
 }
 
-void removedControl(uint16_t input_ref, const String &label) {
-	uint16_t ref = searchByLabel(input_ref, label.c_str());
-	TEST_ASSERT_EQUAL_INT16(0, ref);
-}
-
 Persistance ESPinnerManager(nullptr, &storage);
 
 bool compareESPinnerDC(const ESPinner_DC &expected_ESPinner_DC,
@@ -284,9 +279,6 @@ void test_saved_DCespinner() {
 
 	assertControlValues(saved_DC_assertions);
 
-	// Should return MEMORY FAIL: LABEL NOT FOUND because it has been removed
-	removedControl(firstESPinnerSelector, DC_PINA_SELECT_LABEL);
-	removedControl(firstESPinnerSelector, DC_PINB_SELECT_LABEL);
 	// -------------------------------------------- //
 	// ------ Check Espinner_manager Status ------- //
 	// -------------------------------------------- //
@@ -352,9 +344,6 @@ void test_modified_DCespinner() {
 
 	assertControlValues(modified_DC_assertions);
 
-	// Should return MEMORY FAIL: LABEL NOT FOUND because it has been removed
-	removedControl(firstESPinnerSelector, DC_PINA_SELECT_LABEL);
-	removedControl(firstESPinnerSelector, DC_PINB_SELECT_LABEL);
 	// -------------------------------------------- //
 	// ------ Check Espinner_manager Status ------- //
 	// -------------------------------------------- //

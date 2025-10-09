@@ -97,24 +97,6 @@ void DCSelector_callback(Control *sender, int type) {
 		bool isPinA = (String(sender->label) == DC_PINA_SELECTOR_LABEL);
 		bool isPinB = (String(sender->label) == DC_PINB_SELECTOR_LABEL);
 
-		if (isPinA) {
-			uint16_t selectLabelRefA =
-				searchByLabel(parentRef, DC_PINA_SELECT_LABEL);
-			if (selectLabelRefA != 0) {
-				ESPUI.removeControl(selectLabelRefA);
-				removeValueFromMap(elementToParentMap, selectLabelRefA);
-			}
-		}
-
-		if (isPinB) {
-			uint16_t selectLabelRefB =
-				searchByLabel(parentRef, DC_PINB_SELECT_LABEL);
-			if (selectLabelRefB != 0) {
-				ESPUI.removeControl(selectLabelRefB);
-				removeValueFromMap(elementToParentMap, selectLabelRefB);
-			}
-		}
-
 		char *backgroundStyle = getBackground(SUCCESS_COLOR);
 		ESPUI.setElementStyle(sender->id, backgroundStyle);
 
@@ -259,10 +241,14 @@ void ESPinner_DC::implement() {
 	ESPUI.getControl(DCPIN_selector)->enabled = false;
 	addElementWithParent(elementToParentMap, DCPIN_selector, DCPIN_selector);
 
+	GUI_setLabel(DCPIN_selector, DC_PINA_SELECT_LABEL, DC_PINA_SELECT_VALUE,
+				 SELECTED_COLOR);
 	String gpioA = String(ESPinner_DC::getGPIOA());
 	uint16_t gpioA_ref = GUI_TextField(DCPIN_selector, DC_PINA_SELECTOR_LABEL,
 									   gpioA.c_str(), DCSelector_callback);
 
+	GUI_setLabel(DCPIN_selector, DC_PINB_SELECT_LABEL, DC_PINB_SELECT_VALUE,
+				 SELECTED_COLOR);
 	String gpioB = String(ESPinner_DC::getGPIOB());
 	uint16_t gpioB_ref = GUI_TextField(DCPIN_selector, DC_PINB_SELECTOR_LABEL,
 									   gpioB.c_str(), DCSelector_callback);
