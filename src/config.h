@@ -43,8 +43,8 @@ const byte DNS_PORT = 53;
 IPAddress LOCAL_IP(192, 168, 1, 115);
 IPAddress GATEWAY(192, 168, 1, 1);
 IPAddress SUBNET(255, 255, 255, 0);
-IPAddress PRIMARYDNS(9, 9, 9, 9);
-IPAddress SECONDARYDNS(208, 67, 222, 222);
+IPAddress PRIMARYDNS(8, 8, 8, 8);
+IPAddress SECONDARYDNS(8, 8, 4, 4);
 
 // ========================================
 // API CONFIGURATION

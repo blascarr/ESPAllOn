@@ -150,7 +150,8 @@ class ESPAllOnProjects {
 	 */
 	static void handleProjectsAPIRequest(AsyncWebServerRequest *request) {
 
-		String jsonResponse = projectsClient.fetchProjectsJSON();
+		String jsonResponse =
+			ProjectsAPIClient::getInstance().fetchProjectsJSON();
 		DUMPLN("API request for projects list ", jsonResponse);
 		if (jsonResponse.isEmpty()) {
 			request->send(
@@ -187,7 +188,8 @@ class ESPAllOnProjects {
 		Serial.println(projectId);
 
 		// Fetch project configuration
-		String configJson = projectsClient.fetchProjectConfigJSON(projectId);
+		String configJson =
+		ProjectsAPIClient::getInstance().fetchProjectConfigJSON(projectId);
 
 		if (configJson.isEmpty()) {
 			request->send(500, "application/json",

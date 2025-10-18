@@ -115,6 +115,12 @@ void loop() {
 	MDNS.update();
 #endif
 
+	// Process DNS requests for captive portal when in AP mode
+	if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
+		extern DNSServer dnsServer;
+		dnsServer.processNextRequest();
+	}
+
 #if MEMORYDEBUG
 	Memory_Ticker.update();
 #endif

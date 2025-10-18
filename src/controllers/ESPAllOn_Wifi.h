@@ -83,6 +83,9 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 
 		if (!WiFi.config(LOCAL_IP, GATEWAY, SUBNET, PRIMARYDNS, SECONDARYDNS)) {
 			DUMPSLN("STA Failed to configure");
+		} else {
+			DUMPLN("Initial DNS configured - Primary: ", PRIMARYDNS);
+			DUMPLN("Initial DNS configured - Secondary: ", SECONDARYDNS);
 		}
 	}
 
@@ -221,8 +224,12 @@ class ESPALLON_Wifi : public WiFiInterface, public ESPALLON_Controller {
 			DUMPLN("Pass: ", stored_pass.c_str());
 #endif
 
-			if (!WiFi.config(LOCAL_IP, GATEWAY, SUBNET)) {
+			if (!WiFi.config(LOCAL_IP, GATEWAY, SUBNET, PRIMARYDNS,
+							 SECONDARYDNS)) {
 				DUMPSLN("STA Failed to configure");
+			} else {
+				DUMPLN("DNS configured - Primary: ", PRIMARYDNS);
+				DUMPLN("DNS configured - Secondary: ", SECONDARYDNS);
 			}
 
 #if defined(ESP32)
