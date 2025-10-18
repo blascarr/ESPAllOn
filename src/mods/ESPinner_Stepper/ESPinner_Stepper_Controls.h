@@ -412,13 +412,16 @@ void Stepper_Controller(String ID_LABEL, uint16_t parentRef) {
 				 STEPPER_SWITCH_EN_VALUE, Stepper_updateState_callback,
 				 controllerMap);
 	// Velocity Slider
+
 	GUI_Label(STEPPER_Controller_ID, STEPPER_LABEL_VEL_LABEL,
 			  STEPPER_LABEL_VEL_LABEL, controllerMap, SELECTED_COLOR);
 
-	GUI_Slider(STEPPER_Controller_ID, STEPPER_SLIDER_VEL_LABEL,
-			   STEPPER_SLIDER_VEL_VALUE, Stepper_updateState_callback,
-			   controllerMap);
-
+	uint16_t velSliderID = GUI_Slider(
+		STEPPER_Controller_ID, STEPPER_SLIDER_VEL_LABEL,
+		STEPPER_SLIDER_VEL_VALUE, Stepper_updateState_callback, controllerMap);
+	ESPUI.addControl(Min, "MIN", STEPPER_SLIDER_VEL_MIN_VALUE, None,
+					 velSliderID);
+	ESPUI.addControl(Max, "", STEPPER_SLIDER_VEL_MAX_VALUE, None, velSliderID);
 	// Control Pad
 	GUI_PadWithCenter(STEPPER_Controller_ID, STEPPER_PAD_MOVEMENT_LABEL,
 					  STEPPER_PAD_MOVEMENT_VALUE, Stepper_Pad_callback,
