@@ -76,13 +76,38 @@ class ESPAllOnProjects {
 				  "Configuración</button>");
 		html += F("</div>");
 
+		// Pagination controls
+		html += F("<div id='pagination' style='text-align:center;margin:20px "
+				  "0;display:none'>");
+		html += F("<button id='prevBtn' class='btn btn-primary' "
+				  "onclick='previousPage()' disabled>⬅️ Anterior</button>");
+		html += F("<span id='pageInfo' style='margin:0 "
+				  "15px;font-weight:bold'>Página 1</span>");
+		html += F("<button id='nextBtn' class='btn btn-primary' "
+				  "onclick='nextPage()'>Siguiente ➡️</button>");
+		html += F("</div>");
+
 		html += F("<div id='status' style='display:none'></div>");
 		html += F("<div id='projects' class='projects'></div>");
+
+		// Project details section
+		html += F("<div id='projectDetails' "
+				  "style='display:none;margin-top:20px;padding:20px;border:2px "
+				  "solid #27ae60;border-radius:10px;background:#f8fff9'>");
+		html += F("<h3 id='projectTitle'>📋 Detalles del Proyecto</h3>");
+		html += F("<p id='projectDescription'></p>");
+		html += F("<div id='projectConfig'></div>");
+		html += F("</div>");
 		html += F("</div>");
 
 		// Add JavaScript
 		html += F("<script>");
-		html += F("let projects=[];let selectedId=null;");
+		// Use a variable to avoid String concatenation issues with F() macro
+		int jsLimit = PROJECT_LIMIT_QUERY;
+		html += F("let projects=[];let selectedId=null;let currentPage=1;let "
+				  "totalPages=1;let limit=");
+		html += String(jsLimit);
+		html += F(";");
 
 		html += F("function showStatus(msg,type){");
 		html += F("const s=document.getElementById('status');");
@@ -91,15 +116,19 @@ class ESPAllOnProjects {
 		html += F("if(type!=='loading')setTimeout(()=>s.style.display='none',"
 				  "3000);}");
 
-		html += F("async function loadProjects(){");
-		html += F("showStatus('Cargando proyectos...','loading');");
-		html += F("try{const r=await fetch('/api/projects');");
+		html += F("async function loadProjects(page=1){");
+		html += F(
+			"currentPage=page;showStatus('Cargando proyectos...','loading');");
+		html += F("try{const r=await "
+				  "fetch('/api/projects?page='+page+'&limit='+limit);");
 		html += F("if(!r.ok)throw new Error('Error HTTP: '+r.status);");
 		html += F("const data=await r.json();");
-		html += F("if(data.success&&data.data){projects=data.data;"
-				  "displayProjects();");
-		html += F("showStatus('✅ '+projects.length+' proyectos "
-				  "cargados','success');}");
+		html += F("if(data.success&&data.data){projects=data.data;");
+		html += F("totalPages=data.pagination?data.pagination.totalPages:Math."
+				  "ceil((data.total||projects.length)/limit);");
+		html += F("displayProjects();updatePagination();");
+		html += F("showStatus('✅ '+projects.length+' proyectos cargados "
+				  "(Página '+page+')','success');}");
 		html += F("else throw new Error('Respuesta inválida');}");
 		html += F("catch(e){showStatus('❌ Error: '+e.message,'error');}}");
 
@@ -121,7 +150,23 @@ class ESPAllOnProjects {
 			F("event.target.closest('.project').classList.add('selected');");
 		html += F("document.getElementById('loadBtn').disabled=false;");
 		html += F("const p=projects.find(pr=>pr.id===id);");
-		html += F("showStatus('✅ Seleccionado: '+p.name,'success');}");
+		html += F("showStatus('✅ Seleccionado: "
+				  "'+p.name,'success');showProjectPreview(p);}");
+
+		html += F("function showProjectPreview(project){");
+		html +=
+			F("const detailsDiv=document.getElementById('projectDetails');");
+		html += F("const titleEl=document.getElementById('projectTitle');");
+		html +=
+			F("const descEl=document.getElementById('projectDescription');");
+		html += F("const configEl=document.getElementById('projectConfig');");
+		html += F("titleEl.textContent='📋 '+project.name+' (Vista Previa)';");
+		html += F("descEl.textContent=project.description||'Sin descripción "
+				  "disponible';");
+		html +=
+			F("configEl.innerHTML='<p><em>Haz clic en \"Cargar Configuración\" "
+			  "para ver los elementos configurados</em></p>';");
+		html += F("detailsDiv.style.display='block';}");
 
 		html += F("async function loadSelected(){");
 		html += F("if(!selectedId){showStatus('❌ No hay proyecto "
@@ -133,11 +178,55 @@ class ESPAllOnProjects {
 				  "fetch('/api/project/'+selectedId+'/load',{method:'POST'});");
 		html += F("if(!r.ok)throw new Error('Error HTTP: '+r.status);");
 		html += F("const result=await r.json();");
-		html += F("if(result.success)showStatus('🎉 Configuración cargada: "
-				  "'+p.name,'success');");
+		html += F("if(result.success){showStatus('🎉 Configuración cargada: "
+				  "'+p.name,'success');showProjectDetails(p,result.config);}");
 		html +=
 			F("else throw new Error(result.message||'Error desconocido');}");
 		html += F("catch(e){showStatus('❌ Error: '+e.message,'error');}}");
+
+		// Project details display function
+		html += F("function showProjectDetails(project,config){");
+		html +=
+			F("const detailsDiv=document.getElementById('projectDetails');");
+		html += F("const titleEl=document.getElementById('projectTitle');");
+		html +=
+			F("const descEl=document.getElementById('projectDescription');");
+		html += F("const configEl=document.getElementById('projectConfig');");
+		html += F("titleEl.textContent='📋 '+project.name;");
+		html += F("descEl.textContent=project.description||'Sin descripción "
+				  "disponible';");
+		html += F("let configHtml='<h4>🔧 Configuración de Elementos:</h4>';");
+		html += F("if(config&&config.espinners){");
+		html += F("config.espinners.forEach(esp=>{");
+		html +=
+			F("configHtml+='<div style=\"margin:10px 0;padding:10px;border:1px "
+			  "solid #ddd;border-radius:5px;\">';");
+		html +=
+			F("configHtml+='<strong>'+esp.type+'</strong> - Pin: '+esp.pin;");
+		html += F("if(esp.config)configHtml+=' | Config: "
+				  "'+JSON.stringify(esp.config);");
+		html += F("configHtml+='</div>';});");
+		html += F("}else{configHtml+='<p>No hay elementos configurados</p>';}");
+		html += F(
+			"configEl.innerHTML=configHtml;detailsDiv.style.display='block';}");
+
+		// Pagination functions
+		html += F("function updatePagination(){");
+		html += F("const pagination=document.getElementById('pagination');");
+		html += F("const prevBtn=document.getElementById('prevBtn');");
+		html += F("const nextBtn=document.getElementById('nextBtn');");
+		html += F("const pageInfo=document.getElementById('pageInfo');");
+		html += F("pagination.style.display=totalPages>1?'block':'none';");
+		html += F("prevBtn.disabled=currentPage<=1;");
+		html += F("nextBtn.disabled=currentPage>=totalPages;");
+		html +=
+			F("pageInfo.textContent='Página '+currentPage+' de '+totalPages;}");
+
+		html += F("function previousPage(){");
+		html += F("if(currentPage>1)loadProjects(currentPage-1);}");
+
+		html += F("function nextPage(){");
+		html += F("if(currentPage<totalPages)loadProjects(currentPage+1);}");
 
 		html += F("</script></body></html>");
 
@@ -149,10 +238,28 @@ class ESPAllOnProjects {
 	 * @param request AsyncWebServerRequest object
 	 */
 	static void handleProjectsAPIRequest(AsyncWebServerRequest *request) {
+		// Get pagination parameters from query string
+		int page = 1;
+		int limit = PROJECT_LIMIT_QUERY;
+
+		if (request->hasParam("page")) {
+			page = request->getParam("page")->value().toInt();
+			if (page < 1)
+				page = 1;
+		}
+
+		if (request->hasParam("limit")) {
+			limit = request->getParam("limit")->value().toInt();
+			if (limit < 1 || limit > 50)
+				limit = PROJECT_LIMIT_QUERY; // Max 50 items per page
+		}
 
 		String jsonResponse =
-			ProjectsAPIClient::getInstance().fetchProjectsJSON();
-		DUMPLN("API request for projects list ", jsonResponse);
+			ProjectsAPIClient::getInstance().fetchProjectsJSON(page, limit);
+		DUMPLN("API request for projects list (page=", page);
+		DUMPLN(", limit=", limit);
+		DUMPLN(") response: ", jsonResponse);
+
 		if (jsonResponse.isEmpty()) {
 			request->send(
 				500, "application/json",
@@ -172,7 +279,6 @@ class ESPAllOnProjects {
 		DUMPLN("Load project request: ", url);
 
 		// Extract project ID from URL: /api/project/{id}/load
-		/*
 		int startIdx = url.indexOf("/api/project/") + 13;
 		int endIdx = url.indexOf("/load");
 
@@ -189,7 +295,7 @@ class ESPAllOnProjects {
 
 		// Fetch project configuration
 		String configJson =
-		ProjectsAPIClient::getInstance().fetchProjectConfigJSON(projectId);
+			ProjectsAPIClient::getInstance().fetchProjectConfigJSON(projectId);
 
 		if (configJson.isEmpty()) {
 			request->send(500, "application/json",
@@ -198,13 +304,19 @@ class ESPAllOnProjects {
 			return;
 		}
 
-		// For now, just return success - in a full implementation, this would
-		// apply the configuration
-		Serial.println("Project configuration would be applied here");
+		DUMPLN("Project configuration received: ", configJson);
+
+		// TODO: Parse and apply the configuration to the ESP
+		// This would involve:
+		// 1. Parse the JSON configuration
+		// 2. Configure pins according to the project setup
+		// 3. Initialize modules (steppers, sensors, etc.)
+		// 4. Save configuration to EEPROM/Flash
+
 		request->send(200, "application/json",
 					  "{\"success\":true,\"message\":\"Configuration loaded "
-					  "successfully\"}");
-					  */
+					  "successfully\",\"config\":" +
+						  configJson + "}");
 	}
 };
 

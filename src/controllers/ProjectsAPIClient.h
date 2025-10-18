@@ -32,7 +32,18 @@ class ProjectsAPIClient {
 	 * @return JSON string with projects data
 	 */
 	String fetchProjectsJSON() {
+		return fetchProjectsJSON(1, PROJECT_LIMIT_QUERY);
+	};
+
+	/**
+	 * Fetch projects list as JSON string with pagination
+	 * @param page Page number (1-based)
+	 * @param limit Number of projects per page
+	 * @return JSON string with projects data
+	 */
+	String fetchProjectsJSON(int page, int limit) {
 		String url = String(API_BASE_URL) + String(API_PROJECTS_ENDPOINT);
+		url += "?page=" + String(page) + "&limit=" + String(limit);
 
 		return makeHTTPRequest(url);
 	};

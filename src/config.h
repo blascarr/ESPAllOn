@@ -52,6 +52,7 @@ IPAddress SECONDARYDNS(8, 8, 4, 4);
 #define API_BASE_URL "https://espallon.blascarr.com"
 #define API_PROJECTS_ENDPOINT "/api/espallones/projects"
 #define API_PROJECT_ENDPOINT "/api/espallones/project/"
+#define PROJECT_LIMIT_QUERY 5
 
 // ------------ Persistance CONFIG ------------//
 
