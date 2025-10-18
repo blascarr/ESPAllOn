@@ -6,12 +6,13 @@
 #include <vector>
 
 enum NEOPIXEL_ANIMATION {
-	VOID = 0,
+	SOLID = 0,
 	BLINK = 1,
 	FADE = 2,
 	INCREMENTAL = 3,
 	DECREMENTAL = 4,
-	RAINBOW = 5
+	RAINBOW = 5,
+	CLEAR = 6,
 };
 
 typedef struct {
@@ -38,8 +39,13 @@ class INeopixelRunnable {
 	String ID;
 	virtual ~INeopixelRunnable() = default;
 	virtual void run() = 0;
+	virtual void enable(bool on) { _active = on; }
+	virtual bool isEnabled() const { return _active; }
 	virtual bool isActive() const = 0;
 	String get_ID() { return ID; }
+
+  private:
+	bool _active = false;
 };
 
 /**
@@ -74,9 +80,6 @@ class NeopixelRunner {
 	bool registerRunnable(std::shared_ptr<INeopixelRunnable> runnable) {
 		if (_runnables.size() < MAX_NEOPIXELS) {
 			_runnables.push_back(runnable);
-			if (!_isRunning) {
-				// startTicker();
-			}
 			return true;
 		}
 		return false;
@@ -95,9 +98,6 @@ class NeopixelRunner {
 						   });
 		if (it != _runnables.end()) {
 			_runnables.erase(it, _runnables.end());
-			if (_runnables.empty()) {
-				// stopTicker();
-			}
 			return true;
 		}
 		return false;
@@ -111,15 +111,6 @@ class NeopixelRunner {
 			if (runnable && runnable->isActive()) {
 				runnable->run();
 			}
-		}
-	}
-
-	/**
-	 * Static callback for Ticker
-	 */
-	static void tickerCallback() {
-		if (_instance) {
-			_instance->runAll();
 		}
 	}
 

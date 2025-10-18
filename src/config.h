@@ -284,33 +284,66 @@ String ESPinner_Path = "espinners";
 #define NEOPIXEL_SAVE_VALUE "Save Neopixel"
 #define NEOPIXEL_REMOVE_LABEL "Neopixel_Remove"
 #define NEOPIXEL_REMOVE_VALUE "Remove"
-#define NEOPIXEL_PINSELECTOR_LABEL "PinSelector"
-#define NEOPIXEL_PINSELECTOR_VALUE "0"
 
-#define NEOPIXEL_MODESELECTOR_LABEL "Neopixel_ModeSelector"
+#define NEOPIXEL_PIN_SELECT_LABEL "Pin Selector"
+#define NEOPIXEL_PIN_SELECT_VALUE "Pin Selector"
+#define NEOPIXEL_PIN_SELECTOR_LABEL "PinSelector"
+#define NEOPIXEL_PIN_SELECTOR_VALUE "0"
 
-#define NEOPIXEL_ID_LABEL "Neopixel_ID"
-
+#define NEOPIXEL_NUMPIXELS_SELECT_LABEL "Num Pixels"
+#define NEOPIXEL_NUMPIXELS_SELECT_VALUE "Num Pixels"
 #define NEOPIXEL_NUMPIXELS_LABEL "NumPixels"
 #define NEOPIXEL_NUMPIXELS_VALUE "8"
 
-// NeoPixel control definitions
-#define NEOPIXEL_EN_LABEL "Neopixel_Enable"
-#define NEOPIXEL_EN_VALUE "0"
-#define NEOPIXEL_SWITCH_EN_LABEL "Neopixel_Enable"
-#define NEOPIXEL_SWITCH_EN_VALUE "0"
-#define NEOPIXEL_COLOR_LABEL "Neopixel_Color"
-#define NEOPIXEL_COLOR_VALUE "#FF0000"
+#define NEOPIXEL_MODESELECTOR_LABEL "Neopixel_ModeSelector"
 
-#define NEOPIXEL_RAINBOW_LABEL "Neopixel_Rainbow"
-#define NEOPIXEL_RAINBOW_VALUE "0"
+// NeoPixel control definitions
+#define NEOPIXEL_ID_LABEL "Neopixel_ID"
+
+#define NEOPIXEL_EN_LABEL "Neopixel_Enable"
+#define NEOPIXEL_EN_VALUE "Enable"
+#define NEOPIXEL_SWITCH_EN_LABEL "Neopixel_Enable"
+#define NEOPIXEL_SWITCH_EN_VALUE "1"
+#define NEOPIXEL_COLOR_LABEL "Neopixel_Color"
+#define NEOPIXEL_COLOR_VALUE "#F8E45C"
+
 #define NEOPIXEL_SWITCH_RAINBOW_LABEL "Neopixel Enable Rainbow"
 #define NEOPIXEL_SWITCH_RAINBOW_VALUE "0"
 #define NEOPIXEL_SPEED_LABEL "Neopixel_RainbowSpeed"
 #define NEOPIXEL_SPEED_VALUE "50"
 
-#define NEOPIXEL_DEFAULT_BRIGHTNESS 50
+#define NEOPIXEL_BRIGHTNESS_LABEL "Brightness"
+#define NEOPIXEL_BRIGHTNESS_VALUE "Brightness"
+#define NEOPIXEL_BRIGHTNESS_SLIDER_LABEL "Brightness"
+#define NEOPIXEL_BRIGHTNESS_SLIDER_VALUE "50"
+
+#define NEOPIXEL_ANIMATION_LABEL "Neopixel_Animation"
+#define NEOPIXEL_ANIMATION_SELECT_LABEL "Animation Type"
+#define NEOPIXEL_ANIMATION_SELECT_VALUE "Animation"
+#define NEOPIXEL_ANIMATION_SELECTOR_LABEL "Neopixel_AnimationSelector"
+#define NEOPIXEL_ANIMATION_SELECTOR_VALUE "0"
+
+// Animation type values
+#define NEOPIXEL_ANIMATION_VOID_LABEL "Solid"
+#define NEOPIXEL_ANIMATION_VOID_VALUE "0"
+#define NEOPIXEL_ANIMATION_BLINK_LABEL "Blink"
+#define NEOPIXEL_ANIMATION_BLINK_VALUE "1"
+#define NEOPIXEL_ANIMATION_FADE_LABEL "Fade"
+#define NEOPIXEL_ANIMATION_FADE_VALUE "2"
+#define NEOPIXEL_ANIMATION_INCREMENTAL_LABEL "Incremental"
+#define NEOPIXEL_ANIMATION_INCREMENTAL_VALUE "3"
+#define NEOPIXEL_ANIMATION_DECREMENTAL_LABEL "Decremental"
+#define NEOPIXEL_ANIMATION_DECREMENTAL_VALUE "4"
+#define NEOPIXEL_ANIMATION_RAINBOW_LABEL "Rainbow"
+#define NEOPIXEL_ANIMATION_RAINBOW_VALUE "5"
+
+#define NEOPIXEL_INTERVAL_LABEL "Neopixel_Speed"
+#define NEOPIXEL_INTERVAL_VALUE "Neopixel_Speed"
+#define NEOPIXEL_INTERVAL_MIN_VALUE "10"
+#define NEOPIXEL_INTERVAL_MAX_VALUE "1000"
+
 #define NEOPIXEL_INTERVAL_MS 200
+#define DEFAULT_BRIGHTNESS 50
 
 // --------------- LCD MOD Definition -----------------//
 #define LCD_LABEL "LCD"
