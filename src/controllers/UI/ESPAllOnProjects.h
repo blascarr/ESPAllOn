@@ -4,6 +4,19 @@
 #include "../../utils.h"
 #include "../ProjectsAPIClient.h"
 #include <ESPUI.h>
+
+#ifdef USE_LITTLEFS_MODE
+#if defined(ESP32)
+#if (ESP_IDF_VERSION_MAJOR == 4 && ESP_IDF_VERSION_MINOR >= 4) ||              \
+	ESP_IDF_VERSION_MAJOR > 4
+#include <LittleFS.h>
+#else
+#include <LITTLEFS.h>
+#endif
+#else
+#include <LittleFS.h>
+#endif
+#endif
 /**
  * Simple Projects endpoint handler for ESPAllOn system
  * Provides web interface for project management and configuration loading
@@ -22,6 +35,23 @@ class ESPAllOnProjects {
 		ESPUI.server->on("/api/project/*/load", HTTP_POST,
 						 handleLoadProjectRequest);
 
+#ifdef USE_LITTLEFS_MODE
+		// Serve CSS file for projects page when in LittleFS mode
+		ESPUI.server->on(
+			"/projects.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+#if defined(ESP32)
+#if (ESP_IDF_VERSION_MAJOR == 4 && ESP_IDF_VERSION_MINOR >= 4) ||              \
+	ESP_IDF_VERSION_MAJOR > 4
+				request->send(LittleFS, "/projects.css", "text/css");
+#else
+			request->send(LITTLEFS, "/projects.css", "text/css");
+#endif
+#else
+			request->send(LittleFS, "/projects.css", "text/css");
+#endif
+			});
+#endif
+
 		DUMPSLN("Projects endpoints registered");
 	}
 
@@ -33,6 +63,19 @@ class ESPAllOnProjects {
 	static void handleProjectsPageRequest(AsyncWebServerRequest *request) {
 		DUMPSLN("Serving projects page");
 
+#ifdef USE_LITTLEFS_MODE
+		// Serve HTML file from LittleFS
+#if defined(ESP32)
+#if (ESP_IDF_VERSION_MAJOR == 4 && ESP_IDF_VERSION_MINOR >= 4) ||              \
+	ESP_IDF_VERSION_MAJOR > 4
+		request->send(LittleFS, "/projects.html", "text/html");
+#else
+		request->send(LITTLEFS, "/projects.html", "text/html");
+#endif
+#else
+		request->send(LittleFS, "/projects.html", "text/html");
+#endif
+#else
 		// Serve simple HTML page
 		String html = F("<!DOCTYPE html><html><head><meta charset='UTF-8'>");
 		html += F("<title>ESPAllOn - Proyectos</title>");
@@ -231,6 +274,7 @@ class ESPAllOnProjects {
 		html += F("</script></body></html>");
 
 		request->send(200, "text/html", html);
+#endif
 	}
 
 	/**

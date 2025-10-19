@@ -4,270 +4,9 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>ESPAllOn - Proyectos</title>
-		<style>
-			* {
-				margin: 0;
-				padding: 0;
-				box-sizing: border-box;
-			}
-
-			body {
-				font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-				min-height: 100vh;
-				padding: 20px;
-			}
-
-			.container {
-				max-width: 1200px;
-				margin: 0 auto;
-				background: white;
-				border-radius: 15px;
-				box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-				overflow: hidden;
-			}
-
-			.header {
-				background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-				color: white;
-				padding: 30px;
-				text-align: center;
-			}
-
-			.header h1 {
-				font-size: 2.5em;
-				margin-bottom: 10px;
-			}
-
-			.header p {
-				font-size: 1.1em;
-				opacity: 0.9;
-			}
-
-			.controls {
-				padding: 30px;
-				background: #f8f9fa;
-				border-bottom: 1px solid #e9ecef;
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				flex-wrap: wrap;
-				gap: 15px;
-			}
-
-			.btn {
-				padding: 12px 24px;
-				border: none;
-				border-radius: 8px;
-				cursor: pointer;
-				font-size: 16px;
-				font-weight: 600;
-				transition: all 0.3s ease;
-				text-decoration: none;
-				display: inline-block;
-			}
-
-			.btn-primary {
-				background: linear-gradient(135deg, #3498db, #2980b9);
-				color: white;
-			}
-
-			.btn-primary:hover {
-				transform: translateY(-2px);
-				box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
-			}
-
-			.btn-success {
-				background: linear-gradient(135deg, #27ae60, #229954);
-				color: white;
-			}
-
-			.btn-success:hover {
-				transform: translateY(-2px);
-				box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
-			}
-
-			.btn:disabled {
-				opacity: 0.6;
-				cursor: not-allowed;
-				transform: none !important;
-			}
-
-			.status {
-				padding: 15px 30px;
-				font-weight: 600;
-				text-align: center;
-				border-bottom: 1px solid #e9ecef;
-			}
-
-			.status.loading {
-				background: #fff3cd;
-				color: #856404;
-			}
-
-			.status.success {
-				background: #d4edda;
-				color: #155724;
-			}
-
-			.status.error {
-				background: #f8d7da;
-				color: #721c24;
-			}
-
-			.projects-grid {
-				padding: 30px;
-				display: grid;
-				grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-				gap: 20px;
-			}
-
-			.project-card {
-				border: 2px solid #e9ecef;
-				border-radius: 12px;
-				padding: 25px;
-				transition: all 0.3s ease;
-				cursor: pointer;
-				background: white;
-			}
-
-			.project-card:hover {
-				border-color: #3498db;
-				transform: translateY(-5px);
-				box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-			}
-
-			.project-card.selected {
-				border-color: #27ae60;
-				background: #f8fff9;
-				box-shadow: 0 8px 25px rgba(39, 174, 96, 0.2);
-			}
-
-			.project-title {
-				font-size: 1.4em;
-				font-weight: 700;
-				color: #2c3e50;
-				margin-bottom: 10px;
-			}
-
-			.project-description {
-				color: #7f8c8d;
-				margin-bottom: 15px;
-				line-height: 1.5;
-			}
-
-			.project-meta {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				margin-top: 15px;
-				padding-top: 15px;
-				border-top: 1px solid #ecf0f1;
-			}
-
-			.project-status {
-				padding: 5px 12px;
-				border-radius: 20px;
-				font-size: 0.85em;
-				font-weight: 600;
-				text-transform: uppercase;
-			}
-
-			.status-active {
-				background: #d4edda;
-				color: #155724;
-			}
-
-			.status-completed {
-				background: #cce7ff;
-				color: #004085;
-			}
-
-			.status-inactive {
-				background: #f8d7da;
-				color: #721c24;
-			}
-
-			.project-date {
-				font-size: 0.9em;
-				color: #95a5a6;
-			}
-
-			.config-preview {
-				margin-top: 15px;
-				padding: 15px;
-				background: #f8f9fa;
-				border-radius: 8px;
-				border-left: 4px solid #3498db;
-			}
-
-			.config-item {
-				font-size: 0.9em;
-				color: #5a6c7d;
-				margin-bottom: 5px;
-			}
-
-			.loading-spinner {
-				display: inline-block;
-				width: 20px;
-				height: 20px;
-				border: 3px solid #f3f3f3;
-				border-top: 3px solid #3498db;
-				border-radius: 50%;
-				animation: spin 1s linear infinite;
-				margin-right: 10px;
-			}
-
-			@keyframes spin {
-				0% {
-					transform: rotate(0deg);
-				}
-				100% {
-					transform: rotate(360deg);
-				}
-			}
-
-			.empty-state {
-				text-align: center;
-				padding: 60px 30px;
-				color: #7f8c8d;
-			}
-
-			.empty-state h3 {
-				font-size: 1.5em;
-				margin-bottom: 15px;
-			}
-
-			@media (max-width: 768px) {
-				.container {
-					margin: 10px;
-					border-radius: 10px;
-				}
-
-				.header {
-					padding: 20px;
-				}
-
-				.header h1 {
-					font-size: 2em;
-				}
-
-				.controls {
-					padding: 20px;
-					flex-direction: column;
-					align-items: stretch;
-				}
-
-				.projects-grid {
-					grid-template-columns: 1fr;
-					padding: 20px;
-				}
-
-				.project-card {
-					padding: 20px;
-				}
-			}
-		</style>
+		<link rel="stylesheet" href="/css/normalize.css" />
+		<link rel="stylesheet" href="/css/style.css" />
+		<link rel="stylesheet" href="/projects.css" />
 	</head>
 	<body>
 		<div class="container">
@@ -277,6 +16,7 @@
 			</div>
 
 			<div class="controls">
+				<a href="/" class="btn btn-primary">🏠 Volver al Panel Principal</a>
 				<button
 					id="refreshBtn"
 					class="btn btn-primary"
@@ -550,5 +290,12 @@
 				// loadProjects();
 			});
 		</script>
+
+		<!-- ESPUI Scripts for enhanced functionality -->
+		<script src="/js/zepto.min.js"></script>
+		<script src="/js/controls.js"></script>
+		<script src="/js/slider.js"></script>
+		<script src="/js/graph.js"></script>
+		<script src="/js/tabbedcontent.js"></script>
 	</body>
 </html>
