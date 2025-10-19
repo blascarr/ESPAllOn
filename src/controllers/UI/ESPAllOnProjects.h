@@ -50,6 +50,22 @@ class ESPAllOnProjects {
 			request->send(LittleFS, "/projects.css", "text/css");
 #endif
 			});
+
+		// Serve JavaScript file for projects page when in LittleFS mode
+		ESPUI.server->on("/projects.js", HTTP_GET,
+						 [](AsyncWebServerRequest *request) {
+#if defined(ESP32)
+#if (ESP_IDF_VERSION_MAJOR == 4 && ESP_IDF_VERSION_MINOR >= 4) ||              \
+	ESP_IDF_VERSION_MAJOR > 4
+							 request->send(LittleFS, "/projects.js",
+										   "application/javascript");
+#else
+			request->send(LITTLEFS, "/projects.js", "application/javascript");
+#endif
+#else
+			request->send(LittleFS, "/projects.js", "application/javascript");
+#endif
+						 });
 #endif
 
 		DUMPSLN("Projects endpoints registered");
