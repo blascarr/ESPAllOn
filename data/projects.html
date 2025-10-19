@@ -11,8 +11,10 @@
 	<body>
 		<div class="container">
 			<div class="header">
-				<h1>🚀 Gestión de Proyectos</h1>
-				<p>Selecciona y carga configuraciones de proyectos desde la API</p>
+				<h1>🚀 Proyectos ESPAllOn</h1>
+				<p>
+					Selecciona y carga la configuración del proyecto que te gustaría crear
+				</p>
 			</div>
 
 			<div class="controls">
@@ -24,14 +26,6 @@
 				>
 					<span id="refreshIcon">🔄</span> Actualizar Proyectos
 				</button>
-				<button
-					id="loadConfigBtn"
-					class="btn btn-success"
-					onclick="loadSelectedProject()"
-					disabled
-				>
-					<span id="loadIcon">⚙️</span> Cargar Configuración
-				</button>
 			</div>
 
 			<div id="status" class="status" style="display: none"></div>
@@ -39,10 +33,35 @@
 			<div id="projectsContainer" class="projects-grid">
 				<div class="empty-state">
 					<h3>👋 ¡Bienvenido!</h3>
-					<p>
-						Haz clic en "Actualizar Proyectos" para cargar los proyectos
-						disponibles desde la API.
-					</p>
+					<p>Los proyectos se cargarán automáticamente.</p>
+				</div>
+			</div>
+
+			<!-- Pagination Controls -->
+			<div
+				id="paginationContainer"
+				class="pagination-container"
+				style="display: none"
+			>
+				<div class="pagination-info">
+					<span id="pageInfo">Página 1 de 1</span>
+				</div>
+				<div class="pagination-controls">
+					<button
+						id="prevPageBtn"
+						class="pagination-btn"
+						onclick="goToPreviousPage()"
+					>
+						⬅️ Anterior
+					</button>
+					<div id="pageNumbers" class="page-numbers"></div>
+					<button
+						id="nextPageBtn"
+						class="pagination-btn"
+						onclick="goToNextPage()"
+					>
+						Siguiente ➡️
+					</button>
 				</div>
 			</div>
 		</div>

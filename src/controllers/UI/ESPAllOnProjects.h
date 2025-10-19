@@ -350,33 +350,19 @@ class ESPAllOnProjects {
 		}
 
 		String projectId = url.substring(startIdx, endIdx);
-		Serial.print("Extracted project ID: ");
-		Serial.println(projectId);
-
-		// Fetch project configuration
-		String configJson =
-			ProjectsAPIClient::getInstance().fetchProjectConfigJSON(projectId);
-
-		if (configJson.isEmpty()) {
-			request->send(500, "application/json",
-						  "{\"success\":false,\"error\":\"Failed to fetch "
-						  "project configuration\"}");
-			return;
-		}
-
-		DUMPLN("Project configuration received: ", configJson);
+		DUMPLN("Extracted project ID: ", projectId);
 
 		// TODO: Parse and apply the configuration to the ESP
 		// This would involve:
-		// 1. Parse the JSON configuration
+		// 1. Parse the JSON configuration from request body
 		// 2. Configure pins according to the project setup
 		// 3. Initialize modules (steppers, sensors, etc.)
 		// 4. Save configuration to EEPROM/Flash
 
+		// For now, just return success
 		request->send(200, "application/json",
 					  "{\"success\":true,\"message\":\"Configuration loaded "
-					  "successfully\",\"config\":" +
-						  configJson + "}");
+					  "successfully\"}");
 	}
 };
 

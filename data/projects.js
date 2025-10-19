@@ -1,86 +1,40 @@
-/**
- * ESPAllOn Projects Page JavaScript
- * ================================
- *
- * Handles project management functionality including:
- * - Loading projects from API
- * - Displaying projects in grid layout
- * - Project selection and configuration loading
- * - Status messages and UI interactions
- */
-
-// Global variables
+// ========== Global Variables ==========
 let projects = [];
 let selectedProjectId = null;
+let currentPage = 1;
+let totalPages = 1;
+let totalProjects = 0;
+let isLoading = false;
+
+// ========== UI Functions ==========
 
 /**
- * Show status message to user
+ * Show status message
  * @param {string} message - Message to display
- * @param {string} type - Type of message: 'loading', 'success', 'error'
+ * @param {string} type - Type: 'loading', 'success', 'error'
  */
-function showStatus(message, type = 'loading') {
+function showStatus(message, type) {
 	const statusEl = document.getElementById('status');
 	statusEl.textContent = message;
 	statusEl.className = `status ${type}`;
 	statusEl.style.display = 'block';
 
-	if (type === 'success' || type === 'error') {
+	// Auto-hide non-loading messages
+	if (type !== 'loading') {
 		setTimeout(() => {
 			statusEl.style.display = 'none';
-		}, 5000);
+		}, 3000);
 	}
 }
 
 /**
- * Load projects from API endpoint
- * Fetches project list and displays them in the grid
- */
-async function loadProjects() {
-	const refreshBtn = document.getElementById('refreshBtn');
-	const refreshIcon = document.getElementById('refreshIcon');
-
-	refreshBtn.disabled = true;
-	refreshIcon.innerHTML = '<div class="loading-spinner"></div>';
-
-	showStatus('Cargando proyectos desde la API...', 'loading');
-
-	try {
-		const response = await fetch('/api/projects');
-
-		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}`);
-		}
-
-		const data = await response.json();
-
-		if (data.success && data.data) {
-			projects = data.data;
-			displayProjects(projects);
-			showStatus(
-				`✅ ${projects.length} proyectos cargados exitosamente`,
-				'success'
-			);
-		} else {
-			throw new Error('Respuesta de API inválida');
-		}
-	} catch (error) {
-		console.error('Error loading projects:', error);
-		showStatus(`❌ Error al cargar proyectos: ${error.message}`, 'error');
-		displayEmptyState();
-	} finally {
-		refreshBtn.disabled = false;
-		refreshIcon.textContent = '🔄';
-	}
-}
-
-/**
- * Display projects in grid layout
- * @param {Array} projectsList - Array of project objects to display
+ * Display projects in the grid
+ * @param {Array} projectsList - Array of project objects
  */
 function displayProjects(projectsList) {
 	const container = document.getElementById('projectsContainer');
 
-	if (projectsList.length === 0) {
+	if (!projectsList || projectsList.length === 0) {
 		displayEmptyState();
 		return;
 	}
@@ -88,198 +42,589 @@ function displayProjects(projectsList) {
 	container.innerHTML = projectsList
 		.map(
 			(project) => `
-                <div class="project-card" onclick="selectProject('${
-									project.id
-								}')">
-                    <div class="project-title">${escapeHtml(project.name)}</div>
-                    <div class="project-description">${escapeHtml(
-											project.description
-										)}</div>
-                    
-                    <div class="project-meta">
-                        <span class="project-status status-${project.status}">
-                            ${getStatusIcon(project.status)} ${project.status}
-                        </span>
-                        <span class="project-date">
-                            ${formatDate(project.updated_at)}
-                        </span>
-                    </div>
-                    
-                    ${
-											project.config && project.config.config
-												? `
-                        <div class="config-preview">
-                            <strong>📋 Configuración:</strong>
-                            ${project.config.config
-															.slice(0, 3)
-															.map(
-																(item) => `
-                                <div class="config-item">
-                                    • ${item.ID || 'Item'}: ${
-																	item.ESPinner_Mod || 'N/A'
-																}
-                                </div>
-                            `
-															)
-															.join('')}
-                            ${
-															project.config.config.length > 3
-																? `
-                                <div class="config-item">... y ${
-																	project.config.config.length - 3
-																} más</div>
-                            `
-																: ''
-														}
-                        </div>
-                    `
-												: ''
-										}
-                </div>
-            `
+		<div class="project-card" onclick="selectProject('${project.id}')">
+			<div class="project-header">
+				<h3 class="project-title">${project.name}</h3>
+				<span class="project-status status-${
+					project.status?.toLowerCase() || 'unknown'
+				}">
+					${getStatusIcon(project.status)} ${project.status || 'UNKNOWN'}
+				</span>
+			</div>
+			<p class="project-description">${
+				project.description || 'Sin descripción disponible'
+			}</p>
+			<div class="project-date">
+				📅 ${formatProjectDate(
+					project.created_at || project.date || project.updated_at
+				)}
+			</div>
+			<div class="project-actions">
+				<button class="btn btn-load" onclick="event.stopPropagation(); showLoadConfirmDialog('${
+					project.id
+				}')">
+					⚙️ Cargar Configuración
+				</button>
+			</div>
+		</div>
+	`
 		)
 		.join('');
 }
 
 /**
- * Display empty state when no projects are available
+ * Display empty state
  */
 function displayEmptyState() {
 	const container = document.getElementById('projectsContainer');
 	container.innerHTML = `
-                <div class="empty-state">
-                    <h3>📭 No hay proyectos disponibles</h3>
-                    <p>No se encontraron proyectos en la API o hubo un error al cargarlos.</p>
-                </div>
-            `;
+		<div class="empty-state">
+			<h3>📭 No hay proyectos</h3>
+			<p>No se encontraron proyectos en esta página.</p>
+		</div>
+	`;
 }
 
 /**
- * Select a project and update UI
- * @param {string} projectId - ID of the project to select
- */
-function selectProject(projectId) {
-	selectedProjectId = projectId;
-
-	// Update visual selection
-	document.querySelectorAll('.project-card').forEach((card) => {
-		card.classList.remove('selected');
-	});
-
-	event.currentTarget.classList.add('selected');
-
-	// Enable load config button
-	document.getElementById('loadConfigBtn').disabled = false;
-
-	const project = projects.find((p) => p.id === projectId);
-	showStatus(`✅ Proyecto seleccionado: ${project.name}`, 'success');
-}
-
-/**
- * Load configuration for the selected project
- * Sends POST request to load project configuration
- */
-async function loadSelectedProject() {
-	if (!selectedProjectId) {
-		showStatus('❌ No hay proyecto seleccionado', 'error');
-		return;
-	}
-
-	const loadBtn = document.getElementById('loadConfigBtn');
-	const loadIcon = document.getElementById('loadIcon');
-
-	loadBtn.disabled = true;
-	loadIcon.innerHTML = '<div class="loading-spinner"></div>';
-
-	const project = projects.find((p) => p.id === selectedProjectId);
-	showStatus(`Cargando configuración de: ${project.name}...`, 'loading');
-
-	try {
-		const response = await fetch(`/api/project/${selectedProjectId}/load`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		});
-
-		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}`);
-		}
-
-		const result = await response.json();
-
-		if (result.success) {
-			showStatus(
-				`🎉 Configuración cargada exitosamente: ${project.name}`,
-				'success'
-			);
-		} else {
-			throw new Error(result.message || 'Error desconocido');
-		}
-	} catch (error) {
-		console.error('Error loading project config:', error);
-		showStatus(`❌ Error al cargar configuración: ${error.message}`, 'error');
-	} finally {
-		loadBtn.disabled = false;
-		loadIcon.textContent = '⚙️';
-	}
-}
-
-// ========== Utility Functions ==========
-
-/**
- * Escape HTML characters to prevent XSS
- * @param {string} text - Text to escape
- * @returns {string} Escaped HTML
- */
-function escapeHtml(text) {
-	const div = document.createElement('div');
-	div.textContent = text;
-	return div.innerHTML;
-}
-
-/**
- * Get status icon for project status
+ * Get status icon for project
  * @param {string} status - Project status
- * @returns {string} Emoji icon for status
+ * @returns {string} Icon emoji
  */
 function getStatusIcon(status) {
-	switch (status) {
+	switch (status?.toLowerCase()) {
 		case 'active':
 			return '🟢';
 		case 'completed':
 			return '✅';
 		case 'inactive':
 			return '🔴';
+		case 'pending':
+			return '🟡';
 		default:
-			return '⚪';
+			return '❓';
 	}
 }
 
 /**
- * Format date string to localized format
- * @param {string} dateString - ISO date string
+ * Format project date for display
+ * @param {string} dateString - Date string from API
  * @returns {string} Formatted date
  */
-function formatDate(dateString) {
+function formatProjectDate(dateString) {
+	if (!dateString) {
+		return 'Fecha no disponible';
+	}
+
 	try {
+		// Try to parse the date
 		const date = new Date(dateString);
-		return date.toLocaleDateString('es-ES', {
+
+		// Check if date is valid
+		if (isNaN(date.getTime())) {
+			return dateString; // Return original if can't parse
+		}
+
+		// Format date in Spanish locale
+		const options = {
 			year: 'numeric',
-			month: 'short',
+			month: 'long',
 			day: 'numeric',
-		});
-	} catch {
-		return 'Fecha inválida';
+			timeZone: 'Europe/Madrid',
+		};
+
+		return date.toLocaleDateString('es-ES', options);
+	} catch (error) {
+		console.warn('Error formatting date:', dateString, error);
+		return dateString; // Return original string if formatting fails
 	}
 }
+
+/**
+ * Format configuration data for modal display
+ * @param {Object} config - Configuration object
+ * @returns {string} Formatted HTML string
+ */
+function formatConfigForModal(config) {
+	if (!config || typeof config !== 'object') {
+		return '<p><em>Configuración no válida</em></p>';
+	}
+
+	// If config has a 'config' property with an array (ESPinner format)
+	if (config.config && Array.isArray(config.config)) {
+		return `
+			<div class="config-items">
+				${config.config
+					.map(
+						(item, index) => `
+					<div class="config-item">
+						<div class="config-item-header">
+							<strong>📌 Elemento ${index + 1}</strong>
+						</div>
+						<div class="config-item-details">
+							${Object.entries(item)
+								.map(
+									([key, value]) => `
+								<div class="config-detail">
+									<span class="config-key">${key}:</span>
+									<span class="config-value">${
+										Array.isArray(value) ? value.join(', ') : value
+									}</span>
+								</div>
+							`
+								)
+								.join('')}
+						</div>
+					</div>
+				`
+					)
+					.join('')}
+			</div>
+		`;
+	}
+
+	// If config is a simple object
+	return `
+		<div class="config-simple">
+			${Object.entries(config)
+				.map(
+					([key, value]) => `
+				<div class="config-detail">
+					<span class="config-key">${key}:</span>
+					<span class="config-value">${
+						Array.isArray(value)
+							? value.join(', ')
+							: typeof value === 'object'
+							? JSON.stringify(value, null, 2)
+							: value
+					}</span>
+				</div>
+			`
+				)
+				.join('')}
+		</div>
+	`;
+}
+
+// ========== API Functions ==========
+
+/**
+ * Load projects from API with pagination
+ * @param {number} page - Page number (default: 1)
+ * @param {boolean} showLoadingInButton - Show loading in refresh button
+ */
+async function loadProjects(page = 1, showLoadingInButton = true) {
+	if (isLoading) {
+		console.log('Already loading, skipping request');
+		return;
+	}
+
+	isLoading = true;
+	currentPage = page;
+
+	// UI Loading state
+	const refreshBtn = document.getElementById('refreshBtn');
+	const refreshIcon = document.getElementById('refreshIcon');
+
+	if (showLoadingInButton && refreshBtn) {
+		refreshBtn.disabled = true;
+		refreshIcon.textContent = '⏳';
+	}
+
+	showStatus('🔄 Cargando proyectos...', 'loading');
+
+	try {
+		const limit = 5; // Fixed limit matching PROJECT_LIMIT_QUERY
+		const response = await fetch(`/api/projects?page=${page}&limit=${limit}`);
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const data = await response.json();
+		console.log('=== API RESPONSE ===');
+		console.log('Full response:', JSON.stringify(data, null, 2));
+
+		if (data.success && data.data) {
+			projects = data.data;
+			console.log(`Loaded ${projects.length} projects for page ${page}`);
+
+			// Simple pagination logic
+			if (projects.length < limit) {
+				// If we got fewer projects than requested, this is the last page
+				totalPages = page;
+				console.log('This appears to be the last page');
+			} else {
+				// If we got exactly 'limit' projects, there might be more
+				totalPages = page + 1;
+				console.log('There might be more pages');
+			}
+
+			// Use API pagination info if available
+			if (data.pagination) {
+				totalPages = data.pagination.totalPages || totalPages;
+				totalProjects = data.pagination.total || projects.length;
+				console.log('Using API pagination info:', data.pagination);
+			} else if (data.total) {
+				totalProjects = data.total;
+				totalPages = Math.ceil(totalProjects / limit);
+				console.log('Calculated pagination from total:', data.total);
+			}
+
+			displayProjects(projects);
+
+			// Reset loading state before updating pagination controls
+			isLoading = false;
+			updatePaginationControls();
+
+			showStatus(
+				`✅ ${projects.length} proyectos cargados (página ${page})`,
+				'success'
+			);
+		} else {
+			throw new Error('Respuesta de API inválida');
+		}
+	} catch (error) {
+		console.error('Error loading projects:', error);
+		isLoading = false; // Reset loading state on error too
+		showStatus(`❌ Error: ${error.message}`, 'error');
+		displayEmptyState();
+		hidePaginationControls();
+	} finally {
+		// isLoading is already reset above, but keep this as safety net
+		isLoading = false;
+		if (showLoadingInButton && refreshBtn) {
+			refreshBtn.disabled = false;
+			refreshIcon.textContent = '🔄';
+		}
+	}
+}
+
+// ========== Pagination Functions ==========
+
+/**
+ * Update pagination controls
+ */
+function updatePaginationControls() {
+	const paginationContainer = document.getElementById('paginationContainer');
+	const prevBtn = document.getElementById('prevPageBtn');
+	const nextBtn = document.getElementById('nextPageBtn');
+	const pageInfo = document.getElementById('pageInfo');
+
+	console.log(`=== PAGINATION UPDATE ===`);
+	console.log(
+		`Page: ${currentPage}, Projects: ${projects.length}, Loading: ${isLoading}`
+	);
+
+	// Hide pagination if no projects and on first page
+	if (projects.length === 0 && currentPage === 1) {
+		paginationContainer.style.display = 'none';
+		return;
+	}
+
+	// Show pagination
+	paginationContainer.style.display = 'flex';
+
+	// Update buttons
+	prevBtn.disabled = currentPage <= 1 || isLoading;
+
+	// Next button logic: only disable if we're sure there are no more pages
+	// If we got exactly 5 projects, there might be more pages
+	if (projects.length === 5) {
+		nextBtn.disabled = isLoading; // Enable if we got a full page
+	} else {
+		nextBtn.disabled = true; // Disable if we got less than full page (last page)
+	}
+
+	// Force remove disabled attribute if it should be enabled
+	if (!nextBtn.disabled) {
+		nextBtn.removeAttribute('disabled');
+	}
+
+	console.log(
+		`Projects loaded: ${projects.length}, Next button disabled: ${nextBtn.disabled}, isLoading: ${isLoading}`
+	);
+
+	// Update page info
+	pageInfo.textContent = `Página ${currentPage} - ${projects.length} proyectos`;
+
+	// Update page numbers
+	updatePageNumbers();
+
+	console.log(`Buttons: prev=${prevBtn.disabled}, next=${nextBtn.disabled}`);
+	console.log('=== END PAGINATION ===');
+}
+
+/**
+ * Update page number buttons
+ */
+function updatePageNumbers() {
+	const pageNumbers = document.getElementById('pageNumbers');
+	pageNumbers.innerHTML = '';
+
+	// Show current page
+	addPageButton(currentPage);
+
+	// Show page 1 if not current
+	if (currentPage > 1) {
+		pageNumbers.innerHTML = '';
+		addPageButton(1);
+		if (currentPage > 2) {
+			addEllipsis();
+		}
+		addPageButton(currentPage);
+	}
+
+	// Show next page if we have full results
+	if (projects.length === 5) {
+		addPageButton(currentPage + 1);
+	}
+}
+
+/**
+ * Add page button
+ * @param {number} pageNum - Page number
+ */
+function addPageButton(pageNum) {
+	const pageNumbers = document.getElementById('pageNumbers');
+	const button = document.createElement('button');
+	button.className = `page-btn ${pageNum === currentPage ? 'active' : ''}`;
+	button.textContent = pageNum;
+	button.onclick = () => goToPage(pageNum);
+	pageNumbers.appendChild(button);
+}
+
+/**
+ * Add ellipsis
+ */
+function addEllipsis() {
+	const pageNumbers = document.getElementById('pageNumbers');
+	const ellipsis = document.createElement('span');
+	ellipsis.className = 'page-ellipsis';
+	ellipsis.textContent = '...';
+	pageNumbers.appendChild(ellipsis);
+}
+
+/**
+ * Hide pagination controls
+ */
+function hidePaginationControls() {
+	const paginationContainer = document.getElementById('paginationContainer');
+	paginationContainer.style.display = 'none';
+}
+
+/**
+ * Go to specific page
+ * @param {number} page - Page number
+ */
+function goToPage(page) {
+	if (page < 1 || page === currentPage || isLoading) {
+		console.log(
+			`Navigation blocked: page=${page}, current=${currentPage}, loading=${isLoading}`
+		);
+		return;
+	}
+	console.log(`Navigating to page ${page}`);
+	loadProjects(page, false);
+}
+
+/**
+ * Go to previous page
+ */
+function goToPreviousPage() {
+	if (currentPage > 1) {
+		goToPage(currentPage - 1);
+	}
+}
+
+/**
+ * Go to next page
+ */
+function goToNextPage() {
+	goToPage(currentPage + 1);
+}
+
+// ========== Project Selection and Loading ==========
+
+/**
+ * Select a project
+ * @param {string} projectId - Project ID
+ */
+function selectProject(projectId) {
+	selectedProjectId = projectId;
+	const project = projects.find((p) => p.id === projectId);
+
+	// Update visual selection
+	document.querySelectorAll('.project-card').forEach((card) => {
+		card.classList.remove('selected');
+	});
+	event.target.closest('.project-card').classList.add('selected');
+
+	showStatus(`✅ Seleccionado: ${project.name}`, 'success');
+}
+
+/**
+ * Show load confirmation dialog
+ * @param {string} projectId - Project ID
+ */
+function showLoadConfirmDialog(projectId) {
+	const project = projects.find((p) => p.id === projectId);
+	if (!project) return;
+
+	// Create modal
+	const modal = document.createElement('div');
+	modal.className = 'modal-backdrop';
+	modal.innerHTML = `
+		<div class="modal-dialog">
+			<div class="modal-header">
+				<h3>⚠️ Confirmar Carga de Configuración</h3>
+			</div>
+			<div class="modal-body">
+				<div class="project-info">
+					<h4>📋 Información del Proyecto</h4>
+					<p><strong>Nombre:</strong> ${project.name}</p>
+					<p><strong>Descripción:</strong> ${
+						project.description || 'Sin descripción disponible'
+					}</p>
+					<p><strong>Estado:</strong> ${getStatusIcon(project.status)} ${
+		project.status || 'UNKNOWN'
+	}</p>
+					<p><strong>Fecha:</strong> ${formatProjectDate(
+						project.created_at || project.date || project.updated_at
+					)}</p>
+				</div>
+				
+				${
+					project.config
+						? `
+				<div class="config-details">
+					<h4>⚙️ Configuración a Cargar</h4>
+					<div class="config-preview">
+						${formatConfigForModal(project.config)}
+					</div>
+				</div>
+				`
+						: `
+				<div class="config-details">
+					<h4>⚙️ Configuración</h4>
+					<p><em>No hay configuración específica disponible para este proyecto.</em></p>
+				</div>
+				`
+				}
+				
+				<div class="warning-section">
+					<p><strong>¿Estás seguro de que quieres cargar esta configuración?</strong></p>
+					<p class="warning-text">⚠️ Esta acción sobrescribirá la configuración actual de la placa.</p>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-secondary" onclick="closeModal()">❌ Cancelar</button>
+				<button class="btn btn-success" onclick="confirmLoadProject('${projectId}')">⚙️ Cargar Configuración</button>
+			</div>
+		</div>
+	`;
+
+	document.body.appendChild(modal);
+	modal.addEventListener('click', (e) => {
+		if (e.target === modal) closeModal();
+	});
+}
+
+/**
+ * Close modal dialog
+ */
+function closeModal() {
+	const modal = document.querySelector('.modal-backdrop');
+	if (modal) {
+		modal.remove();
+	}
+}
+
+/**
+ * Confirm and load project configuration
+ * @param {string} projectId - Project ID
+ */
+async function confirmLoadProject(projectId) {
+	const project = projects.find((p) => p.id === projectId);
+	if (!project) return;
+
+	closeModal();
+	showStatus(`⏳ Cargando configuración de: ${project.name}`, 'loading');
+
+	try {
+		const configData = project.config || {};
+		const response = await fetch(`/api/project/${projectId}/load`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				config: configData,
+				projectName: project.name,
+				projectId: projectId,
+			}),
+		});
+
+		// Validate response
+		const contentType = response.headers.get('content-type');
+		if (!contentType || !contentType.includes('application/json')) {
+			throw new Error('La respuesta del servidor no es JSON válido');
+		}
+
+		if (!response.ok) {
+			throw new Error(`Error HTTP: ${response.status}`);
+		}
+
+		const result = await response.json();
+		if (result.success) {
+			showStatus(
+				`🎉 Configuración cargada exitosamente: ${project.name}`,
+				'success'
+			);
+		} else {
+			throw new Error(
+				result.message || 'Error desconocido al cargar configuración'
+			);
+		}
+	} catch (error) {
+		console.error('Error loading project config:', error);
+		showStatus(`❌ Error al cargar configuración: ${error.message}`, 'error');
+	}
+}
+
+// ========== Debug Function ==========
+
+/**
+ * Debug API response - call from browser console
+ */
+window.debugAPI = async function () {
+	try {
+		console.log('=== DEBUG API TEST ===');
+		const response = await fetch('/api/projects?page=1&limit=5');
+		console.log('Response status:', response.status);
+		console.log('Response headers:', [...response.headers.entries()]);
+
+		const data = await response.json();
+		console.log('Full API Response:', JSON.stringify(data, null, 2));
+
+		console.log('data.success:', data.success);
+		console.log(
+			'data.data length:',
+			data.data ? data.data.length : 'undefined'
+		);
+		console.log('data.pagination:', data.pagination);
+		console.log('data.total:', data.total);
+		console.log('=== END DEBUG ===');
+
+		return data;
+	} catch (error) {
+		console.error('Debug API Error:', error);
+	}
+};
 
 // ========== Event Listeners ==========
 
 /**
- * Initialize page when DOM is loaded
+ * Initialize when DOM is loaded
  */
 document.addEventListener('DOMContentLoaded', function () {
-	// Optional: Auto-load projects when page loads
-	// loadProjects();
+	console.log('Projects page loaded, fetching initial data...');
+	loadProjects(1);
 });
