@@ -93,6 +93,34 @@ class ESPAllOn {
 #endif
 	}
 	/**
+	 * Load and display current WiFi configuration values in UI
+	 */
+	void loadWifiConfigToUI() {
+		// Load current credentials
+		String stored_ssid, stored_pass, stored_local_ip, stored_gateway,
+			stored_subnet, stored_primary_dns, stored_secondary_dns;
+		ESPALLON_Wifi::getInstance().loadCredentials(
+			stored_ssid, stored_pass, stored_local_ip, stored_gateway,
+			stored_subnet, stored_primary_dns, stored_secondary_dns);
+
+		// Update UI controls with loaded values
+		ESPUI.updateControlValue(ESPALLON_Wifi::getInstance().wifi_ssid_text,
+								 stored_ssid);
+		ESPUI.updateControlValue(ESPALLON_Wifi::getInstance().wifi_pass_text,
+								 stored_pass);
+		ESPUI.updateControlValue(
+			ESPALLON_Wifi::getInstance().wifi_local_ip_text, stored_local_ip);
+		ESPUI.updateControlValue(
+			ESPALLON_Wifi::getInstance().wifi_dns_primary_text,
+			stored_primary_dns);
+		ESPUI.updateControlValue(
+			ESPALLON_Wifi::getInstance().wifi_dns_secondary_text,
+			stored_secondary_dns);
+
+		DUMPSLN("WiFi configuration loaded to UI");
+	}
+
+	/**
 	 * Creates the WiFi configuration tab in the UI
 	 *
 	 * Sets up UI controls for WiFi SSID/password input, save functionality,
@@ -149,6 +177,7 @@ class ESPAllOn {
 		WIFI_UI_ref[DNS_SECONDARY_LABEL] =
 			ESPALLON_Wifi::getInstance().wifi_dns_secondary_text;
 		WIFI_UI_ref[WIFI_SAVE_LABEL] = saveButtonId;
+		WIFI_UI_ref[IPDNS_SAVE_LABEL] = ipdnsSaveButtonId;
 
 		ESPUI.addControl(ControlType::Button, REMOVE_PINCONFIG_LABEL,
 						 REMOVE_PINCONFIG_VALUE, ControlColor::Peterriver,
@@ -236,6 +265,9 @@ class ESPAllOn {
 #else
 		ESPUI.begin(HOSTNAME);
 #endif
+		// Load WiFi configuration values into UI after ESPUI is initialized
+		loadWifiConfigToUI();
+
 		// Register the pin status endpoint after ESPUI initialization
 		ESPAllOnPinStatus::registerPinStatusEndpoint();
 
