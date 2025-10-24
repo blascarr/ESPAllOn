@@ -37,14 +37,46 @@
 #define HARDCODED_SSID "ZMS"
 #define HARDCODED_PASS "ZM4K3RS:P"
 
+const byte DNS_PORT = 53;
+#define HARDCODED_LOCAL_IP "192.168.1.115"
+#define HARDCODED_GATEWAY "192.168.1.1"
+#define HARDCODED_SUBNET "255.255.255.0"
+#define HARDCODED_PRIMARYDNS "8.8.8.8"
+#define HARDCODED_SECONDARYDNS "8.8.4.4"
+
 #define DNS_NAME "espallon"
 
-const byte DNS_PORT = 53;
-IPAddress LOCAL_IP(192, 168, 1, 115);
-IPAddress GATEWAY(192, 168, 1, 1);
-IPAddress SUBNET(255, 255, 255, 0);
-IPAddress PRIMARYDNS(8, 8, 8, 8);
-IPAddress SECONDARYDNS(8, 8, 4, 4);
+#define SSID_ADDRESS 0
+#define PASS_ADDRESS 32
+#define LOCAL_IP_ADDRESS 64
+#define PRIMARY_DNS_ADDRESS 96
+#define SECONDARY_DNS_ADDRESS 128
+
+// EEPROM_SIZE must be large enough to hold all fields plus null terminators
+// Last used address is SECONDARY_DNS_ADDRESS + max IP field size + null
+// terminator
+
+// Calculate required size: assuming max SSID = 30, PASS = 63, IPs = 16 each
+// (plus nulls)
+#define SSID_MAX_LENGTH 30
+#define PASS_MAX_LENGTH 63
+#define IP_MAX_LENGTH 16
+
+// End address for secondary DNS: 128 + 16 + 1 = 145
+// Round up to next multiple of 16 for safe margin
+#define EEPROM_SIZE 160
+
+#define SSID_LABEL "SSID"
+#define PASS_LABEL "Password"
+#define LOCAL_IP_LABEL "Local IP"
+#define DNS_PRIMARY_LABEL "Primary DNS"
+#define DNS_SECONDARY_LABEL "Secondary DNS"
+#define WIFI_SAVE_LABEL "Save"
+#define IPDNS_SAVE_LABEL "Save IP/DNS"
+#define IPDNS_SAVE_VALUE "Save IP/DNS"
+#define VOID_LABEL "VOID"
+#define WIFI_SAVE_VALUE "Save"
+#define WIFI_RESET_LABEL "Reset WiFi Config"
 
 // ========================================
 // API CONFIGURATION
@@ -150,11 +182,6 @@ String ESPinner_Path = "espinners";
 #define SAVEESPINNER_VALUE "Save"
 #define REMOVEESPINNER_LABEL "ESPinner_Remove"
 #define REMOVEESPINNER_VALUE "Remove"
-#define SSID_LABEL "SSID"
-#define PASS_LABEL "Password"
-#define WIFI_SAVE_LABEL "Save"
-#define VOID_LABEL "VOID"
-#define WIFI_SAVE_VALUE "Save"
 #define VOID_VALUE ""
 
 #define REMOVE_PINCONFIG_LABEL "REMOVE_PIN_CONFIGURATION"

@@ -101,24 +101,53 @@ class ESPAllOn {
 	 */
 	void wifiTab() {
 		auto wifitab = getTab(TabType::NetworkTab);
-		ESPALLON_Wifi::getInstance().wifi_ssid_text =
-			ESPUI.addControl(ControlType::Text, SSID_LABEL, VOID_VALUE,
-							 ControlColor::Alizarin, wifitab, textCallback);
+		uint16_t wifi_control_ref =
+			ESPALLON_Wifi::getInstance().wifi_ssid_text =
+				ESPUI.addControl(ControlType::Text, SSID_LABEL, VOID_VALUE,
+								 ControlColor::Turquoise, wifitab,
+								 textCallback);
 		ESPUI.addControl(ControlType::Max, VOID_VALUE, "32", None,
 						 ESPALLON_Wifi::getInstance().wifi_ssid_text);
-		ESPALLON_Wifi::getInstance().wifi_pass_text =
-			ESPUI.addControl(ControlType::Password, PASS_LABEL, VOID_VALUE,
-							 ControlColor::Alizarin, wifitab, textCallback);
+		ESPALLON_Wifi::getInstance().wifi_pass_text = ESPUI.addControl(
+			ControlType::Password, PASS_LABEL, VOID_VALUE,
+			ControlColor::Turquoise, wifi_control_ref, textCallback);
 		ESPUI.addControl(ControlType::Max, VOID_VALUE, "64", None,
 						 ESPALLON_Wifi::getInstance().wifi_pass_text);
 
+		uint16_t ip_dns_control_ref =
+			ESPALLON_Wifi::getInstance().wifi_local_ip_text =
+				ESPUI.addControl(ControlType::Text, LOCAL_IP_LABEL, VOID_VALUE,
+								 ControlColor::Dark, wifitab, textCallback);
+		ESPUI.addControl(ControlType::Max, VOID_VALUE, "16", None,
+						 ESPALLON_Wifi::getInstance().wifi_local_ip_text);
+
+		ESPALLON_Wifi::getInstance().wifi_dns_primary_text = ESPUI.addControl(
+			ControlType::Text, DNS_PRIMARY_LABEL, VOID_VALUE,
+			ControlColor::Dark, ip_dns_control_ref, textCallback);
+		ESPUI.addControl(ControlType::Max, VOID_VALUE, "16", None,
+						 ESPALLON_Wifi::getInstance().wifi_dns_primary_text);
+		ESPALLON_Wifi::getInstance().wifi_dns_secondary_text = ESPUI.addControl(
+			ControlType::Text, DNS_SECONDARY_LABEL, VOID_VALUE,
+			ControlColor::Dark, ip_dns_control_ref, textCallback);
+		ESPUI.addControl(ControlType::Max, VOID_VALUE, "16", None,
+						 ESPALLON_Wifi::getInstance().wifi_dns_secondary_text);
 		// Create Save button and register it
-		uint16_t saveButtonId = ESPUI.addControl(
-			ControlType::Button, WIFI_SAVE_LABEL, WIFI_SAVE_VALUE,
-			ControlColor::Peterriver, wifitab, enterWifiDetailsCallback);
+		uint16_t saveButtonId =
+			ESPUI.addControl(ControlType::Button, WIFI_SAVE_LABEL,
+							 WIFI_SAVE_VALUE, ControlColor::Turquoise,
+							 wifi_control_ref, enterWifiDetailsCallback);
+		uint16_t ipdnsSaveButtonId = ESPUI.addControl(
+			ControlType::Button, IPDNS_SAVE_LABEL, IPDNS_SAVE_VALUE,
+			ControlColor::Dark, ip_dns_control_ref, enterIPDNSDetailsCallback);
 
 		WIFI_UI_ref[SSID_LABEL] = ESPALLON_Wifi::getInstance().wifi_ssid_text;
 		WIFI_UI_ref[PASS_LABEL] = ESPALLON_Wifi::getInstance().wifi_pass_text;
+		WIFI_UI_ref[LOCAL_IP_LABEL] =
+			ESPALLON_Wifi::getInstance().wifi_local_ip_text;
+		WIFI_UI_ref[DNS_PRIMARY_LABEL] =
+			ESPALLON_Wifi::getInstance().wifi_dns_primary_text;
+		WIFI_UI_ref[DNS_SECONDARY_LABEL] =
+			ESPALLON_Wifi::getInstance().wifi_dns_secondary_text;
 		WIFI_UI_ref[WIFI_SAVE_LABEL] = saveButtonId;
 
 		ESPUI.addControl(ControlType::Button, REMOVE_PINCONFIG_LABEL,

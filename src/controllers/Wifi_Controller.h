@@ -19,7 +19,6 @@ uint16_t getWiFiControlByLabel(const String &label) {
 	if (it != WIFI_UI_ref.end()) {
 		return it->second;
 	}
-	DUMPLN("WiFi control not found for label: ", label);
 	return 0;
 }
 
@@ -58,19 +57,26 @@ void clearEEPROMRange(int startAddress, size_t length) {
 }
 
 /**
+ * Validate IP address format (x.x.x.x where each x is 0-255)
+ * @param ip String containing the IP address to validate
+ * @return true if IP format is valid, false otherwise
+ */
+bool isValidIPFormat(const String &ip) {
+	IPAddress addr;
+	return addr.fromString(ip); // true si es IPv4 válida
+}
+
+/**
  * WiFi credentials structure for better organization
  */
 struct WiFiCredentials {
 	String ssid;
 	String password;
+	String localIp;
+	String primaryDNS;
+	String secondaryDNS;
 
 	// EEPROM layout constants
-	static const int SSID_ADDRESS = 0;
-	static const int PASS_ADDRESS = 32;
-	static const size_t SSID_MAX_LENGTH = 30; // Max SSID length for WPA
-	static const size_t PASS_MAX_LENGTH = 63; // Max WPA password length
-	static const size_t TOTAL_SIZE = 96;	  // Total EEPROM space used
-
 	/**
 	 * Validate WiFi credentials
 	 * @return true if credentials are valid, false otherwise
@@ -97,6 +103,79 @@ struct WiFiCredentials {
 		return true;
 	}
 
+	bool isValidIPDNS() const {
+		uint16_t save_button_ref = getWiFiControlByLabel(IPDNS_SAVE_LABEL);
+		char *dangerBackgroundStyle = getBackground(DANGER_COLOR);
+
+		if (localIp.length() == 0 && primaryDNS.length() == 0 &&
+			secondaryDNS.length() == 0) {
+			DUMPSLN("ERROR: Data IP/DNS are empty!");
+			ESPUI.setElementStyle(save_button_ref, dangerBackgroundStyle);
+			return false;
+		}
+
+		if (localIp.length() == 0 || localIp.length() > IP_MAX_LENGTH) {
+			DUMPSLN("ERROR: Local IP is empty or too long!");
+		}
+		if (primaryDNS.length() == 0 || primaryDNS.length() > IP_MAX_LENGTH) {
+			DUMPSLN("ERROR: Primary DNS is empty or too long!");
+		}
+		if (secondaryDNS.length() == 0 ||
+			secondaryDNS.length() > IP_MAX_LENGTH) {
+			DUMPSLN("ERROR: Secondary DNS is empty or too long!");
+		}
+
+		DUMPSLN("SUCCESS: Data IP/DNS successfully validated!");
+		char *successBackgroundStyle = getBackground(SUCCESS_COLOR);
+		ESPUI.setElementStyle(save_button_ref, successBackgroundStyle);
+		return true;
+	}
+
+	/**
+	 * Save IP/DNS credentials to EEPROM
+	 * @return true if saved successfully, false otherwise
+	 */
+	bool saveToEEPROMIPDNS() {
+		bool success = false;
+		EEPROM.begin(EEPROM_SIZE);
+		if (localIp.length() != 0) {
+			if (isValidIPFormat(localIp)) {
+				clearEEPROMRange(LOCAL_IP_ADDRESS, IP_MAX_LENGTH);
+				writeStringToEEPROM(localIp, LOCAL_IP_ADDRESS, IP_MAX_LENGTH);
+				success = true;
+				DUMPSLN("Local IP saved successfully!");
+			} else {
+				DUMPLN("ERROR: Local IP has invalid format: ", localIp);
+			}
+		}
+		if (primaryDNS.length() != 0) {
+			if (isValidIPFormat(primaryDNS)) {
+				clearEEPROMRange(PRIMARY_DNS_ADDRESS, IP_MAX_LENGTH);
+				writeStringToEEPROM(primaryDNS, PRIMARY_DNS_ADDRESS,
+									IP_MAX_LENGTH);
+				success = true;
+				DUMPSLN("Primary DNS saved successfully!");
+			} else {
+				DUMPLN("ERROR: Primary DNS has invalid format: ", primaryDNS);
+			}
+		}
+
+		if (secondaryDNS.length() != 0) {
+			if (isValidIPFormat(secondaryDNS)) {
+				clearEEPROMRange(SECONDARY_DNS_ADDRESS, IP_MAX_LENGTH);
+				writeStringToEEPROM(secondaryDNS, SECONDARY_DNS_ADDRESS,
+									IP_MAX_LENGTH);
+				success = true;
+				DUMPSLN("Secondary DNS saved successfully!");
+			} else {
+				DUMPLN("ERROR: Secondary DNS has invalid format: ",
+					   secondaryDNS);
+			}
+		}
+		EEPROM.end();
+		return success;
+	}
+
 	/**
 	 * Save credentials to EEPROM
 	 * @return true if saved successfully, false otherwise
@@ -105,10 +184,10 @@ struct WiFiCredentials {
 		if (!isValid()) {
 			return false;
 		}
-		EEPROM.begin(TOTAL_SIZE);
+		EEPROM.begin(EEPROM_SIZE);
 
 		// Clear previous data
-		clearEEPROMRange(0, TOTAL_SIZE);
+		clearEEPROMRange(0, EEPROM_SIZE);
 
 		// Save SSID
 		size_t ssidWritten =
@@ -143,6 +222,11 @@ void enterWifiDetailsCallback(Control *sender, int type) {
 		uint16_t ssid_control_ref = getWiFiControlByLabel(SSID_LABEL);
 		uint16_t pass_control_ref = getWiFiControlByLabel(PASS_LABEL);
 		uint16_t save_button_ref = getWiFiControlByLabel(WIFI_SAVE_LABEL);
+		uint16_t local_ip_control_ref = getWiFiControlByLabel(LOCAL_IP_LABEL);
+		uint16_t dns_primary_control_ref =
+			getWiFiControlByLabel(DNS_PRIMARY_LABEL);
+		uint16_t dns_secondary_control_ref =
+			getWiFiControlByLabel(DNS_SECONDARY_LABEL);
 
 		if (ssid_control_ref == 0 || pass_control_ref == 0 ||
 			save_button_ref == 0) {
@@ -168,4 +252,36 @@ void enterWifiDetailsCallback(Control *sender, int type) {
 	}
 }
 
+void enterIPDNSDetailsCallback(Control *sender, int type) {
+	if (type == B_UP) {
+		uint16_t local_ip_control_ref = getWiFiControlByLabel(LOCAL_IP_LABEL);
+		uint16_t dns_primary_control_ref =
+			getWiFiControlByLabel(DNS_PRIMARY_LABEL);
+		uint16_t dns_secondary_control_ref =
+			getWiFiControlByLabel(DNS_SECONDARY_LABEL);
+		uint16_t save_button_ref = getWiFiControlByLabel(IPDNS_SAVE_LABEL);
+
+		// Create IP/DNS credentials structure
+		WiFiCredentials credentials;
+		credentials.localIp = ESPUI.getControl(local_ip_control_ref)->value;
+		credentials.primaryDNS =
+			ESPUI.getControl(dns_primary_control_ref)->value;
+		credentials.secondaryDNS =
+			ESPUI.getControl(dns_secondary_control_ref)->value;
+		DUMPLN("Local IP Credentials: ", credentials.localIp);
+		DUMPLN("Primary DNS Credentials: ", credentials.primaryDNS);
+		DUMPLN("Secondary DNS Credentials: ", credentials.secondaryDNS);
+		// Check if credentials are valid and update button color
+		if (credentials.isValidIPDNS()) {
+			// Valid credentials
+			if (credentials.saveToEEPROMIPDNS()) {
+				DUMPSLN("IP/DNS credentials saved! Scheduling "
+						"reconnection...");
+				ESPALLON_Wifi::getInstance().shouldReconnect = true;
+			} else {
+				DUMPSLN("Failed to save IP/DNS credentials!");
+			}
+		}
+	}
+}
 #endif
