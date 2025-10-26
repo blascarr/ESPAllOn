@@ -1,8 +1,11 @@
 #ifndef _ESPALLON_PROJECTS_H
 #define _ESPALLON_PROJECTS_H
 
+#include "../../manager/ESPinner_Manager.h"
 #include "../../utils.h"
 #include "../ProjectsAPIClient.h"
+#include <ArduinoJson.h>
+#include <AsyncJson.h>
 #include <ESPUI.h>
 
 #ifndef USE_LITTLEFS_MODE
@@ -36,8 +39,8 @@ class ESPAllOnProjects {
 
 		// API endpoints
 		ESPUI.server->on("/api/projects", HTTP_GET, handleProjectsAPIRequest);
-		ESPUI.server->on("/api/project/*/load", HTTP_POST,
-						 handleLoadProjectRequest);
+
+		registerProjectPOSTEndpoints();
 
 #ifdef USE_LITTLEFS_MODE
 		// Serve CSS file for projects page when in LittleFS mode
@@ -141,38 +144,50 @@ class ESPAllOnProjects {
 	}
 
 	/**
-	 * HTTP request handler for loading a project configuration
-	 * @param request AsyncWebServerRequest object
+	 * HTTP request handler for POST endpoints
+	 * /api/config/load
+	 * @return void
 	 */
-	static void handleLoadProjectRequest(AsyncWebServerRequest *request) {
-		String url = request->url();
-		DUMPLN("Load project request: ", url);
 
-		// Extract project ID from URL: /api/project/{id}/load
-		int startIdx = url.indexOf("/api/project/") + 13;
-		int endIdx = url.indexOf("/load");
+	static void registerProjectPOSTEndpoints() {
 
-		if (startIdx < 13 || endIdx == -1) {
-			request->send(
-				400, "application/json",
-				"{\"success\":false,\"error\":\"Invalid project ID\"}");
-			return;
-		}
+		auto *jh = new AsyncCallbackJsonWebHandler(
+			"/api/config/load",
+			[](AsyncWebServerRequest *request, JsonVariant &json) {
+				JsonObject obj = json.as<JsonObject>();
 
-		String projectId = url.substring(startIdx, endIdx);
-		DUMPLN("Extracted project ID: ", projectId);
+				// The JSON you send is the entire "project"; we access
+				// obj["config"]
+				if (!obj.containsKey("config")) {
+					request->send(
+						400, "application/json",
+						R"({"success":false,"error":"Missing 'config'"})");
+					return;
+				}
+				// We expect an array inside: obj["config"]["config"]
+				if (!obj["config"]["config"].is<JsonArray>()) {
+					request->send(
+						400, "application/json",
+						R"({"success":false,"error":"Invalid 'config' structure"})");
+					return;
+				}
 
-		// TODO: Parse and apply the configuration to the ESP
-		// This would involve:
-		// 1. Parse the JSON configuration from request body
-		// 2. Configure pins according to the project setup
-		// 3. Initialize modules (steppers, sensors, etc.)
-		// 4. Save configuration to EEPROM/Flash
+				String configJson;
+				serializeJson(obj["config"]["config"], configJson);
+				DUMPLN("JSON converted to string: ", configJson);
 
-		// For now, just return success
-		request->send(200, "application/json",
-					  "{\"success\":true,\"message\":\"Configuration loaded "
-					  "successfully\"}");
+				// TODO: Implement the loading of the configuration
+				bool ok =
+					ESPinner_Manager::getInstance().loadFromJSON(configJson);
+
+				if (ok)
+					request->send(200, "application/json",
+								  R"({"success":true})");
+				else
+					request->send(500, "application/json",
+								  R"({"success":false})");
+			});
+		ESPUI.server->addHandler(jh);
 	}
 };
 

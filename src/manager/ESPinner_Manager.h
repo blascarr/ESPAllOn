@@ -85,6 +85,27 @@ class ESPinner_Manager {
 		}
 	}
 
+	/**
+	 * Load ESPinners from JSON string
+	 * @param jsonString JSON string containing ESPinner configuration array
+	 * @return true if loaded successfully, false otherwise
+	 */
+	bool loadFromJSON(const String &jsonString) {
+		DynamicJsonDocument doc(2048);
+		DeserializationError error = deserializeJson(doc, jsonString);
+		if (error) {
+			DUMPSLN("JSON parsing error in loadFromJSON");
+			return false;
+		}
+
+		if (!doc.is<JsonArray>()) {
+			DUMPSLN("ERROR: JSON is not an array format in loadFromJSON.");
+			return false;
+		}
+
+		return true;
+	}
+
 	void saveESPinnersInStorage() {
 		DynamicJsonDocument doc(1024);
 		JsonArray JSONESPinner_array = doc.to<JsonArray>();

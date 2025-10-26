@@ -1,10 +1,13 @@
 // ========== Global Variables ==========
+
 let projects = [];
-let selectedProjectId = null;
+let allProjects = [];
 let currentPage = 1;
+let isLoading = false;
+
+let selectedProjectId = null;
 let totalPages = 1;
 let totalProjects = 0;
-let isLoading = false;
 
 // ========== UI Functions ==========
 
@@ -42,32 +45,27 @@ function displayProjects(projectsList) {
 	container.innerHTML = projectsList
 		.map(
 			(project) => `
-		<div class="project-card" onclick="selectProject('${project.id}')">
-			<div class="project-header">
-				<h3 class="project-title">${project.name}</h3>
-				<span class="project-status status-${
-					project.status?.toLowerCase() || 'unknown'
-				}">
-					${getStatusIcon(project.status)} ${project.status || 'UNKNOWN'}
-				</span>
-			</div>
-			<p class="project-description">${
-				project.description || 'Sin descripción disponible'
-			}</p>
-			<div class="project-date">
-				📅 ${formatProjectDate(
-					project.created_at || project.date || project.updated_at
-				)}
-			</div>
-			<div class="project-actions">
-				<button class="btn btn-load" onclick="event.stopPropagation(); showLoadConfirmDialog('${
-					project.id
-				}')">
-					⚙️ Cargar Configuración
-				</button>
-			</div>
-		</div>
-	`
+                <div class="project-card" onclick="selectProject('${
+									project.id
+								}')">
+                    <div class="project-title">${project.name}</div>
+                    <div class="project-description">${
+											project.description || 'Sin descripción'
+										}</div>
+                    <span class="project-status status-${(
+											project.status || 'unknown'
+										).toLowerCase()}">
+                        ${getStatusIcon(project.status)} ${
+				project.status || 'UNKNOWN'
+			}
+                    </span>
+                    <button class="btn btn-load" onclick="event.stopPropagation(); loadProject('${
+											project.id
+										}')">
+                        ⚙️ Cargar Configuración
+                    </button>
+                </div>
+            `
 		)
 		.join('');
 }
@@ -518,7 +516,7 @@ function showLoadConfirmDialog(projectId) {
 			</div>
 			<div class="modal-footer">
 				<button class="btn btn-secondary" onclick="closeModal()">❌ Cancelar</button>
-				<button class="btn btn-success" onclick="confirmLoadProject('${projectId}')">⚙️ Cargar Configuración</button>
+				<button class="btn btn-success" onclick="loadProject('${projectId}')">⚙️ Cargar Configuración</button>
 			</div>
 		</div>
 	`;
@@ -539,53 +537,83 @@ function closeModal() {
 	}
 }
 
-/**
- * Confirm and load project configuration
- * @param {string} projectId - Project ID
- */
-async function confirmLoadProject(projectId) {
-	const project = projects.find((p) => p.id === projectId);
-	if (!project) return;
+async function loadProject(projectId) {
+	// Buscar el proyecto en los datos actuales o en todos los proyectos
+	let project = projects.find((p) => p.id === projectId);
+	if (!project) {
+		project = allProjects.find((p) => p.id === projectId);
+	}
 
-	closeModal();
-	showStatus(`⏳ Cargando configuración de: ${project.name}`, 'loading');
+	if (!project) {
+		showStatus('❌ Error: Proyecto no encontrado', 'error');
+		return;
+	}
+
+	if (
+		!confirm(
+			'¿Cargar configuración de "' +
+				project.name +
+				'"?\n\n⚠️ Esto sobrescribirá la configuración actual.'
+		)
+	) {
+		return;
+	}
+
+	showStatus('⏳ Cargando configuración...', 'loading');
 
 	try {
-		const configData = project.config || {};
-		const response = await fetch(`/api/project/${projectId}/load`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				config: configData,
-				projectName: project.name,
-				projectId: projectId,
-			}),
-		});
-
-		// Validate response
-		const contentType = response.headers.get('content-type');
-		if (!contentType || !contentType.includes('application/json')) {
-			throw new Error('La respuesta del servidor no es JSON válido');
+		// Verificar que el proyecto tiene configuración
+		if (!project.config) {
+			throw new Error('El proyecto no tiene configuración disponible');
 		}
+		console.log('🔧 Configuración a enviar:', project.config);
+		// Enviar configuración al endpoint de la placa
+		const response = await fetch('/api/config/load', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(project),
+		});
 
 		if (!response.ok) {
 			throw new Error(`Error HTTP: ${response.status}`);
 		}
 
 		const result = await response.json();
+
 		if (result.success) {
-			showStatus(
-				`🎉 Configuración cargada exitosamente: ${project.name}`,
-				'success'
-			);
+			showStatus('🎉 Configuración cargada: ' + project.name, 'success');
+
+			// Log detalles de la configuración enviada
+			console.log('📋 Configuración enviada a la placa:', {
+				projectId: projectId,
+				projectName: project.name,
+				config: project.config,
+			});
+
+			// Mostrar detalles de la configuración en consola
+			if (project.config.config && Array.isArray(project.config.config)) {
+				console.log(
+					'🔧 Elementos de configuración cargados en la placa:',
+					project.config.config.length
+				);
+				project.config.config.forEach((item, index) => {
+					console.log(
+						`  ${index + 1}. ${item.ID || 'Sin ID'} (${
+							item.ESPinner_Mod || 'Sin módulo'
+						})`
+					);
+				});
+			}
 		} else {
 			throw new Error(
 				result.message || 'Error desconocido al cargar configuración'
 			);
 		}
 	} catch (error) {
-		console.error('Error loading project config:', error);
-		showStatus(`❌ Error al cargar configuración: ${error.message}`, 'error');
+		showStatus('❌ Error: ' + error.message, 'error');
+		console.error('Error cargando configuración:', error);
 	}
 }
 
