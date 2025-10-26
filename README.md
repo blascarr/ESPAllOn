@@ -1,20 +1,24 @@
 # 🚀 ESPAllOn - Plataforma Educativa para Proyectos IoT
 
 **ESPAllOn** es una plataforma educativa diseñada específicamente para adolescentes que quieren desarrollar proyectos de Internet de las Cosas (IoT) sin necesidad de conocimientos avanzados en programación. Con una interfaz web intuitiva, permite configurar y controlar dispositivos ESP32/ESP8266 de forma visual y sencilla.
+Con una interfaz web intuitiva, transforma tu ESP en un sistema configurable y reutilizable para múltiples aplicaciones.
 
 ## 🎯 ¿Qué es ESPAllOn?
 
-ESPAllOn es un sistema de gestión y control para placas ESP32/ESP8266 que incluye:
+ESPAllOn funciona como un **modelo genérico** que:
 
-- **Interfaz web moderna** basada en ESPUI para configuración visual
-- **Módulos predefinidos** (ESPinners) para diferentes tipos de hardware
-- **Importación de proyectos** desde fuentes externas con un solo clic
-- **Configuración automática** de pines y componentes
-- **Control remoto** desde cualquier dispositivo con navegador web
+1. Se conecta a una **base de datos externa** de proyectos
+2. Descarga configuraciones predefinidas con un **solo click**
+3. Configura automáticamente pines, componentes y controladores
+4. Está listo para ejecutar el proyecto sin reprogramar el ESP
 
 ## 🌟 Características Principales
 
-### 🔧 Módulos Disponibles (ESPinners)
+> **Piensa en ello**: Un ESP → Múltiples proyectos. Sin necesidad de recompilar código.
+
+### 🔧 Customiza e integra tus Módulos (ESPinners)
+
+![Projects Page](data/img/EspinnerPanel.png)
 
 El sistema incluye módulos predefinidos para los componentes más comunes:
 
@@ -22,46 +26,38 @@ El sistema incluye módulos predefinidos para los componentes más comunes:
 - **Stepper**: Motores paso a paso con múltiples drivers (TMC2208, TMC2209, A4988, etc.)
 - **DC Motor**: Motores de corriente continua con control de dirección
 - **NeoPixel**: Tiras de LEDs direccionables
-- **LCD**: Pantallas de cristal líquido
-- **TFT**: Pantallas táctiles
 - **RFID**: Lectores de tarjetas RFID
 - **MPU**: Sensores de movimiento (acelerómetro/giroscopio)
 - **Encoder**: Encoders rotativos
 
-### 🌐 Interfaz Web
+### 1. **Conéctate a la Base de Datos**
 
-- **Configuración visual**: Selecciona pines y componentes desde el navegador
-- **Control en tiempo real**: Activa/desactiva componentes desde cualquier dispositivo
-- **Monitoreo de estado**: Visualiza el estado de todos los pines
-- **Gestión de proyectos**: Importa configuraciones predefinidas
+El ESP se conecta a un servidor remoto (`https://espallon.blascarr.com`) donde están almacenados los proyectos disponibles.
 
-### 📡 Conectividad
+![Controller Panel](data/img/ProjectsPage.png)
 
-- **WiFi integrado**: Conexión automática a redes WiFi
-- **API REST**: Comunicación con servicios externos
-- **Importación de proyectos**: Descarga configuraciones desde servidor remoto
+### 2. **Selecciona un Proyecto**
 
-## 🚀 Cómo Funciona
+Desde la interfaz web, navegas por proyectos ya predefinidos. Haz click en el botón de Cargar Proyecto y ...
 
-### 1. **Configuración Inicial**
+### 3. **Carga con Un Click**
 
-1. Conecta tu ESP32/ESP8266 a la red WiFi
-2. Accede a la interfaz web desde cualquier navegador
-3. Configura los pines y componentes que necesites
+El sistema descarga la configuración JSON y automáticamente:
 
-### 2. **Uso de Módulos**
+- Configura los pines necesarios
+- Crea los módulos (ESPinners) requeridos
+- Genera controladores para la interfaz
+- Inicializa sensores y actuadores
 
-- Selecciona el tipo de componente (GPIO, Stepper, etc.)
-- Asigna los pines correspondientes
-- Configura parámetros específicos (velocidad, dirección, etc.)
-- Guarda la configuración
+### 4. **Listo para Usar**
+
+Tu proyecto está funcionando. Puedes controlarlo desde cualquier navegador.
 
 ### 3. **Control Remoto**
 
-- Accede a la interfaz web desde cualquier dispositivo
-- Controla componentes en tiempo real
-- Monitorea el estado de sensores
-- Ajusta parámetros dinámicamente
+![Controller Panel](data/img/ControllerPanel.png)
+
+## 🧩 Módulos (ESPinners)
 
 ### 4. **Importación de Proyectos**
 
@@ -70,23 +66,17 @@ El sistema incluye módulos predefinidos para los componentes más comunes:
 - Carga la configuración con un solo clic
 - ¡Tu proyecto está listo para usar!
 
-## 🎓 Valor Educativo
+### Estado de Pines
 
-### Para Estudiantes
+Visualiza en tiempo real el estado de todos los pines del ESP: configuración, modo, tipo, y uso.
 
-- **Aprendizaje visual**: Configuración sin código
-- **Conceptos IoT**: Comprende la interacción entre hardware y software
-- **Proyectos reales**: Desarrolla soluciones prácticas
-- **Escalabilidad**: Desde proyectos simples hasta sistemas complejos
+![Pin Status](data/img/PinStatusPage.png)
 
-### Para Educadores
+### Control Dinámico
 
-- **Currículo estructurado**: Progresión desde conceptos básicos
-- **Proyectos predefinidos**: Biblioteca de ejemplos
-- **Evaluación práctica**: Resultados tangibles y medibles
-- **Flexibilidad**: Adaptable a diferentes niveles educativos
+Cada proyecto genera automáticamente su interfaz de control adaptada a los componentes configurados.
 
-## 🛠️ Configuración del Proyecto
+## 🛠️ Instalación Rápida
 
 ### Requisitos
 
@@ -94,81 +84,33 @@ El sistema incluye módulos predefinidos para los componentes más comunes:
 - **Software**: PlatformIO IDE
 - **Conectividad**: Red WiFi
 
-### Instalación
+### Setup
 
-1. Clona el repositorio
-2. Abre el proyecto en PlatformIO
-3. Configura las credenciales WiFi en `src/config.h`
-4. Compila y sube el firmware
-5. Accede a la interfaz web
+```bash
+# 1. Clona el repositorio
+git clone https://github.com/yourusername/ESPAllOn.git
 
-### Modos de Operación
-
-#### Modo Estándar (Recomendado para principiantes)
-
-```cpp
-// #define USE_LITTLEFS_MODE  // Comentado = modo estándar
 ```
 
-- Interfaz más rápida
-- Menor uso de memoria
-- Ideal para desarrollo y aprendizaje
+Abre el proyecto con Platformio, selecciona el tipo de placa que vas a usar.
+Y sube el firmware
 
-#### Modo LittleFS (Para proyectos avanzados)
+Conectate a la Wifi de tu dispositivo y configura tu red.
 
-```cpp
-#define USE_LITTLEFS_MODE  // Descomentado = modo filesystem
-```
+- Si quieres, puedes introducir tu red dentro del archivo de config.h e introducir las credenciales de tu red \*
 
-- Monitor de pines avanzado
-- Personalización de estilos
-- Funcionalidades adicionales
+## 🎓 Valor Educativo
 
-## 🔗 Integraciones
-
-### API Externa
+### En el Aula para Educadores y Estudiantes
 
 - **Servidor de proyectos**: `https://espallon.blascarr.com`
 - **Biblioteca de configuraciones**: Proyectos predefinidos
 - **Actualizaciones automáticas**: Nuevos módulos y funcionalidades
 
-### Protocolos Soportados
-
-- **HTTP/HTTPS**: Comunicación web estándar
-- **JSON**: Intercambio de datos estructurado
-- **REST API**: Integración con servicios externos
-
-## 🎯 Casos de Uso Educativos
-
-### En el Aula
-
-- **Demostraciones interactivas**: Conceptos de IoT en tiempo real
-- **Proyectos colaborativos**: Múltiples estudiantes trabajando en equipo
-- **Evaluación práctica**: Resultados medibles y tangibles
-
-### En Casa
-
-- **Proyectos personales**: Automatización del hogar
-- **Experimentación libre**: Prueba diferentes configuraciones
-- **Compartir creaciones**: Comunidad de proyectos
-
-## 🚀 Próximos Pasos
-
-1. **Explora la interfaz**: Familiarízate con los controles
-2. **Prueba un módulo simple**: Comienza con GPIO
-3. **Importa un proyecto**: Usa la biblioteca online
-4. **Crea tu primer proyecto**: Combina diferentes módulos
-5. **Comparte tu experiencia**: Contribuye a la comunidad
-
-## 📖 Documentación Adicional
-
-- **Guía de inicio rápido**: Primeros pasos con ESPAllOn
-- **Manual de módulos**: Detalles de cada ESPinner
-- **API Reference**: Documentación técnica completa
-- **Proyectos de ejemplo**: Tutoriales paso a paso
+Interfaz más rápida, ideal para producción.
 
 ---
 
 **ESPAllOn** - Haciendo la programación IoT accesible para todos 🎓✨
 
-_¿Listo para crear tu primer proyecto IoT? ¡Comienza ahora!_
+_¿Listo para cargar tu primer proyecto? Conecta y haz click._
