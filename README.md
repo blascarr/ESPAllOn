@@ -18,7 +18,7 @@ ESPAllOn funciona como un **modelo genérico** que:
 
 ### 🔧 Customiza e integra tus Módulos (ESPinners)
 
-![Projects Page](data/img/EspinnerPanel.png)
+![ESpinner Panel](data/img/ESPinnerPanel.png)
 
 El sistema incluye módulos predefinidos para los componentes más comunes:
 
