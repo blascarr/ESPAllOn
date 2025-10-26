@@ -95,7 +95,7 @@ const byte DNS_PORT = 53;
 // When enabled: CSS/JS served from filesystem, Pin Status endpoint available
 // When disabled: CSS/JS served from PROGMEM, standard ESPUI mode
 // Uncomment the line below to enable LittleFS mode:
-// #define USE_LITTLEFS_MODE
+#define USE_LITTLEFS_MODE
 
 String ESPinner_File = "/ESPinner";
 String ESPinner_Path = "espinners";

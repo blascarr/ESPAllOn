@@ -26,13 +26,13 @@ El sistema incluye módulos predefinidos para los componentes más comunes:
 - **Stepper**: Motores paso a paso con múltiples drivers (TMC2208, TMC2209, A4988, etc.)
 - **DC Motor**: Motores de corriente continua con control de dirección
 - **NeoPixel**: Tiras de LEDs direccionables
-- **RFID**: Lectores de tarjetas RFID
-- **MPU**: Sensores de movimiento (acelerómetro/giroscopio)
-- **Encoder**: Encoders rotativos
+- **RFID (En desarrollo)**: Lectores de tarjetas RFID
+- **MPU (En desarrollo)**: Sensores de movimiento (acelerómetro/giroscopio)
+- **Encoder (En desarrollo)**: Encoders rotativos
 
 ### 1. **Conéctate a la Base de Datos**
 
-El ESP se conecta a un servidor remoto (`https://espallon.blascarr.com`) donde están almacenados los proyectos disponibles.
+El ESP se conecta a un servidor remoto (`https://espallon.blascarr.com`) donde están almacenados los proyectos disponibles (En desarrollo).
 
 ![Controller Panel](data/img/ProjectsPage.png)
 
@@ -88,7 +88,7 @@ Cada proyecto genera automáticamente su interfaz de control adaptada a los comp
 
 ```bash
 # 1. Clona el repositorio
-git clone https://github.com/yourusername/ESPAllOn.git
+git clone https://github.com/blascarr/ESPAllOn
 
 ```
 
