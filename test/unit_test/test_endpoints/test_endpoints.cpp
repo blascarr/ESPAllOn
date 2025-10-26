@@ -28,28 +28,26 @@
 // Test configuration JSON with two stepper motors
 // This matches the format received by the endpoint
 String testConfigJson = R"({
-	"config": {
-		"config": [
-			{
-				"DIR": 3,
-				"DRIVER": "ACCELSTEPPER",
-				"EN": 4,
-				"ESPinner_Mod": "ESPINNER_STEPPER",
-				"ID": "MAIN_STEPPER",
-				"STEP": 2,
-				"STEPS_PER_REV": 200
-			},
-			{
-				"DIR": 16,
-				"DRIVER": "ACCELSTEPPER",
-				"EN": 17,
-				"ESPinner_Mod": "ESPINNER_STEPPER",
-				"ID": "SECONDARY_STEPPER",
-				"STEP": 18,
-				"STEPS_PER_REV": 400
-			}
-		]
-	}
+	"config": [
+		{
+			"DIR": 3,
+			"DRIVER": "ACCELSTEPPER",
+			"EN": 4,
+			"ESPinner_Mod": "ESPINNER_STEPPER",
+			"ID": "MAIN_STEPPER",
+			"STEP": 2,
+			"STEPS_PER_REV": 200
+		},
+		{
+			"DIR": 16,
+			"DRIVER": "ACCELSTEPPER",
+			"EN": 17,
+			"ESPinner_Mod": "ESPINNER_STEPPER",
+			"ID": "SECONDARY_STEPPER",
+			"STEP": 18,
+			"STEPS_PER_REV": 400
+		}
+	]
 })";
 
 void runEndpointsTest() {
@@ -208,9 +206,70 @@ void test_endpoint_invalid_json() {
 	DUMPSLN("Invalid JSON test completed");
 }
 
+/**
+ * Test configuration with invalid/broken pins
+ * Verifies that configurations with broken or invalid pins are rejected
+ */
+void test_endpoint_invalid_pins() {
+	DUMPSLN("Testing /api/config/load with invalid pins");
+
+	// Configuration with pin 6 and 7 which are typically reserved/broken on
+	// ESP32
+	String invalidPinConfig = R"({
+		"config": [
+			{
+				"DIR": 6,
+				"DRIVER": "ACCELSTEPPER",
+				"EN": 7,
+				"ESPinner_Mod": "ESPINNER_STEPPER",
+				"ID": "INVALID_STEPPER",
+				"STEP": 8,
+				"STEPS_PER_REV": 200
+			}
+		]
+	})";
+
+	String localIP = WiFi.localIP().toString();
+	String url = "http://" + localIP + "/api/config/load";
+
+	HTTPClient http;
+	http.begin(url);
+	http.addHeader("Content-Type", "application/json");
+
+	int httpResponseCode = http.POST(invalidPinConfig);
+
+	DUMPLN("HTTP Response code: ", httpResponseCode);
+
+	// Should return 400 Bad Request for invalid pins
+	TEST_ASSERT_EQUAL_INT_MESSAGE(
+		400, httpResponseCode,
+		"HTTP response should be 400 Bad Request for invalid pins");
+
+	String response = http.getString();
+	DUMPLN("Response: ", response);
+
+	http.end();
+
+	// Parse response
+	JsonDocument doc;
+	deserializeJson(doc, response);
+
+	// Verify response indicates failure
+	TEST_ASSERT_FALSE_MESSAGE(doc["success"].as<bool>(),
+							  "Response should indicate failure");
+
+	// Verify error message mentions pin validation
+	String errorMsg = doc["error"].as<String>();
+	TEST_ASSERT_TRUE_MESSAGE(errorMsg.indexOf("Pin validation") >= 0,
+							 "Error message should mention pin validation");
+
+	DUMPSLN("Invalid pins test completed");
+}
+
 void isWifiConnected() { RUN_TEST(test_wifi); }
 void testConfigLoadEndpoint() { RUN_TEST(test_endpoint_config_load); }
 void testInvalidJsonEndpoint() { RUN_TEST(test_endpoint_invalid_json); }
+void testInvalidPinsEndpoint() { RUN_TEST(test_endpoint_invalid_pins); }
 
 void setup() {
 	Serial.begin(115200);
@@ -232,9 +291,9 @@ void setup() {
 	testFunctions.push_back(isWifiConnected);
 
 	// Add tests to be executed after WiFi connection
-
 	testFunctions.push_back(testConfigLoadEndpoint);
 	testFunctions.push_back(testInvalidJsonEndpoint);
+	testFunctions.push_back(testInvalidPinsEndpoint);
 
 	// Start WiFi connection and test ticker
 	ESPALLON_Wifi::getInstance().start();
