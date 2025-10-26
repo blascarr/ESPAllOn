@@ -103,6 +103,39 @@ class ESPinner_Manager {
 			return false;
 		}
 
+		clearESPinners();
+		JsonArray array = doc.as<JsonArray>();
+		uint16_t idx = 0;
+		for (JsonDocument obj : array) {
+			String mod = obj[ESPINNER_MODEL_JSONCONFIG].as<const char *>();
+
+			char where[32];
+			snprintf(where, sizeof(where), "loop %u pre", idx);
+			dumpHeap(where);
+			DUMPLN("Loading ESPinner module from JSON: ", mod);
+
+			auto espinner = ESPinner::create(mod);
+			if (espinner) {
+				String output;
+				serializeJson(obj, output);
+				espinner->deserializeJSON(output);
+				uint16_t parentRef = getTab(TabType::BasicTab);
+
+				// Implement Includes GUI and ESPAllOn_PinManager Configuration
+				espinner->implement();
+				dumpHeap("after implement");
+				// Create ESPinner Model in List
+				ESPinners.push_back(std::move(espinner));
+				dumpHeap("after push_back");
+			} else {
+				DUMPLN("Failed to create ESPinner for module: ", mod);
+			}
+			idx++;
+		}
+
+		// Save the new configuration to storage
+		saveESPinnersInStorage();
+
 		return true;
 	}
 
