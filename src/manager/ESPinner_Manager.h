@@ -109,9 +109,6 @@ class ESPinner_Manager {
 		for (JsonDocument obj : array) {
 			String mod = obj[ESPINNER_MODEL_JSONCONFIG].as<const char *>();
 
-			char where[32];
-			snprintf(where, sizeof(where), "loop %u pre", idx);
-			dumpHeap(where);
 			DUMPLN("Loading ESPinner module from JSON: ", mod);
 
 			auto espinner = ESPinner::create(mod);
@@ -123,10 +120,10 @@ class ESPinner_Manager {
 
 				// Implement Includes GUI and ESPAllOn_PinManager Configuration
 				espinner->implement();
-				dumpHeap("after implement");
+
 				// Create ESPinner Model in List
 				ESPinners.push_back(std::move(espinner));
-				dumpHeap("after push_back");
+
 			} else {
 				DUMPLN("Failed to create ESPinner for module: ", mod);
 			}

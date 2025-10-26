@@ -165,7 +165,7 @@ class ESPAllOnProjects {
 					return;
 				}
 				// We expect an array inside: obj["config"]["config"]
-				if (!obj["config"]["config"].is<JsonArray>()) {
+				if (!obj["config"].is<JsonArray>()) {
 					request->send(
 						400, "application/json",
 						R"({"success":false,"error":"Invalid 'config' structure"})");
@@ -173,10 +173,21 @@ class ESPAllOnProjects {
 				}
 
 				String configJson;
-				serializeJson(obj["config"]["config"], configJson);
+				serializeJson(obj["config"], configJson);
 				DUMPLN("JSON converted to string: ", configJson);
 
-				// TODO: Implement the loading of the configuration
+				// Validate all pins before applying configuration
+				String validationError;
+				if (!validatePinsInConfig(obj["config"].as<JsonArray>(),
+										  validationError)) {
+					String errorResponse = "{\"success\":false,\"error\":\"Pin "
+										   "validation failed: " +
+										   validationError + "\"}";
+					DUMPLN("Pin validation failed: ", validationError);
+					request->send(400, "application/json", errorResponse);
+					return;
+				}
+
 				bool ok =
 					ESPinner_Manager::getInstance().loadFromJSON(configJson);
 

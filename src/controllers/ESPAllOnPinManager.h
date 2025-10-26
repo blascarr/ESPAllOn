@@ -207,4 +207,115 @@ bool isNumericAndInRange(const String value, uint16_t ref) {
 	return false;
 }
 
+/**
+ * Validates all pins in a configuration array
+ * @param configArray JsonArray containing ESPinner configurations
+ * @param errorMsg Output parameter for error message
+ * @return true if all pins are valid, false otherwise
+ */
+static bool validatePinsInConfig(JsonArray configArray, String &errorMsg) {
+	for (JsonVariant config : configArray) {
+		JsonObject obj = config.as<JsonObject>();
+		String espinnerType = obj["ESPinner_Mod"].as<String>();
+		String espinnerID = obj["ID"].as<String>();
+
+		// Check common pin fields based on ESPinner type
+		std::vector<String> pinsToCheck;
+
+		if (espinnerType == "ESPINNER_STEPPER") {
+			if (obj.containsKey("STEP"))
+				pinsToCheck.push_back("STEP");
+			if (obj.containsKey("DIR"))
+				pinsToCheck.push_back("DIR");
+			if (obj.containsKey("EN"))
+				pinsToCheck.push_back("EN");
+			if (obj.containsKey("CS"))
+				pinsToCheck.push_back("CS");
+			if (obj.containsKey("DIAG0"))
+				pinsToCheck.push_back("DIAG0");
+		} else if (espinnerType == "ESPINNER_GPIO") {
+			if (obj.containsKey("GPIO"))
+				pinsToCheck.push_back("GPIO");
+		} else if (espinnerType == "ESPINNER_DC") {
+			if (obj.containsKey("GPIOA"))
+				pinsToCheck.push_back("GPIOA");
+			if (obj.containsKey("GPIOB"))
+				pinsToCheck.push_back("GPIOB");
+		} else if (espinnerType == "ESPINNER_NEOPIXEL") {
+			if (obj.containsKey("GPIO"))
+				pinsToCheck.push_back("GPIO");
+		} else if (espinnerType == "ESPINNER_ENCODER") {
+			if (obj.containsKey("CLK"))
+				pinsToCheck.push_back("CLK");
+			if (obj.containsKey("DT"))
+				pinsToCheck.push_back("DT");
+			if (obj.containsKey("SW"))
+				pinsToCheck.push_back("SW");
+		}
+
+		// Validate each pin
+		for (const String &pinField : pinsToCheck) {
+			if (!obj.containsKey(pinField))
+				continue;
+
+			int pinNumber = obj[pinField].as<int>();
+
+			// Check if pin is 0 (invalid)
+			if (pinNumber == 0) {
+				errorMsg = "ESPinner '" + espinnerID + "': Pin field '" +
+						   pinField + "' has invalid value 0";
+				DUMPLN("Validation error: ", errorMsg);
+				return false;
+			}
+
+			// Check if pin is out of range for the board
+			if (pinNumber < 0 || pinNumber >= ESP_BoardConf::NUM_PINS) {
+				errorMsg =
+					"ESPinner '" + espinnerID + "': Pin " + String(pinNumber) +
+					" (" + pinField + ") is out of range (0-" +
+					String(ESP_BoardConf::NUM_PINS - 1) + ") for this board";
+				DUMPLN("Validation error: ", errorMsg);
+				return false;
+			}
+
+			// Get the pin configuration directly from board configuration
+			ESP_PinMode pinConfig =
+				ESPAllOnPinManager::getInstance().getGPIO(pinNumber);
+
+			// Check if pin is broken according to board configuration
+			if (pinConfig.isBroken) {
+				errorMsg = "ESPinner '" + espinnerID + "': Pin " +
+						   String(pinNumber) + " (" + pinField +
+						   ") is marked as BROKEN in board configuration";
+				DUMPLN("Validation error: ", errorMsg);
+				return false;
+			}
+
+			// Check if pin is OK using PinManager validation
+			if (!ESPAllOnPinManager::getInstance().isPinOK(pinNumber)) {
+				errorMsg =
+					"ESPinner '" + espinnerID + "': Pin " + String(pinNumber) +
+					" (" + pinField +
+					") is not valid for this board (isPinOK check failed)";
+				DUMPLN("Validation error: ", errorMsg);
+				return false;
+			}
+
+			// Optional: Check if pin is already reserved (status 10000)
+			uint16_t pinStatus =
+				ESPAllOnPinManager::getInstance().pinCurrentStatus[pinNumber];
+			if (pinStatus == 10000) {
+				errorMsg = "ESPinner '" + espinnerID + "': Pin " +
+						   String(pinNumber) + " (" + pinField +
+						   ") is reserved or internally marked as broken";
+				DUMPLN("Validation error: ", errorMsg);
+				return false;
+			}
+		}
+	}
+
+	DUMPSLN("All pins validated successfully");
+	return true;
+}
+
 #endif
